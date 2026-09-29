@@ -46,7 +46,7 @@ jobs:
           # optional: block workflow/script changes in the release commit
           SHA=$(git rev-list -n 1 "$RELEASE_TAG")
           PARENT=$(git rev-list -n 1 "$SHA^")
-          git diff --name-only "$PARENT" "$SHA" | grep -E '^\\.github/(workflows|scripts)/' \
+          git diff --name-only "$PARENT" "$SHA" | grep -E '^\.github/(workflows|scripts)/' \
             && { echo 'Workflow/scripts changed in release commit — refuse.'; exit 1; } || true
 
       - name: Verify tag matches package version
