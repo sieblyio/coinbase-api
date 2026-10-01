@@ -299,9 +299,6 @@ export abstract class BaseRestClient {
     );
 
     // Build a request and handle signature process
-    const isAdvancedTradeGlobal =
-      this.getClientType() === REST_CLIENT_TYPE_ENUM.advancedTradeGlobal;
-
     const options = await this.buildRequest(
       method,
       endpoint,
@@ -316,43 +313,41 @@ export abstract class BaseRestClient {
 
     // Dispatch request
     return axios(options)
-      .then((response) => {
-        if (response.status >= 200 && response.status <= 204) {
-          // Global JSON-RPC calls can fail inside an HTTP 200 response.
-          if (isAdvancedTradeGlobal && response.data?.error) {
-            throw { response };
-          }
+      .then((response) => this.parseResponse(response))
+      .catch((e) =>
+        this.parseException(
+          e,
+          { method, endpoint, requestUrl, params },
+          options,
+        ),
+      );
+  }
 
-          // Throw if API returns an error (e.g. insufficient balance)
-          if (
-            typeof response.data?.code === 'string' &&
-            response.data?.code !== '200000'
-          ) {
-            throw { response };
-          }
+  /** Validate the response and extract the payload for this product group. */
+  private parseResponse(response: AxiosResponse): any {
+    if (!(response.status >= 200 && response.status <= 204)) {
+      throw { response };
+    }
 
-          return isAdvancedTradeGlobal ? response.data?.result : response.data;
+    // Throw if API returns an error (e.g. insufficient balance).
+    if (
+      typeof response.data?.code === 'string' &&
+      response.data?.code !== '200000'
+    ) {
+      throw { response };
+    }
+
+    switch (this.getClientType()) {
+      case REST_CLIENT_TYPE_ENUM.advancedTradeGlobal: {
+        // JSON-RPC errors can arrive inside an HTTP 200 response.
+        if (response.data?.error) {
+          throw { response };
         }
-        throw { response };
-      })
-      .catch((e) => {
-        const error = isAdvancedTradeGlobal
-          ? this.getAdvancedTradeGlobalAuth().handleRequestError(e, options)
-          : e;
-
-        return this.parseException(error, {
-          method,
-          endpoint,
-          requestUrl: isAdvancedTradeGlobal ? options.url : requestUrl,
-          // Automatic and explicit global auth calls carry a credential in the body.
-          params:
-            isAdvancedTradeGlobal &&
-            (endpoint === ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT ||
-              (params?.body as { method?: string })?.method === 'public/auth')
-              ? undefined
-              : params,
-        });
-      });
+        return response.data?.result;
+      }
+      default:
+        return response.data;
+    }
   }
 
   public generateNewOrderId(): string {
@@ -405,24 +400,55 @@ export abstract class BaseRestClient {
   /**
    * @private generic handler to parse request exceptions
    */
-  parseException(e: any, requestParams: any): unknown {
+  parseException(
+    e: any,
+    requestParams: any,
+    requestOptions?: AxiosRequestConfig,
+  ): unknown {
+    let error = e;
+    let context = requestParams;
+
+    switch (this.getClientType()) {
+      case REST_CLIENT_TYPE_ENUM.advancedTradeGlobal: {
+        if (!requestOptions) {
+          break;
+        }
+
+        // Handle token rejection and credential redaction before applying the
+        // shared error format, including when parseExceptions is disabled.
+        error = this.getAdvancedTradeGlobalAuth().handleRequestError(
+          e,
+          requestOptions,
+        );
+        const isAuthRequest =
+          requestParams.endpoint === ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT ||
+          requestParams.params?.body?.method === 'public/auth';
+        context = {
+          ...requestParams,
+          requestUrl: requestOptions.url,
+          params: isAuthRequest ? undefined : requestParams.params,
+        };
+        break;
+      }
+    }
+
     if (this.options.parseExceptions === false) {
-      throw e;
+      throw error;
     }
 
     // Something happened in setting up the request that triggered an error
-    if (!e.response) {
-      if (!e.request) {
-        throw e.message;
+    if (!error.response) {
+      if (!error.request) {
+        throw error.message;
       }
 
       // request made but no response received
-      throw e;
+      throw error;
     }
 
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
-    const response: AxiosResponse = e.response;
+    const response: AxiosResponse = error.response;
     // console.error('err: ', response?.data);
 
     throw {
@@ -438,7 +464,7 @@ export abstract class BaseRestClient {
         apiPassphrase: 'omittedFromError',
         cdpApiKey: 'omittedFromError',
       },
-      requestParams,
+      requestParams: context,
     };
   }
 
