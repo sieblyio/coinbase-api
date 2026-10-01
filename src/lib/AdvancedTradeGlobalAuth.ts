@@ -1,5 +1,7 @@
 import { AxiosError, AxiosHeaders, AxiosRequestConfig } from 'axios';
 
+import { AdvTradeGlobalAuthRequest } from '../types/request/advanced-trade-global-client.js';
+import { AdvTradeGlobalAuthResult } from '../types/response/advanced-trade-global-client.js';
 import { signJWT } from './jwtNode.js';
 
 export const ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT = '/api/v2/public/auth';
@@ -11,14 +13,6 @@ interface GlobalAuthOptions {
   jwtExpiresSeconds: number;
   getSignTimestampMs: () => number;
   traceLogs?: boolean;
-}
-
-interface GlobalAuthResponse {
-  result?: {
-    access_token: string;
-    expires_in: number;
-    token_type: string;
-  };
 }
 
 /** Remove credentials from gateway error data, including credentials echoed in strings. */
@@ -59,7 +53,9 @@ export class AdvancedTradeGlobalAuth {
 
   constructor(
     private readonly authOptions: GlobalAuthOptions,
-    private readonly requestAuth: (body: object) => Promise<GlobalAuthResponse>,
+    private readonly requestAuth: (
+      params: AdvTradeGlobalAuthRequest,
+    ) => Promise<AdvTradeGlobalAuthResult>,
   ) {}
 
   getAccessToken(): Promise<string> {
@@ -105,11 +101,9 @@ export class AdvancedTradeGlobalAuth {
       });
     }
 
-    const authRequestParams = {
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'public/auth',
-      params: { grant_type: 'coinbase_cdp', token: jwt },
+    const authRequestParams: AdvTradeGlobalAuthRequest = {
+      grant_type: 'coinbase_cdp',
+      token: jwt,
     };
 
     if (traceLogs) {
@@ -119,13 +113,12 @@ export class AdvancedTradeGlobalAuth {
       );
     }
 
-    const response = await this.requestAuth(authRequestParams);
+    const result = await this.requestAuth(authRequestParams);
 
     if (traceLogs) {
-      console.log('3. Advanced Trade Global requestAuth: ', response);
+      console.log('3. Advanced Trade Global requestAuth: ', result);
     }
 
-    const result = response?.result;
     if (
       typeof result?.access_token !== 'string' ||
       !result.access_token.trim() ||

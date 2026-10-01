@@ -8,6 +8,10 @@ import {
   CloseAdvTradePositionRequest,
   SubmitAdvTradeOrderRequest,
 } from '../types/request/advanced-trade-client.js';
+import {
+  AdvTradeGlobalEditByLabelRequest,
+  AdvTradeGlobalPlaceOrderRequest,
+} from '../types/request/advanced-trade-global-client.js';
 import { SubmitCBExchOrderRequest } from '../types/request/coinbase-exchange.js';
 import { SubmitINTXOrderRequest } from '../types/request/coinbase-international.js';
 import { SubmitPrimeOrderRequest } from '../types/request/coinbase-prime.js';
@@ -134,6 +138,8 @@ export abstract class BaseRestClient {
   private apiPassphrase: string | undefined;
 
   private advancedTradeGlobalAuth?: AdvancedTradeGlobalAuth;
+
+  private advancedTradeGlobalRpcId = 0;
 
   /** Defines the client type (affecting how requests & signatures behave) */
   abstract getClientType(): RestClientType;
@@ -325,7 +331,7 @@ export abstract class BaseRestClient {
             throw { response };
           }
 
-          return response.data;
+          return isAdvancedTradeGlobal ? response.data?.result : response.data;
         }
         throw { response };
       })
@@ -337,8 +343,14 @@ export abstract class BaseRestClient {
         return this.parseException(error, {
           method,
           endpoint,
-          requestUrl,
-          params,
+          requestUrl: isAdvancedTradeGlobal ? options.url : requestUrl,
+          // Automatic and explicit global auth calls carry a credential in the body.
+          params:
+            isAdvancedTradeGlobal &&
+            (endpoint === ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT ||
+              (params?.body as { method?: string })?.method === 'public/auth')
+              ? undefined
+              : params,
         });
       });
   }
@@ -356,8 +368,12 @@ export abstract class BaseRestClient {
       | CloseAdvTradePositionRequest
       | SubmitCBExchOrderRequest
       | SubmitINTXOrderRequest
-      | SubmitPrimeOrderRequest,
+      | SubmitPrimeOrderRequest
+      | AdvTradeGlobalPlaceOrderRequest
+      | AdvTradeGlobalEditByLabelRequest,
     orderIdProperty: CustomOrderIdProperty,
+    /** Global Derivatives `label` max is 64. Other Coinbase client ids allow 128. */
+    maxLength = 128,
   ): void {
     // Not the cleanest but strict checks aren't quite necessary here either
     const requestParams = params as any;
@@ -379,9 +395,9 @@ export abstract class BaseRestClient {
       requestParams[orderIdProperty] = newValue;
     }
 
-    if (requestParams[orderIdProperty].length > 128) {
+    if (requestParams[orderIdProperty].length > maxLength) {
       console.warn(
-        `WARNING: "${orderIdProperty}" exceeds the 128 character maximum enforced by Coinbase. Value length: ${requestParams[orderIdProperty].length}. Invalid argument errors may be returned by the API.`,
+        `WARNING: "${orderIdProperty}" exceeds the ${maxLength} character maximum enforced by Coinbase. Value length: ${requestParams[orderIdProperty].length}. Invalid argument errors may be returned by the API.`,
       );
     }
   }
@@ -737,14 +753,41 @@ export abstract class BaseRestClient {
     method: Method,
     endpoint: string,
     url: string,
-    params?: any | undefined,
+    requestParams?: any | undefined,
     isPublicApi?: boolean,
   ): Promise<AxiosRequestConfig> {
+    let params = requestParams;
     const options: AxiosRequestConfig = {
       ...this.globalRequestOptions,
       url: url,
       method: method,
     };
+
+    const isAdvancedTradeGlobal =
+      this.getClientType() === REST_CLIENT_TYPE_ENUM.advancedTradeGlobal;
+    if (
+      isAdvancedTradeGlobal &&
+      method === 'POST' &&
+      endpoint.startsWith('/api/v2/')
+    ) {
+      // Keep JSON-RPC formatting here so endpoint methods use the usual post helpers.
+      const rpcParams = { ...params?.body };
+      deleteUndefinedValues(rpcParams);
+      params = {
+        ...params,
+        body: {
+          jsonrpc: '2.0',
+          id: ++this.advancedTradeGlobalRpcId,
+          method: endpoint.slice('/api/v2/'.length),
+          ...(Object.keys(rpcParams).length ? { params: rpcParams } : {}),
+        },
+      };
+      // Method paths identify the RPC call; POSTs use the shared gateway URL.
+      // Auth keeps its documented POST URL, which is also bound into the CDP JWT.
+      if (endpoint !== ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT) {
+        options.url = `${this.baseUrl}/api/v2`;
+      }
+    }
 
     deleteUndefinedValues(params);
     deleteUndefinedValues(params?.body);
@@ -752,13 +795,19 @@ export abstract class BaseRestClient {
     deleteUndefinedValues(params?.headers);
 
     if (isPublicApi || !this.apiKey || !this.apiSecret) {
-      if (
-        this.getClientType() === REST_CLIENT_TYPE_ENUM.advancedTradeGlobal &&
-        method === 'POST'
-      ) {
-        // The public auth exchange sends its JSON-RPC envelope in the body.
-        return { ...options, params: params?.query, data: params?.body };
+      if (isAdvancedTradeGlobal && method === 'POST' && params?.body) {
+        // Global JSON-RPC calls send their envelope in the body. Flat params stay queries.
+        return {
+          ...options,
+          headers: {
+            ...options.headers,
+            ...params.headers,
+          },
+          params: params.query,
+          data: params.body,
+        };
       }
+
       return {
         ...options,
         params: params,
