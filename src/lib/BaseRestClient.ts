@@ -12,6 +12,10 @@ import { SubmitCBExchOrderRequest } from '../types/request/coinbase-exchange.js'
 import { SubmitINTXOrderRequest } from '../types/request/coinbase-international.js';
 import { SubmitPrimeOrderRequest } from '../types/request/coinbase-prime.js';
 import { CustomOrderIdProperty } from '../types/shared.types.js';
+import {
+  ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT,
+  AdvancedTradeGlobalAuth,
+} from './AdvancedTradeGlobalAuth.js';
 import { signJWT } from './jwtNode.js';
 import { neverGuard } from './misc-util.js';
 import {
@@ -128,6 +132,8 @@ export abstract class BaseRestClient {
   private apiSecret: string | undefined;
 
   private apiPassphrase: string | undefined;
+
+  private advancedTradeGlobalAuth?: AdvancedTradeGlobalAuth;
 
   /** Defines the client type (affecting how requests & signatures behave) */
   abstract getClientType(): RestClientType;
@@ -255,6 +261,23 @@ export abstract class BaseRestClient {
     return this._call('PATCH', endpoint, params, false);
   }
 
+  private getAdvancedTradeGlobalAuth(): AdvancedTradeGlobalAuth {
+    if (!this.advancedTradeGlobalAuth) {
+      this.advancedTradeGlobalAuth = new AdvancedTradeGlobalAuth(
+        {
+          baseUrl: this.baseUrl,
+          apiKey: this.apiKey,
+          apiSecret: this.apiSecret,
+          jwtExpiresSeconds: this.options.jwtExpiresSeconds || 120,
+          getSignTimestampMs: () => this.getSignTimestampMs(),
+          traceLogs: !!ENABLE_HTTP_TRACE,
+        },
+        (body) => this.post(ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT, { body }),
+      );
+    }
+    return this.advancedTradeGlobalAuth;
+  }
+
   /**
    * @private Make a HTTP request to a specific endpoint. Private endpoint API calls are automatically signed.
    */
@@ -270,6 +293,9 @@ export abstract class BaseRestClient {
     );
 
     // Build a request and handle signature process
+    const isAdvancedTradeGlobal =
+      this.getClientType() === REST_CLIENT_TYPE_ENUM.advancedTradeGlobal;
+
     const options = await this.buildRequest(
       method,
       endpoint,
@@ -286,6 +312,11 @@ export abstract class BaseRestClient {
     return axios(options)
       .then((response) => {
         if (response.status >= 200 && response.status <= 204) {
+          // Global JSON-RPC calls can fail inside an HTTP 200 response.
+          if (isAdvancedTradeGlobal && response.data?.error) {
+            throw { response };
+          }
+
           // Throw if API returns an error (e.g. insufficient balance)
           if (
             typeof response.data?.code === 'string' &&
@@ -298,9 +329,18 @@ export abstract class BaseRestClient {
         }
         throw { response };
       })
-      .catch((e) =>
-        this.parseException(e, { method, endpoint, requestUrl, params }),
-      );
+      .catch((e) => {
+        const error = isAdvancedTradeGlobal
+          ? this.getAdvancedTradeGlobalAuth().handleRequestError(e, options)
+          : e;
+
+        return this.parseException(error, {
+          method,
+          endpoint,
+          requestUrl,
+          params,
+        });
+      });
   }
 
   public generateNewOrderId(): string {
@@ -477,7 +517,15 @@ export abstract class BaseRestClient {
         }
 
         case REST_CLIENT_TYPE_ENUM.advancedTradeGlobal: {
-          throw new Error('TODO:!');
+          const accessToken =
+            await this.getAdvancedTradeGlobalAuth().getAccessToken();
+
+          return {
+            ...res,
+            sign: accessToken,
+            queryParamsWithSign: signRequestParams,
+            headers: { Authorization: `Bearer ${accessToken}` },
+          };
         }
 
         // Docs: https://docs.cdp.coinbase.com/exchange/docs/rest-auth
@@ -704,6 +752,13 @@ export abstract class BaseRestClient {
     deleteUndefinedValues(params?.headers);
 
     if (isPublicApi || !this.apiKey || !this.apiSecret) {
+      if (
+        this.getClientType() === REST_CLIENT_TYPE_ENUM.advancedTradeGlobal &&
+        method === 'POST'
+      ) {
+        // The public auth exchange sends its JSON-RPC envelope in the body.
+        return { ...options, params: params?.query, data: params?.body };
+      }
       return {
         ...options,
         params: params,

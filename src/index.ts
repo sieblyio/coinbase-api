@@ -1,4 +1,5 @@
 export * from './CBAdvancedTradeClient.js';
+export * from './CBAdvancedTradeGlobalClient.js';
 export * from './CBAppClient.js';
 export * from './CBCommerceClient.js';
 export * from './CBExchangeClient.js';

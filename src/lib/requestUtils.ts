@@ -31,6 +31,7 @@ export type RestClientType =
 
 const exchangeBaseURLMap = {
   [REST_CLIENT_TYPE_ENUM.advancedTrade]: 'https://api.coinbase.com',
+  [REST_CLIENT_TYPE_ENUM.advancedTradeGlobal]: 'https://drb.coinbase.com',
   [REST_CLIENT_TYPE_ENUM.coinbaseApp]: 'https://api.coinbase.com',
   [REST_CLIENT_TYPE_ENUM.exchange]: 'https://api.exchange.coinbase.com',
   [REST_CLIENT_TYPE_ENUM.prime]: 'https://api.prime.coinbase.com',
@@ -43,6 +44,7 @@ const exchangeSandboxURLMap = {
   [REST_CLIENT_TYPE_ENUM.exchange]:
     'https://api-public.sandbox.exchange.coinbase.com',
   [REST_CLIENT_TYPE_ENUM.international]: 'https://api-n5e1.coinbase.com',
+  [REST_CLIENT_TYPE_ENUM.advancedTradeGlobal]: 'NoSandboxAvailable',
   // Static Advanced Trade sandbox (mocked accounts/orders). No matching engine / WebSocket sandbox.
   // https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/sandbox
   [REST_CLIENT_TYPE_ENUM.advancedTrade]: 'https://api-sandbox.coinbase.com',
