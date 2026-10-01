@@ -18,11 +18,23 @@ export const WS_KEY_MAP = {
    */
   advTradeMarketData: 'advTradeMarketData',
   /**
-   * User Order Data provides updates for the orders of the user.
+   * Coinbase Advanced Trade User Order Data provides updates for the orders of the user.
    *
    * https://docs.cdp.coinbase.com/advanced-trade/docs/ws-overview
    */
   advTradeUserData: 'advTradeUserData',
+  /**
+   * Unauthenticated Coinbase Global Derivatives market data. Channel parameters are part of the topic name.
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-overview
+   */
+  advTradeGlobalMarketData: 'advTradeGlobalMarketData',
+  /**
+   * Coinbase Global Derivatives Advanced Trade User Data
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-overview
+   */
+  advTradeGlobalUserData: 'advTradeGlobalUserData',
   /**
    * Coinbase Market Data (part of Coinbase Exchange API) is the traditional feed which is available without authentication.
    *
@@ -117,6 +129,14 @@ export const WS_URL_MAP: Record<WsKey, NetworkMap<'livenet' | 'testnet'>> = {
   },
   [WS_KEY_MAP.advTradeUserData]: {
     livenet: 'wss://advanced-trade-ws-user.coinbase.com',
+    testnet: 'NotAvailable',
+  },
+  [WS_KEY_MAP.advTradeGlobalMarketData]: {
+    livenet: 'wss://streams.drb.coinbase.com/ws/api/v2',
+    testnet: 'NotAvailable',
+  },
+  [WS_KEY_MAP.advTradeGlobalUserData]: {
+    livenet: 'wss://advanced-trade-ws-user.coinbase.com/ws/api/v2',
     testnet: 'NotAvailable',
   },
   [WS_KEY_MAP.exchangeMarketData]: {

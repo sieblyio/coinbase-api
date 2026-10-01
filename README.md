@@ -397,6 +397,27 @@ client.subscribe(
 );
 ```
 
+#### Global Derivatives Public WebSocket
+
+Use `advTradeGlobalMarketData` for the Global Derivatives public feed. Pass complete channel names, including their instrument and interval, through the same subscription interface:
+
+```javascript
+const client = new WebsocketClient();
+
+client.on('update', (event) => {
+  console.log(event.params.channel, event.params.data);
+});
+
+client.subscribe(
+  ['quote.BTC-PERPETUAL', 'ticker.BTC-PERPETUAL.100ms'],
+  'advTradeGlobalMarketData',
+);
+
+// client.unsubscribe('quote.BTC-PERPETUAL', 'advTradeGlobalMarketData');
+```
+
+No credentials are required. The client handles liveness checks and restores subscribed topics after reconnecting. Updates preserve the JSON-RPC envelope, with data under `params.data`; acknowledgements use `response` and API errors use `exception`. Public intervals are `100ms` and `agg2`; `raw` requires authentication. See the [public example](./examples/AdvancedTradeGlobal/WebSockets/publicWs.ts) and [channel/event types](./src/types/websockets/advanced-trade-global.ts).
+
 #### Private Websocket
 
 ```javascript

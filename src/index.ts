@@ -10,6 +10,7 @@ export * from './lib/websocket/websocket-util.js';
 export * from './types/request/advanced-trade-client.js';
 export * from './types/request/advanced-trade-global-client.js';
 export * from './types/response/advanced-trade-global-client.js';
+export * from './types/websockets/advanced-trade-global.js';
 export * from './types/websockets/client.js';
 export * from './types/websockets/events.js';
 export * from './types/websockets/requests.js';
