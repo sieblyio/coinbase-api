@@ -8,6 +8,10 @@ import {
   CloseAdvTradePositionRequest,
   SubmitAdvTradeOrderRequest,
 } from '../types/request/advanced-trade-client.js';
+import {
+  AdvTradeGlobalEditByLabelRequest,
+  AdvTradeGlobalPlaceOrderRequest,
+} from '../types/request/advanced-trade-global-client.js';
 import { SubmitCBExchOrderRequest } from '../types/request/coinbase-exchange.js';
 import { SubmitINTXOrderRequest } from '../types/request/coinbase-international.js';
 import { SubmitPrimeOrderRequest } from '../types/request/coinbase-prime.js';
@@ -316,8 +320,12 @@ export abstract class BaseRestClient {
       | CloseAdvTradePositionRequest
       | SubmitCBExchOrderRequest
       | SubmitINTXOrderRequest
-      | SubmitPrimeOrderRequest,
+      | SubmitPrimeOrderRequest
+      | AdvTradeGlobalPlaceOrderRequest
+      | AdvTradeGlobalEditByLabelRequest,
     orderIdProperty: CustomOrderIdProperty,
+    /** Global Derivatives `label` max is 64. Other Coinbase client ids allow 128. */
+    maxLength = 128,
   ): void {
     // Not the cleanest but strict checks aren't quite necessary here either
     const requestParams = params as any;
@@ -339,9 +347,9 @@ export abstract class BaseRestClient {
       requestParams[orderIdProperty] = newValue;
     }
 
-    if (requestParams[orderIdProperty].length > 128) {
+    if (requestParams[orderIdProperty].length > maxLength) {
       console.warn(
-        `WARNING: "${orderIdProperty}" exceeds the 128 character maximum enforced by Coinbase. Value length: ${requestParams[orderIdProperty].length}. Invalid argument errors may be returned by the API.`,
+        `WARNING: "${orderIdProperty}" exceeds the ${maxLength} character maximum enforced by Coinbase. Value length: ${requestParams[orderIdProperty].length}. Invalid argument errors may be returned by the API.`,
       );
     }
   }
@@ -704,6 +712,19 @@ export abstract class BaseRestClient {
     deleteUndefinedValues(params?.headers);
 
     if (isPublicApi || !this.apiKey || !this.apiSecret) {
+      // JSON-RPC clients pass { body } on public POST. Flat params stay query strings.
+      if (params?.body) {
+        return {
+          ...options,
+          headers: {
+            ...options.headers,
+            ...params.headers,
+          },
+          params: params.query,
+          data: params.body,
+        };
+      }
+
       return {
         ...options,
         params: params,

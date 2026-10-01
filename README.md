@@ -19,11 +19,17 @@
 
 [1]: https://www.npmjs.com/package/coinbase-api
 
+> [!WARNING]
+> On **October 1, 2026**, Advanced Trade is moving international derivatives from INTX onto a Deribit-powered gateway running on the Starbase platform.
+>
+> Spot and US futures stay on [`CBAdvancedTradeClient`](./src/CBAdvancedTradeClient.ts). International derivatives move to [`CBAdvancedTradeGlobalClient`](./src/CBAdvancedTradeGlobalClient.ts) (`https://drb.coinbase.com/api/v2`, JSON-RPC 2.0). Endpoint mapping is [below](#cbadvancedtradeglobalclient). Coinbase's guide: [Technical Migration Guide](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/technical).
+
 Updated & performant JavaScript & Node.js SDK for Coinbase's Advanced Trade, App, Exchange, International, Prime & Commerce REST APIs and WebSockets:
 
 - Professional, robust & performant Coinbase SDK with extensive production use in live trading environments.
 - Complete integration with all Coinbase APIs - supports both retail and institutional REST clients and WebSockets:
   - [Coinbase Advanced Trade](https://docs.cdp.coinbase.com/advanced-trade/docs/welcome) - Modern trading platform
+  - [Coinbase Advanced Trade Global Derivatives](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/overview) - International perpetuals on the Deribit-powered Starbase gateway (`CBAdvancedTradeGlobalClient`)
   - [Coinbase App](https://docs.cdp.coinbase.com/coinbase-app/docs/welcome) - Consumer mobile/web application
   - [Coinbase Exchange](https://docs.cdp.coinbase.com/exchange/docs/welcome) - Professional trading platform
   - [Coinbase International Exchange](https://docs.cdp.coinbase.com/intx/docs/welcome) - International institutional trading
@@ -58,6 +64,7 @@ Updated & performant JavaScript & Node.js SDK for Coinbase's Advanced Trade, App
 - [Usage](#usage)
   - [REST API Clients](#rest-api)
     - [CBAdvancedTradeClient](#cbadvancedtradeclient)
+    - [CBAdvancedTradeGlobalClient](#cbadvancedtradeglobalclient)
     - [CBAppClient](#cbappclient)
     - [CBExchangeClient](#cbexchangeclient)
     - [CBInternationalClient](#cbinternationalclient)
@@ -120,6 +127,7 @@ Most methods accept JS objects. These can be populated using parameters specifie
 
 - [Coinbase Developer Platform - Product APIs](https://docs.cdp.coinbase.com/product-apis/docs/welcome)
   - [Advanced Trade API](https://docs.cdp.coinbase.com/advanced-trade/docs/welcome)
+  - [Advanced Trade Global Derivatives](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/technical)
   - [Coinbase App API](https://docs.cdp.coinbase.com/coinbase-app/docs/welcome)
   - [Exchange API](https://docs.cdp.coinbase.com/exchange/docs/welcome)
   - [International Exchange API](https://docs.cdp.coinbase.com/intx/docs/welcome)
@@ -149,6 +157,7 @@ The SDK provides dedicated REST clients for each of Coinbase's API groups. Each 
 To use any of Coinbase's REST APIs in JavaScript/TypeScript/Node.js, import (or require) the client you want to use. We currently support the following clients:
 
 - [CBAdvancedTradeClient](./src/CBAdvancedTradeClient.ts)
+- [CBAdvancedTradeGlobalClient](./src/CBAdvancedTradeGlobalClient.ts)
 - [CBAppClient](./src/CBAppClient.ts)
 - [CBExchangeClient](./src/CBExchangeClient.ts)
 - [CBInternationalClient](./src/CBInternationalClient.ts)
@@ -203,6 +212,40 @@ async function doAPICall() {
 
 doAPICall();
 ```
+
+#### CBAdvancedTradeGlobalClient
+
+International derivatives (perpetuals today, options and dated futures after cutover) use [`CBAdvancedTradeGlobalClient`](./src/CBAdvancedTradeGlobalClient.ts). It talks JSON-RPC 2.0 to `https://drb.coinbase.com/api/v2`. Spot and US futures stay on `CBAdvancedTradeClient`.
+
+The table below only says which method replaces which old endpoint. Parameters and responses are not the same shape. The breaks that matter:
+
+- The client returns the JSON-RPC `result` and throws the JSON-RPC `error`. You do not read `result` or `id` off the return value.
+- Prices and sizes are JSON numbers, not decimal strings. `amount: 0.001` is `0.001` of the base coin on these USDC perpetuals.
+- `instrument_name` replaces the old product id. `BTC-PERP-INTX` becomes `BTC_USDC-PERPETUAL`.
+- `label` replaces `client_order_id`. It is not guaranteed unique, so do not use it as an idempotency key.
+- Order type, time in force, and status are lowercase (`limit`, `good_til_cancelled`, `open`), not `LIMIT` or `OPEN`.
+
+Coinbase's source table: [Endpoint mapping](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/technical#endpoint-mapping).
+
+| Action                                                           | Current API                         | New API                                  | `CBAdvancedTradeGlobalClient`                                                                                                                                  |
+| ---------------------------------------------------------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Place order**<br>_Side becomes the method_                     | `POST /orders`                      | `private/buy`, `private/sell`            | `buy()`, `sell()`                                                                                                                                              |
+| **Edit order**<br>_Edit by label supported_                      | `POST /orders/edit`                 | `private/edit`, `private/edit_by_label`  | `edit()`, `editByLabel()`                                                                                                                                      |
+| **Cancel orders**<br>_No cancel-by-ID-list; loop, or cancel all_ | `POST /orders/batch_cancel`         | `private/cancel`, `private/cancel_all_*` | `cancel()`, `cancelByLabel()`, `cancelAll()`, `cancelAllByCurrency()`, `cancelAllByCurrencyPair()`, `cancelAllByInstrument()`, `cancelAllByKindOrType()`       |
+| **Close position**                                               | `POST /orders/close_position`       | `private/close_position`                 | `closePosition()`                                                                                                                                              |
+| **Order preview**<br>_No simulated fills_                        | `POST /orders/preview`              | --                                       | --                                                                                                                                                             |
+| **Order history**                                                | `GET /orders/historical/batch`      | `private/get_order_history_*`            | `getOrderHistoryByCurrency()`, `getOrderHistoryByInstrument()`                                                                                                 |
+| **Order status**                                                 | `GET /orders/historical/{id}`       | `private/get_order_state`                | `getOrderState()`, `getOrderStateByLabel()`                                                                                                                    |
+| **Fills**<br>_Deribit calls fills "user trades"_                 | `GET /orders/historical/fills`      | `private/get_user_trades_*`              | `getUserTradesByCurrency()`, `getUserTradesByCurrencyAndTime()`, `getUserTradesByInstrument()`, `getUserTradesByInstrumentAndTime()`, `getUserTradesByOrder()` |
+| **Positions**<br>_Filter by currency and kind_                   | `GET /intx/positions/{uuid}`        | `private/get_positions`                  | `getPositions()`, `getPosition()`                                                                                                                              |
+| **Account summary**                                              | `GET /intx/portfolio/{uuid}`        | `private/get_account_summary`            | `getAccountSummary()`, `getAccountSummaries()`                                                                                                                 |
+| **Margin model**                                                 | `POST /intx/multi_asset_collateral` | `private/change_margin_model`            | `changeMarginModel()`                                                                                                                                          |
+| **Instruments**<br>_Filter by currency and kind_                 | `GET /products`                     | `public/get_instruments`                 | `getInstruments()`, `getInstrument()`                                                                                                                          |
+| **Order book**                                                   | `GET /product_book`                 | `public/get_order_book`                  | `getOrderBook()`, `getOrderBookByInstrumentId()`                                                                                                               |
+| **Ticker**                                                       | `GET /best_bid_ask`                 | `public/ticker`                          | `getTicker()`                                                                                                                                                  |
+| **Candles**                                                      | `GET /products/{id}/candles`        | `public/get_tradingview_chart_data`      | `getTradingviewChartData()`                                                                                                                                    |
+
+Method names shown with `*` are a family. For example, `private/get_order_history_by_currency` and `private/get_order_history_by_instrument`.
 
 #### CBAppClient
 

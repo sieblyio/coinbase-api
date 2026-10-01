@@ -31,6 +31,9 @@ export type RestClientType =
 
 const exchangeBaseURLMap = {
   [REST_CLIENT_TYPE_ENUM.advancedTrade]: 'https://api.coinbase.com',
+  // Global Derivatives JSON-RPC gateway. Methods are POST /api/v2.
+  // https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/introduction
+  [REST_CLIENT_TYPE_ENUM.advancedTradeGlobal]: 'https://drb.coinbase.com',
   [REST_CLIENT_TYPE_ENUM.coinbaseApp]: 'https://api.coinbase.com',
   [REST_CLIENT_TYPE_ENUM.exchange]: 'https://api.exchange.coinbase.com',
   [REST_CLIENT_TYPE_ENUM.prime]: 'https://api.prime.coinbase.com',
@@ -46,6 +49,7 @@ const exchangeSandboxURLMap = {
   // Static Advanced Trade sandbox (mocked accounts/orders). No matching engine / WebSocket sandbox.
   // https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/sandbox
   [REST_CLIENT_TYPE_ENUM.advancedTrade]: 'https://api-sandbox.coinbase.com',
+  [REST_CLIENT_TYPE_ENUM.advancedTradeGlobal]: 'NoSandboxAvailable',
   [REST_CLIENT_TYPE_ENUM.coinbaseApp]: 'NoSandboxAvailable',
   [REST_CLIENT_TYPE_ENUM.prime]: 'NoSandboxAvailable',
   [REST_CLIENT_TYPE_ENUM.commerce]: 'NoSandboxAvailable',

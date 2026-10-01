@@ -103,4 +103,4 @@ export interface OrderConfiguration {
   scaled_limit_gtc?: ScaledLimitGtc;
 }
 
-export type CustomOrderIdProperty = 'client_order_id' | 'client_oid';
+export type CustomOrderIdProperty = 'client_order_id' | 'client_oid' | 'label';
