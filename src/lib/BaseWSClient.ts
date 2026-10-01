@@ -85,8 +85,8 @@ function getNormalisedTopicRequests(
       continue;
     }
 
-    // already a normalised object, thanks to user
-    normalisedTopicRequests.push(wsTopicRequest);
+    // Match the string form even when an object omits its optional payload.
+    normalisedTopicRequests.push({ payload: undefined, ...wsTopicRequest });
   }
   return normalisedTopicRequests;
 }
@@ -138,7 +138,7 @@ export abstract class BaseWebsocketClient<
 
   protected abstract isWsPong(data: any): boolean;
 
-  protected abstract isWsPing(data: any): boolean;
+  protected abstract isWsPing(data: any, wsKey: TWSKey): boolean;
 
   protected abstract getWsAuthRequestEvent(wsKey: TWSKey): Promise<object>;
 
@@ -274,9 +274,9 @@ export abstract class BaseWebsocketClient<
   ) {
     const normalisedTopicRequests = getNormalisedTopicRequests(wsTopicRequests);
 
-    // Store topics, so future automation (post-auth, post-reconnect) has everything needed to resubscribe automatically
+    // Remove topics before checking the connection, so reconnect cannot restore cancelled subscriptions.
     for (const topic of normalisedTopicRequests) {
-      this.wsStore.addTopic(wsKey, topic);
+      this.wsStore.deleteTopic(wsKey, topic);
     }
 
     const isConnected = this.wsStore.isConnectionState(
@@ -825,7 +825,7 @@ export abstract class BaseWebsocketClient<
         return this.onWsPong(event, wsKey, 'onWsMessage');
       }
 
-      if (this.isWsPing(event)) {
+      if (this.isWsPing(event, wsKey)) {
         this.logger.trace('Received ping', {
           ...WS_LOGGER_CATEGORY,
           wsKey,

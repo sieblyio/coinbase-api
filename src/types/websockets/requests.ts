@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export type WsOperation = 'subscribe' | 'unsubscribe';
 
+/** Public Global Derivatives subscriptions use complete channel names in params.channels. */
+export interface WsAdvTradeGlobalRequestOperation {
+  jsonrpc: '2.0';
+  id: string;
+  method: `public/${WsOperation}`;
+  params: { channels: string[] };
+}
+
 /**
  * This is the format used for commands sent upstream for this websocket connection.
  *

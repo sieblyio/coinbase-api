@@ -93,4 +93,9 @@ export interface WebsocketClientOptions extends WSClientConfigurableOptions {
   reauthWSAPIOnReconnect: boolean;
 }
 
-export type WsMarket = 'advancedTrade' | 'exchange' | 'international' | 'prime';
+export type WsMarket =
+  | 'advancedTrade'
+  | 'advancedTradeGlobal'
+  | 'exchange'
+  | 'international'
+  | 'prime';

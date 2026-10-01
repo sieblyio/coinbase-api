@@ -14,6 +14,7 @@ import {
   getCBInternationalWSSign,
   getCBPrimeWSSign,
   getMergedCBExchangeWSRequestOperations,
+  isMessageEvent,
   MessageEventLike,
   WS_KEY_MAP,
   WS_URL_MAP,
@@ -23,6 +24,7 @@ import {
 import { WSConnectedResult } from './lib/websocket/WsStore.types.js';
 import { WsMarket } from './types/websockets/client.js';
 import {
+  WsAdvTradeGlobalRequestOperation,
   WsAdvTradeRequestOperation,
   WsExchangeAuthenticatedRequestOperation,
   WsExchangeRequestOperation,
@@ -59,6 +61,7 @@ const PRIVATE_WS_KEYS: WsKey[] = [
  */
 export const PUBLIC_WS_KEYS: WsKey[] = [
   WS_KEY_MAP.advTradeMarketData,
+  WS_KEY_MAP.advTradeGlobalMarketData,
   WS_KEY_MAP.exchangeMarketData,
 ];
 
@@ -75,6 +78,7 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
     return Promise.all([
       this.connect(WS_KEY_MAP.advTradeMarketData),
       this.connect(WS_KEY_MAP.advTradeUserData),
+      this.connect(WS_KEY_MAP.advTradeGlobalMarketData),
       this.connect(WS_KEY_MAP.exchangeMarketData),
       this.connect(WS_KEY_MAP.exchangeDirectMarketData),
       this.connect(WS_KEY_MAP.internationalMarketData),
@@ -197,6 +201,20 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
   }
 
   protected sendPongEvent(wsKey: WsKey) {
+    if (wsKey === WS_KEY_MAP.advTradeGlobalMarketData) {
+      // Reply to the gateway's JSON-RPC test_request. Protocol ping frames are handled by BaseWSClient.
+      this.tryWsSend(
+        wsKey,
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: this.getNewRequestId(),
+          method: 'public/test',
+          params: {},
+        }),
+      );
+      return;
+    }
+
     try {
       this.logger.trace('Sending upstream ws PONG: ', {
         ...WS_LOGGER_CATEGORY,
@@ -224,7 +242,24 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
     }
   }
 
-  protected isWsPing(msg: any): boolean {
+  protected isWsPing(msg: any, wsKey: WsKey): boolean {
+    if (wsKey === WS_KEY_MAP.advTradeGlobalMarketData) {
+      if (!isMessageEvent(msg)) {
+        return false;
+      }
+
+      try {
+        const parsed = JSON.parse(msg.data);
+        return (
+          parsed?.method === 'heartbeat' &&
+          parsed.params?.type === 'test_request'
+        );
+      } catch {
+        // Let the normal message parser report malformed JSON.
+        return false;
+      }
+    }
+
     if (msg?.data === 'ping') {
       return true;
     }
@@ -248,6 +283,26 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
 
     try {
       const parsed = JSON.parse(event.data);
+
+      if (wsKey === WS_KEY_MAP.advTradeGlobalMarketData) {
+        if (parsed.error) {
+          return [{ eventType: 'exception', event: parsed }];
+        }
+
+        if (parsed.method === 'subscription') {
+          return [{ eventType: 'update', event: parsed }];
+        }
+
+        if (parsed.method === 'heartbeat') {
+          // Passive heartbeat notification. test_request is handled by the ping/pong hooks.
+          return [{ eventType: 'response', event: parsed }];
+        }
+
+        // Preserve the JSON-RPC envelope for subscription acknowledgements and liveness replies.
+        if ('id' in parsed) {
+          return [{ eventType: 'response', event: parsed }];
+        }
+      }
 
       const responseEvents = ['subscriptions'];
 
@@ -352,6 +407,14 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
           ? WS_KEY_MAP.advTradeUserData
           : WS_KEY_MAP.advTradeMarketData;
       }
+      case 'advancedTradeGlobal': {
+        if (isPrivate) {
+          throw new Error(
+            'Global Derivatives private WebSockets are not implemented yet',
+          );
+        }
+        return WS_KEY_MAP.advTradeGlobalMarketData;
+      }
       case 'exchange': {
         return isPrivate
           ? WS_KEY_MAP.exchangeDirectMarketData
@@ -378,6 +441,9 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
       case WS_KEY_MAP.advTradeMarketData:
       case WS_KEY_MAP.advTradeUserData: {
         return 'advancedTrade';
+      }
+      case WS_KEY_MAP.advTradeGlobalMarketData: {
+        return 'advancedTradeGlobal';
       }
       case WS_KEY_MAP.exchangeMarketData:
       case WS_KEY_MAP.exchangeDirectMarketData: {
@@ -428,6 +494,17 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
   ): Promise<string[]> {
     if (!topicRequests.length) {
       return [];
+    }
+
+    if (wsKey === WS_KEY_MAP.advTradeGlobalMarketData) {
+      // Unlike the older Advanced Trade feed, Global accepts all channels in one request.
+      const request: WsAdvTradeGlobalRequestOperation = {
+        jsonrpc: '2.0',
+        id: this.getNewRequestId(),
+        method: `public/${operation}`,
+        params: { channels: topicRequests.map(({ topic }) => topic) },
+      };
+      return [JSON.stringify(request)];
     }
 
     const apiKey = this.options.apiKey;
