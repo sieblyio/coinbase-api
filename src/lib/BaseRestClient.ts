@@ -8,10 +8,18 @@ import {
   CloseAdvTradePositionRequest,
   SubmitAdvTradeOrderRequest,
 } from '../types/request/advanced-trade-client.js';
+import {
+  AdvTradeGlobalEditByLabelRequest,
+  AdvTradeGlobalPlaceOrderRequest,
+} from '../types/request/advanced-trade-global-client.js';
 import { SubmitCBExchOrderRequest } from '../types/request/coinbase-exchange.js';
 import { SubmitINTXOrderRequest } from '../types/request/coinbase-international.js';
 import { SubmitPrimeOrderRequest } from '../types/request/coinbase-prime.js';
 import { CustomOrderIdProperty } from '../types/shared.types.js';
+import {
+  ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT,
+  AdvancedTradeGlobalAuth,
+} from './AdvancedTradeGlobalAuth.js';
 import { signJWT } from './jwtNode.js';
 import { neverGuard } from './misc-util.js';
 import {
@@ -128,6 +136,10 @@ export abstract class BaseRestClient {
   private apiSecret: string | undefined;
 
   private apiPassphrase: string | undefined;
+
+  private advancedTradeGlobalAuth?: AdvancedTradeGlobalAuth;
+
+  private advancedTradeGlobalRpcId = 0;
 
   /** Defines the client type (affecting how requests & signatures behave) */
   abstract getClientType(): RestClientType;
@@ -255,6 +267,23 @@ export abstract class BaseRestClient {
     return this._call('PATCH', endpoint, params, false);
   }
 
+  private getAdvancedTradeGlobalAuth(): AdvancedTradeGlobalAuth {
+    if (!this.advancedTradeGlobalAuth) {
+      this.advancedTradeGlobalAuth = new AdvancedTradeGlobalAuth(
+        {
+          baseUrl: this.baseUrl,
+          apiKey: this.apiKey,
+          apiSecret: this.apiSecret,
+          jwtExpiresSeconds: this.options.jwtExpiresSeconds || 120,
+          getSignTimestampMs: () => this.getSignTimestampMs(),
+          traceLogs: !!ENABLE_HTTP_TRACE,
+        },
+        (body) => this.post(ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT, { body }),
+      );
+    }
+    return this.advancedTradeGlobalAuth;
+  }
+
   /**
    * @private Make a HTTP request to a specific endpoint. Private endpoint API calls are automatically signed.
    */
@@ -284,23 +313,41 @@ export abstract class BaseRestClient {
 
     // Dispatch request
     return axios(options)
-      .then((response) => {
-        if (response.status >= 200 && response.status <= 204) {
-          // Throw if API returns an error (e.g. insufficient balance)
-          if (
-            typeof response.data?.code === 'string' &&
-            response.data?.code !== '200000'
-          ) {
-            throw { response };
-          }
-
-          return response.data;
-        }
-        throw { response };
-      })
+      .then((response) => this.parseResponse(response))
       .catch((e) =>
-        this.parseException(e, { method, endpoint, requestUrl, params }),
+        this.parseException(
+          e,
+          { method, endpoint, requestUrl, params },
+          options,
+        ),
       );
+  }
+
+  /** Validate the response and extract the payload for this product group. */
+  private parseResponse(response: AxiosResponse): any {
+    if (!(response.status >= 200 && response.status <= 204)) {
+      throw { response };
+    }
+
+    // Throw if API returns an error (e.g. insufficient balance).
+    if (
+      typeof response.data?.code === 'string' &&
+      response.data?.code !== '200000'
+    ) {
+      throw { response };
+    }
+
+    switch (this.getClientType()) {
+      case REST_CLIENT_TYPE_ENUM.advancedTradeGlobal: {
+        // JSON-RPC errors can arrive inside an HTTP 200 response.
+        if (response.data?.error) {
+          throw { response };
+        }
+        return response.data?.result;
+      }
+      default:
+        return response.data;
+    }
   }
 
   public generateNewOrderId(): string {
@@ -316,8 +363,12 @@ export abstract class BaseRestClient {
       | CloseAdvTradePositionRequest
       | SubmitCBExchOrderRequest
       | SubmitINTXOrderRequest
-      | SubmitPrimeOrderRequest,
+      | SubmitPrimeOrderRequest
+      | AdvTradeGlobalPlaceOrderRequest
+      | AdvTradeGlobalEditByLabelRequest,
     orderIdProperty: CustomOrderIdProperty,
+    /** Global Derivatives `label` max is 64. Other Coinbase client ids allow 128. */
+    maxLength = 128,
   ): void {
     // Not the cleanest but strict checks aren't quite necessary here either
     const requestParams = params as any;
@@ -339,9 +390,9 @@ export abstract class BaseRestClient {
       requestParams[orderIdProperty] = newValue;
     }
 
-    if (requestParams[orderIdProperty].length > 128) {
+    if (requestParams[orderIdProperty].length > maxLength) {
       console.warn(
-        `WARNING: "${orderIdProperty}" exceeds the 128 character maximum enforced by Coinbase. Value length: ${requestParams[orderIdProperty].length}. Invalid argument errors may be returned by the API.`,
+        `WARNING: "${orderIdProperty}" exceeds the ${maxLength} character maximum enforced by Coinbase. Value length: ${requestParams[orderIdProperty].length}. Invalid argument errors may be returned by the API.`,
       );
     }
   }
@@ -349,24 +400,55 @@ export abstract class BaseRestClient {
   /**
    * @private generic handler to parse request exceptions
    */
-  parseException(e: any, requestParams: any): unknown {
+  parseException(
+    e: any,
+    requestParams: any,
+    requestOptions?: AxiosRequestConfig,
+  ): unknown {
+    let error = e;
+    let context = requestParams;
+
+    switch (this.getClientType()) {
+      case REST_CLIENT_TYPE_ENUM.advancedTradeGlobal: {
+        if (!requestOptions) {
+          break;
+        }
+
+        // Handle token rejection and credential redaction before applying the
+        // shared error format, including when parseExceptions is disabled.
+        error = this.getAdvancedTradeGlobalAuth().handleRequestError(
+          e,
+          requestOptions,
+        );
+        const isAuthRequest =
+          requestParams.endpoint === ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT ||
+          requestParams.params?.body?.method === 'public/auth';
+        context = {
+          ...requestParams,
+          requestUrl: requestOptions.url,
+          params: isAuthRequest ? undefined : requestParams.params,
+        };
+        break;
+      }
+    }
+
     if (this.options.parseExceptions === false) {
-      throw e;
+      throw error;
     }
 
     // Something happened in setting up the request that triggered an error
-    if (!e.response) {
-      if (!e.request) {
-        throw e.message;
+    if (!error.response) {
+      if (!error.request) {
+        throw error.message;
       }
 
       // request made but no response received
-      throw e;
+      throw error;
     }
 
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
-    const response: AxiosResponse = e.response;
+    const response: AxiosResponse = error.response;
     // console.error('err: ', response?.data);
 
     throw {
@@ -382,7 +464,7 @@ export abstract class BaseRestClient {
         apiPassphrase: 'omittedFromError',
         cdpApiKey: 'omittedFromError',
       },
-      requestParams,
+      requestParams: context,
     };
   }
 
@@ -474,6 +556,18 @@ export abstract class BaseRestClient {
           // TODO: is there demand for oauth support?
           // Docs: https://docs.cdp.coinbase.com/coinbase-app/docs/coinbase-app-integration
           // See: https://github.com/tiagosiebler/coinbase-api/issues/24
+        }
+
+        case REST_CLIENT_TYPE_ENUM.advancedTradeGlobal: {
+          const accessToken =
+            await this.getAdvancedTradeGlobalAuth().getAccessToken();
+
+          return {
+            ...res,
+            sign: accessToken,
+            queryParamsWithSign: signRequestParams,
+            headers: { Authorization: `Bearer ${accessToken}` },
+          };
         }
 
         // Docs: https://docs.cdp.coinbase.com/exchange/docs/rest-auth
@@ -685,14 +779,41 @@ export abstract class BaseRestClient {
     method: Method,
     endpoint: string,
     url: string,
-    params?: any | undefined,
+    requestParams?: any | undefined,
     isPublicApi?: boolean,
   ): Promise<AxiosRequestConfig> {
+    let params = requestParams;
     const options: AxiosRequestConfig = {
       ...this.globalRequestOptions,
       url: url,
       method: method,
     };
+
+    const isAdvancedTradeGlobal =
+      this.getClientType() === REST_CLIENT_TYPE_ENUM.advancedTradeGlobal;
+    if (
+      isAdvancedTradeGlobal &&
+      method === 'POST' &&
+      endpoint.startsWith('/api/v2/')
+    ) {
+      // Keep JSON-RPC formatting here so endpoint methods use the usual post helpers.
+      const rpcParams = { ...params?.body };
+      deleteUndefinedValues(rpcParams);
+      params = {
+        ...params,
+        body: {
+          jsonrpc: '2.0',
+          id: ++this.advancedTradeGlobalRpcId,
+          method: endpoint.slice('/api/v2/'.length),
+          ...(Object.keys(rpcParams).length ? { params: rpcParams } : {}),
+        },
+      };
+      // Method paths identify the RPC call; POSTs use the shared gateway URL.
+      // Auth keeps its documented POST URL, which is also bound into the CDP JWT.
+      if (endpoint !== ADVANCED_TRADE_GLOBAL_AUTH_ENDPOINT) {
+        options.url = `${this.baseUrl}/api/v2`;
+      }
+    }
 
     deleteUndefinedValues(params);
     deleteUndefinedValues(params?.body);
@@ -700,6 +821,19 @@ export abstract class BaseRestClient {
     deleteUndefinedValues(params?.headers);
 
     if (isPublicApi || !this.apiKey || !this.apiSecret) {
+      if (isAdvancedTradeGlobal && method === 'POST' && params?.body) {
+        // Global JSON-RPC calls send their envelope in the body. Flat params stay queries.
+        return {
+          ...options,
+          headers: {
+            ...options.headers,
+            ...params.headers,
+          },
+          params: params.query,
+          data: params.body,
+        };
+      }
+
       return {
         ...options,
         params: params,

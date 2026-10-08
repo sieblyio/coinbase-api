@@ -20,6 +20,7 @@ All REST clients are in the [src](/src) folder. For usage examples, make sure to
 
 List of clients:
 - [CBAdvancedTradeClient](#CBAdvancedTradeClientts)
+- [CBAdvancedTradeGlobalClient](#CBAdvancedTradeGlobalClientts)
 - [CBAppClient](#CBAppClientts)
 - [CBExchangeClient](#CBExchangeClientts)
 - [CBInternationalClient](#CBInternationalClientts)
@@ -45,6 +46,8 @@ Table consists of 4 parts:
 **HTTP Method** shows HTTP method that the function uses to call the endpoint. Sometimes endpoints can have same URL, but different HTTP method so you can use this column to differentiate between them.
 
 **Endpoint** is the URL that the function uses to call the endpoint. Best way to find exact function you need for the endpoint is to search for URL in this table and find corresponding function name.
+
+CBAdvancedTradeGlobalClient is JSON-RPC. Every method is HTTP POST to `/api/v2`. The endpoint column shows that path plus the JSON-RPC method (`public/...` or `private/...`). AUTH follows that prefix: `private/` needs keys, `public/` does not.
 
 
 # CBAdvancedTradeClient.ts
@@ -103,6 +106,118 @@ This table includes all endpoints from the official Exchange API docs and corres
 | [getPaymentMethods()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeClient.ts#L879) | :closed_lock_with_key:  | GET | `/api/v3/brokerage/payment_methods` |
 | [getPaymentMethod()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeClient.ts#L890) | :closed_lock_with_key:  | GET | `/api/v3/brokerage/payment_methods/{payment_method_id}` |
 | [getApiKeyPermissions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeClient.ts#L910) | :closed_lock_with_key:  | GET | `/api/v3/brokerage/key_permissions` |
+
+# CBAdvancedTradeGlobalClient.ts
+
+This table includes all endpoints from the official Exchange API docs and corresponding SDK functions for each endpoint that are found in [CBAdvancedTradeGlobalClient.ts](/src/CBAdvancedTradeGlobalClient.ts). 
+
+| Function | AUTH | HTTP Method | Endpoint |
+| -------- | :------: | :------: | -------- |
+| [auth()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L227) |  | POST | `/api/v2 public/auth` |
+| [getAnnouncements()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L242) |  | POST | `/api/v2 public/get_announcements` |
+| [getBlockRfqTrades()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L257) |  | POST | `/api/v2 public/get_block_rfq_trades` |
+| [getBookSummaryByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L274) |  | POST | `/api/v2 public/get_book_summary_by_currency` |
+| [getBookSummaryByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L290) |  | POST | `/api/v2 public/get_book_summary_by_instrument` |
+| [getComboDetails()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L305) |  | POST | `/api/v2 public/get_combo_details` |
+| [getComboIds()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L320) |  | POST | `/api/v2 public/get_combo_ids` |
+| [getCombos()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L334) |  | POST | `/api/v2 public/get_combos` |
+| [getContractSize()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L352) |  | POST | `/api/v2 public/get_contract_size` |
+| [getCurrencies()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L368) |  | POST | `/api/v2 public/get_currencies` |
+| [getDeliveryPrices()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L383) |  | POST | `/api/v2 public/get_delivery_prices` |
+| [getExpirations()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L400) |  | POST | `/api/v2 public/get_expirations` |
+| [getFundingChartData()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L417) |  | POST | `/api/v2 public/get_funding_chart_data` |
+| [getFundingRateHistory()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L435) |  | POST | `/api/v2 public/get_funding_rate_history` |
+| [getFundingRateValue()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L453) |  | POST | `/api/v2 public/get_funding_rate_value` |
+| [getHistoricalVolatility()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L470) |  | POST | `/api/v2 public/get_historical_volatility` |
+| [getIndexChartData()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L487) |  | POST | `/api/v2 public/get_index_chart_data` |
+| [getIndexPrice()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L503) |  | POST | `/api/v2 public/get_index_price` |
+| [getIndexPriceNames()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L520) |  | POST | `/api/v2 public/get_index_price_names` |
+| [getInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L537) |  | POST | `/api/v2 public/get_instrument` |
+| [getInstruments()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L561) |  | POST | `/api/v2 public/get_instruments` |
+| [getLastSettlementsByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L589) |  | POST | `/api/v2 public/get_last_settlements_by_currency` |
+| [getLastSettlementsByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L616) |  | POST | `/api/v2 public/get_last_settlements_by_instrument` |
+| [getLastTradesByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L638) |  | POST | `/api/v2 public/get_last_trades_by_currency` |
+| [getLastTradesByCurrencyAndTime()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L659) |  | POST | `/api/v2 public/get_last_trades_by_currency_and_time` |
+| [getLastTradesByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L678) |  | POST | `/api/v2 public/get_last_trades_by_instrument` |
+| [getLastTradesByInstrumentAndTime()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L697) |  | POST | `/api/v2 public/get_last_trades_by_instrument_and_time` |
+| [getMarkPriceHistory()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L714) |  | POST | `/api/v2 public/get_mark_price_history` |
+| [getOrderBook()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L733) |  | POST | `/api/v2 public/get_order_book` |
+| [getOrderBookByInstrumentId()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L750) |  | POST | `/api/v2 public/get_order_book_by_instrument_id` |
+| [getSupportedIndexNames()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L767) |  | POST | `/api/v2 public/get_supported_index_names` |
+| [getTime()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L781) |  | POST | `/api/v2 public/get_time` |
+| [getTradeVolumes()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L799) |  | POST | `/api/v2 public/get_trade_volumes` |
+| [getTradingviewChartData()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L820) |  | POST | `/api/v2 public/get_tradingview_chart_data` |
+| [getVolatilityIndexData()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L837) |  | POST | `/api/v2 public/get_volatility_index_data` |
+| [getStatus()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L850) |  | POST | `/api/v2 public/status` |
+| [testConnection()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L862) |  | POST | `/api/v2 public/test` |
+| [getTicker()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L881) |  | POST | `/api/v2 public/ticker` |
+| [submitBuy()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L908) | :closed_lock_with_key:  | POST | `/api/v2 private/buy` |
+| [submitSell()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L931) | :closed_lock_with_key:  | POST | `/api/v2 private/sell` |
+| [updateOrder()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L953) | :closed_lock_with_key:  | POST | `/api/v2 private/edit` |
+| [updateOrderByLabel()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L973) | :closed_lock_with_key:  | POST | `/api/v2 private/edit_by_label` |
+| [cancelOrder()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L991) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel` |
+| [cancelByLabel()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1012) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_by_label` |
+| [cancelAll()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1030) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_all` |
+| [cancelAllByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1047) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_all_by_currency` |
+| [cancelAllByCurrencyPair()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1066) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_all_by_currency_pair` |
+| [cancelAllByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1085) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_all_by_instrument` |
+| [cancelAllByKindOrType()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1104) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_all_by_kind_or_type` |
+| [closePosition()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1123) | :closed_lock_with_key:  | POST | `/api/v2 private/close_position` |
+| [getOpenOrders()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1139) | :closed_lock_with_key:  | POST | `/api/v2 private/get_open_orders` |
+| [getOpenOrdersByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1155) | :closed_lock_with_key:  | POST | `/api/v2 private/get_open_orders_by_currency` |
+| [getOpenOrdersByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1171) | :closed_lock_with_key:  | POST | `/api/v2 private/get_open_orders_by_instrument` |
+| [getOpenOrdersByLabel()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1187) | :closed_lock_with_key:  | POST | `/api/v2 private/get_open_orders_by_label` |
+| [getOrderState()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1211) | :closed_lock_with_key:  | POST | `/api/v2 private/get_order_state` |
+| [getOrderStateByLabel()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1234) | :closed_lock_with_key:  | POST | `/api/v2 private/get_order_state_by_label` |
+| [getOrderHistoryByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1254) | :closed_lock_with_key:  | POST | `/api/v2 private/get_order_history_by_currency` |
+| [getOrderHistoryByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1274) | :closed_lock_with_key:  | POST | `/api/v2 private/get_order_history_by_instrument` |
+| [getOrderMarginByIds()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1290) | :closed_lock_with_key:  | POST | `/api/v2 private/get_order_margin_by_ids` |
+| [getTriggerOrderHistory()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1308) | :closed_lock_with_key:  | POST | `/api/v2 private/get_trigger_order_history` |
+| [getUserTradesByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1329) | :closed_lock_with_key:  | POST | `/api/v2 private/get_user_trades_by_currency` |
+| [getUserTradesByCurrencyAndTime()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1352) | :closed_lock_with_key:  | POST | `/api/v2 private/get_user_trades_by_currency_and_time` |
+| [getUserTradesByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1373) | :closed_lock_with_key:  | POST | `/api/v2 private/get_user_trades_by_instrument` |
+| [getUserTradesByInstrumentAndTime()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1395) | :closed_lock_with_key:  | POST | `/api/v2 private/get_user_trades_by_instrument_and_time` |
+| [getUserTradesByOrder()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1416) | :closed_lock_with_key:  | POST | `/api/v2 private/get_user_trades_by_order` |
+| [getMargins()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1433) | :closed_lock_with_key:  | POST | `/api/v2 private/get_margins` |
+| [getAccountSummaries()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1450) | :closed_lock_with_key:  | POST | `/api/v2 private/get_account_summaries` |
+| [getAccountSummary()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1474) | :closed_lock_with_key:  | POST | `/api/v2 private/get_account_summary` |
+| [getPosition()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1493) | :closed_lock_with_key:  | POST | `/api/v2 private/get_position` |
+| [getPositions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1512) | :closed_lock_with_key:  | POST | `/api/v2 private/get_positions` |
+| [changeMarginModel()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1531) | :closed_lock_with_key:  | POST | `/api/v2 private/change_margin_model` |
+| [getAccessLog()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1548) | :closed_lock_with_key:  | POST | `/api/v2 private/get_access_log` |
+| [getTransactionLog()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1575) | :closed_lock_with_key:  | POST | `/api/v2 private/get_transaction_log` |
+| [getSettlementHistoryByCurrency()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1598) | :closed_lock_with_key:  | POST | `/api/v2 private/get_settlement_history_by_currency` |
+| [getSettlementHistoryByInstrument()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1621) | :closed_lock_with_key:  | POST | `/api/v2 private/get_settlement_history_by_instrument` |
+| [simulatePortfolio()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1641) | :closed_lock_with_key:  | POST | `/api/v2 private/simulate_portfolio` |
+| [simulatePme()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1661) | :closed_lock_with_key:  | POST | `/api/v2 private/pme/simulate` |
+| [enableCancelOnDisconnect()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1685) | :closed_lock_with_key:  | POST | `/api/v2 private/enable_cancel_on_disconnect` |
+| [disableCancelOnDisconnect()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1701) | :closed_lock_with_key:  | POST | `/api/v2 private/disable_cancel_on_disconnect` |
+| [getCancelOnDisconnect()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1714) | :closed_lock_with_key:  | POST | `/api/v2 private/get_cancel_on_disconnect` |
+| [createCombo()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1731) | :closed_lock_with_key:  | POST | `/api/v2 private/create_combo` |
+| [getLegPrices()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1748) | :closed_lock_with_key:  | POST | `/api/v2 private/get_leg_prices` |
+| [createBlockRfq()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1763) | :closed_lock_with_key:  | POST | `/api/v2 private/create_block_rfq` |
+| [cancelBlockRfq()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1779) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_block_rfq` |
+| [acceptBlockRfq()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1792) | :closed_lock_with_key:  | POST | `/api/v2 private/accept_block_rfq` |
+| [cancelBlockRfqTrigger()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1805) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_block_rfq_trigger` |
+| [getBlockRfqs()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1818) | :closed_lock_with_key:  | POST | `/api/v2 private/get_block_rfqs` |
+| [addBlockRfqQuote()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1831) | :closed_lock_with_key:  | POST | `/api/v2 private/add_block_rfq_quote` |
+| [editBlockRfqQuote()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1847) | :closed_lock_with_key:  | POST | `/api/v2 private/edit_block_rfq_quote` |
+| [cancelBlockRfqQuote()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1860) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_block_rfq_quote` |
+| [cancelAllBlockRfqQuotes()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1873) | :closed_lock_with_key:  | POST | `/api/v2 private/cancel_all_block_rfq_quotes` |
+| [getBlockRfqQuotes()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1886) | :closed_lock_with_key:  | POST | `/api/v2 private/get_block_rfq_quotes` |
+| [getBlockRfqMakers()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1899) | :closed_lock_with_key:  | POST | `/api/v2 private/get_block_rfq_makers` |
+| [getBlockRfqUserInfo()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1912) | :closed_lock_with_key:  | POST | `/api/v2 private/get_block_rfq_user_info` |
+| [executeBlockTrade()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1925) | :closed_lock_with_key:  | POST | `/api/v2 private/execute_block_trade` |
+| [verifyBlockTrade()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1938) | :closed_lock_with_key:  | POST | `/api/v2 private/verify_block_trade` |
+| [approveBlockTrade()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1951) | :closed_lock_with_key:  | POST | `/api/v2 private/approve_block_trade` |
+| [rejectBlockTrade()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1964) | :closed_lock_with_key:  | POST | `/api/v2 private/reject_block_trade` |
+| [simulateBlockTrade()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1977) | :closed_lock_with_key:  | POST | `/api/v2 private/simulate_block_trade` |
+| [invalidateBlockTradeSignature()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L1990) | :closed_lock_with_key:  | POST | `/api/v2 private/invalidate_block_trade_signature` |
+| [getBlockTrade()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L2003) | :closed_lock_with_key:  | POST | `/api/v2 private/get_block_trade` |
+| [getBlockTrades()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L2016) | :closed_lock_with_key:  | POST | `/api/v2 private/get_block_trades` |
+| [getBlockTradeRequests()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L2029) | :closed_lock_with_key:  | POST | `/api/v2 private/get_block_trade_requests` |
+| [getBrokerTrades()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L2042) | :closed_lock_with_key:  | POST | `/api/v2 private/get_broker_trades` |
+| [getBrokerTradeRequests()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBAdvancedTradeGlobalClient.ts#L2055) | :closed_lock_with_key:  | POST | `/api/v2 private/get_broker_trade_requests` |
 
 # CBAppClient.ts
 
