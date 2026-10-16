@@ -7,7 +7,7 @@ import {
 import { signMessage } from '../webCryptoAPI.js';
 
 /**
- * Each websocket URL (domain + endpoint) is represented as a "WS Key". Authentication is handled automatically if required.
+ * Each websocket connection is represented as a "WS Key". Authentication is handled automatically if required.
  */
 export const WS_KEY_MAP = {
   /**
@@ -18,11 +18,32 @@ export const WS_KEY_MAP = {
    */
   advTradeMarketData: 'advTradeMarketData',
   /**
-   * User Order Data provides updates for the orders of the user.
+   * Coinbase Advanced Trade User Order Data provides updates for the orders of the user.
    *
    * https://docs.cdp.coinbase.com/advanced-trade/docs/ws-overview
    */
   advTradeUserData: 'advTradeUserData',
+  /**
+   * Unauthenticated Coinbase Global Derivatives market data on the public streams host.
+   * Channel parameters are part of the topic name. See Global Derivatives > Public:
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
+   */
+  advTradeGlobalMarketData: 'advTradeGlobalMarketData',
+  /**
+   * Coinbase Global Derivatives private subscriptions on the main DRB gateway.
+   * Uses public/auth followed by private/subscribe. See Global Derivatives > Private:
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
+   */
+  advTradeGlobalUserData: 'advTradeGlobalUserData',
+  /**
+   * Dedicated Global JSON-RPC API connection to the same main DRB gateway as private subscriptions.
+   * Uses a separate connection. See Global Derivatives > Private:
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
+   */
+  advTradeGlobalWSAPI: 'advTradeGlobalWSAPI',
   /**
    * Coinbase Market Data (part of Coinbase Exchange API) is the traditional feed which is available without authentication.
    *
@@ -119,6 +140,18 @@ export const WS_URL_MAP: Record<WsKey, NetworkMap<'livenet' | 'testnet'>> = {
     livenet: 'wss://advanced-trade-ws-user.coinbase.com',
     testnet: 'NotAvailable',
   },
+  [WS_KEY_MAP.advTradeGlobalMarketData]: {
+    livenet: 'wss://streams.drb.coinbase.com/ws/api/v2',
+    testnet: 'NotAvailable',
+  },
+  [WS_KEY_MAP.advTradeGlobalUserData]: {
+    livenet: 'wss://drb.coinbase.com/ws/api/v2',
+    testnet: 'NotAvailable',
+  },
+  [WS_KEY_MAP.advTradeGlobalWSAPI]: {
+    livenet: 'wss://drb.coinbase.com/ws/api/v2',
+    testnet: 'NotAvailable',
+  },
   [WS_KEY_MAP.exchangeMarketData]: {
     livenet: 'wss://ws-feed.exchange.coinbase.com',
     testnet: 'wss://ws-feed-public.sandbox.exchange.coinbase.com',
@@ -136,6 +169,26 @@ export const WS_URL_MAP: Record<WsKey, NetworkMap<'livenet' | 'testnet'>> = {
     testnet: 'NotAvailable',
   },
 } as const;
+
+/** Global JSON-RPC request IDs are unique within each connection. Replies omit the method. */
+export function getPromiseRefForWSAPIRequest(request: {
+  id: string | number;
+}): string {
+  return `WSAPI_${request.id}`;
+}
+
+export function isAdvancedTradeGlobalWsKey(
+  wsKey: WsKey,
+): wsKey is
+  | typeof WS_KEY_MAP.advTradeGlobalMarketData
+  | typeof WS_KEY_MAP.advTradeGlobalUserData
+  | typeof WS_KEY_MAP.advTradeGlobalWSAPI {
+  return (
+    wsKey === WS_KEY_MAP.advTradeGlobalMarketData ||
+    wsKey === WS_KEY_MAP.advTradeGlobalUserData ||
+    wsKey === WS_KEY_MAP.advTradeGlobalWSAPI
+  );
+}
 
 /**
  * Merge one or more WS Request operations (e.g. subscribe request) for

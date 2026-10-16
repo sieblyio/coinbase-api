@@ -24,6 +24,7 @@ Updated & performant JavaScript & Node.js SDK for Coinbase's Advanced Trade, App
 - Professional, robust & performant Coinbase SDK with extensive production use in live trading environments.
 - Complete integration with all Coinbase APIs - supports both retail and institutional REST clients and WebSockets:
   - [Coinbase Advanced Trade](https://docs.cdp.coinbase.com/advanced-trade/docs/welcome) - Modern trading platform
+  - [Coinbase Advanced Trade Global Derivatives](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/overview) - International perpetuals on the Deribit-powered Starbase gateway (`CBAdvancedTradeGlobalClient`)
   - [Coinbase App](https://docs.cdp.coinbase.com/coinbase-app/docs/welcome) - Consumer mobile/web application
   - [Coinbase Exchange](https://docs.cdp.coinbase.com/exchange/docs/welcome) - Professional trading platform
   - [Coinbase International Exchange](https://docs.cdp.coinbase.com/intx/docs/welcome) - International institutional trading
@@ -58,6 +59,7 @@ Updated & performant JavaScript & Node.js SDK for Coinbase's Advanced Trade, App
 - [Usage](#usage)
   - [REST API Clients](#rest-api)
     - [CBAdvancedTradeClient](#cbadvancedtradeclient)
+    - [CBAdvancedTradeGlobalClient](#cbadvancedtradeglobalclient)
     - [CBAppClient](#cbappclient)
     - [CBExchangeClient](#cbexchangeclient)
     - [CBInternationalClient](#cbinternationalclient)
@@ -120,6 +122,7 @@ Most methods accept JS objects. These can be populated using parameters specifie
 
 - [Coinbase Developer Platform - Product APIs](https://docs.cdp.coinbase.com/product-apis/docs/welcome)
   - [Advanced Trade API](https://docs.cdp.coinbase.com/advanced-trade/docs/welcome)
+  - [Advanced Trade Global Derivatives](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/technical)
   - [Coinbase App API](https://docs.cdp.coinbase.com/coinbase-app/docs/welcome)
   - [Exchange API](https://docs.cdp.coinbase.com/exchange/docs/welcome)
   - [International Exchange API](https://docs.cdp.coinbase.com/intx/docs/welcome)
@@ -149,6 +152,7 @@ The SDK provides dedicated REST clients for each of Coinbase's API groups. Each 
 To use any of Coinbase's REST APIs in JavaScript/TypeScript/Node.js, import (or require) the client you want to use. We currently support the following clients:
 
 - [CBAdvancedTradeClient](./src/CBAdvancedTradeClient.ts)
+- [CBAdvancedTradeGlobalClient](./src/CBAdvancedTradeGlobalClient.ts)
 - [CBAppClient](./src/CBAppClient.ts)
 - [CBExchangeClient](./src/CBExchangeClient.ts)
 - [CBInternationalClient](./src/CBInternationalClient.ts)
@@ -156,6 +160,9 @@ To use any of Coinbase's REST APIs in JavaScript/TypeScript/Node.js, import (or 
 - [CBCommerceClient](./src/CBCommerceClient.ts)
 
 #### CBAdvancedTradeClient
+
+> [!NOTE]
+> Advanced Trade international derivatives moved from INTX to the Deribit-powered Starbase gateway on October 1, 2026. Use [`CBAdvancedTradeGlobalClient`](#cbadvancedtradeglobalclient) for these markets. `CBAdvancedTradeClient` continues to support spot and US futures. See Coinbase's [migration guide](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/technical).
 
 ```javascript
 const { CBAdvancedTradeClient } = require('coinbase-api');
@@ -203,6 +210,42 @@ async function doAPICall() {
 
 doAPICall();
 ```
+
+#### CBAdvancedTradeGlobalClient
+
+International derivatives REST API endpoints, sometimes referred to as "Advanced Trade Global", are available via the dedicated [`CBAdvancedTradeGlobalClient`](./src/CBAdvancedTradeGlobalClient.ts) class.
+
+Under the hood, it talks JSON-RPC 2.0 to `https://drb.coinbase.com/api/v2`. Spot and US futures stay on `CBAdvancedTradeClient`.
+
+The table below only says which method replaces which old endpoint. Parameters and responses are not the same shape. The breaks that matter:
+
+- The client returns the JSON-RPC `result`. Errors use the SDK's standard exception handling, with JSON-RPC details in `body.error` by default (`response.data.error` when `parseExceptions: false`). You do not read `result` or `id` off a successful return value.
+- Prices and sizes are JSON numbers, not decimal strings. `amount: 0.001` is `0.001` of the base coin on these USDC perpetuals.
+- `instrument_name` replaces the old product id. `BTC-PERP-INTX` becomes `BTC_USDC-PERPETUAL`.
+- `label` replaces `client_order_id`. It is not guaranteed unique, so do not use it as an idempotency key.
+- Order type, time in force, and status are lowercase (`limit`, `good_til_cancelled`, `open`), not `LIMIT` or `OPEN`.
+
+Coinbase's source table: [Endpoint mapping](https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/derivatives/technical#endpoint-mapping).
+
+| Action                                                           | Current API                         | New API                                  | `CBAdvancedTradeGlobalClient`                                                                                                                                  |
+| ---------------------------------------------------------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Place order**<br>_Side becomes the method_                     | `POST /orders`                      | `private/buy`, `private/sell`            | `buy()`, `sell()`                                                                                                                                              |
+| **Edit order**<br>_Edit by label supported_                      | `POST /orders/edit`                 | `private/edit`, `private/edit_by_label`  | `edit()`, `editByLabel()`                                                                                                                                      |
+| **Cancel orders**<br>_No cancel-by-ID-list; loop, or cancel all_ | `POST /orders/batch_cancel`         | `private/cancel`, `private/cancel_all_*` | `cancel()`, `cancelByLabel()`, `cancelAll()`, `cancelAllByCurrency()`, `cancelAllByCurrencyPair()`, `cancelAllByInstrument()`, `cancelAllByKindOrType()`       |
+| **Close position**                                               | `POST /orders/close_position`       | `private/close_position`                 | `closePosition()`                                                                                                                                              |
+| **Order preview**<br>_No simulated fills_                        | `POST /orders/preview`              | --                                       | --                                                                                                                                                             |
+| **Order history**                                                | `GET /orders/historical/batch`      | `private/get_order_history_*`            | `getOrderHistoryByCurrency()`, `getOrderHistoryByInstrument()`                                                                                                 |
+| **Order status**                                                 | `GET /orders/historical/{id}`       | `private/get_order_state`                | `getOrderState()`, `getOrderStateByLabel()`                                                                                                                    |
+| **Fills**<br>_Deribit calls fills "user trades"_                 | `GET /orders/historical/fills`      | `private/get_user_trades_*`              | `getUserTradesByCurrency()`, `getUserTradesByCurrencyAndTime()`, `getUserTradesByInstrument()`, `getUserTradesByInstrumentAndTime()`, `getUserTradesByOrder()` |
+| **Positions**<br>_Filter by currency and kind_                   | `GET /intx/positions/{uuid}`        | `private/get_positions`                  | `getPositions()`, `getPosition()`                                                                                                                              |
+| **Account summary**                                              | `GET /intx/portfolio/{uuid}`        | `private/get_account_summary`            | `getAccountSummary()`, `getAccountSummaries()`                                                                                                                 |
+| **Margin model**                                                 | `POST /intx/multi_asset_collateral` | `private/change_margin_model`            | `changeMarginModel()`                                                                                                                                          |
+| **Instruments**<br>_Filter by currency and kind_                 | `GET /products`                     | `public/get_instruments`                 | `getInstruments()`, `getInstrument()`                                                                                                                          |
+| **Order book**                                                   | `GET /product_book`                 | `public/get_order_book`                  | `getOrderBook()`, `getOrderBookByInstrumentId()`                                                                                                               |
+| **Ticker**                                                       | `GET /best_bid_ask`                 | `public/ticker`                          | `getTicker()`                                                                                                                                                  |
+| **Candles**                                                      | `GET /products/{id}/candles`        | `public/get_tradingview_chart_data`      | `getTradingviewChartData()`                                                                                                                                    |
+
+Method names shown with `*` are a family. For example, `private/get_order_history_by_currency` and `private/get_order_history_by_instrument`.
 
 #### CBAppClient
 
@@ -325,7 +368,7 @@ See all clients [here](./src/) for more information on all the functions or the 
 
 ## WebSockets
 
-All available WebSockets can be used via a shared `WebsocketClient`. The WebSocket client will automatically open/track/manage connections as needed. Each unique connection (one per server URL) is tracked using a WsKey (each WsKey is a string - see [WS_KEY_MAP](src/lib/websocket/websocket-util.ts) for a list of supported values - `WS_KEY_MAP` can also be used like an enum).
+All available WebSockets can be used via a shared `WebsocketClient`. The WebSocket client will automatically open/track/manage connections as needed. Each connection is tracked using a WsKey (each WsKey is a string - see [WS_KEY_MAP](src/lib/websocket/websocket-util.ts) for a list of supported values - `WS_KEY_MAP` can also be used like an enum).
 
 Any subscribe/unsubscribe events will need to include a WsKey, so the WebSocket client understands which connection the event should be routed to. See examples below or in the [examples](./examples/) folder on GitHub.
 
@@ -355,6 +398,85 @@ client.subscribe(
   'advTradeMarketData',
 );
 ```
+
+#### Global Derivatives Public WebSocket
+
+Use `WS_KEY_MAP.advTradeGlobalMarketData` for the Global Derivatives public feed. Pass complete channel names, including their instrument and interval, through the same subscription interface:
+
+```javascript
+import { WebsocketClient, WS_KEY_MAP } from 'coinbase-api';
+
+const client = new WebsocketClient();
+
+client.on('update', (event) => {
+  console.log(event.params.channel, event.params.data);
+});
+
+client.subscribe(
+  ['quote.BTC-PERPETUAL', 'ticker.BTC-PERPETUAL.100ms'],
+  WS_KEY_MAP.advTradeGlobalMarketData,
+);
+
+// client.unsubscribe('quote.BTC-PERPETUAL', WS_KEY_MAP.advTradeGlobalMarketData);
+```
+
+No credentials are required. The client handles liveness checks and restores subscribed topics after reconnecting, if a connection for any reason needs to be automatically replaced. Updates preserve the JSON-RPC envelope, with data under `params.data`; acknowledgements use `response` and API errors use `exception`. Public intervals are `100ms` and `agg2`; `raw` requires authentication. See the [public example](./examples/AdvancedTradeGlobal/WebSockets/publicWs.ts) and [channel/event types](./src/types/websockets/advanced-trade-global.ts).
+
+Global connections open on demand and are excluded from `connectAll()`. To preconnect a Global subscription feed, call `connect(WS_KEY_MAP.advTradeGlobalMarketData)` or `connect(WS_KEY_MAP.advTradeGlobalUserData)`. Use `connectWSAPI()` to preconnect and authenticate the Global WS API.
+
+#### Global Derivatives Private WebSocket
+
+Use `WS_KEY_MAP.advTradeGlobalUserData` for account, order, trade, position and portfolio updates:
+
+```javascript
+import { WebsocketClient, WS_KEY_MAP } from 'coinbase-api';
+
+const client = new WebsocketClient({ apiKey, apiSecret });
+
+client.on('authenticated', ({ wsKey }) => console.log('authenticated:', wsKey));
+client.on('update', (event) =>
+  console.log(event.params.channel, event.params.data),
+);
+client.on('exception', (event) => console.error(event));
+
+client.subscribe(
+  ['user.orders.future.USDC.100ms', 'user.portfolio.USDC'],
+  WS_KEY_MAP.advTradeGlobalUserData,
+);
+```
+
+The client authenticates with a CDP JWT before subscribing, renews the session before expiry, and authenticates again before restoring subscriptions after reconnecting. Both ECDSA and Ed25519 CDP keys are supported. Private updates preserve the JSON-RPC envelope. Order notifications use arrays for `100ms`/`agg2` and individual objects for `raw`. See the [private example](./examples/AdvancedTradeGlobal/WebSockets/privateWs.ts) and [channel/event types](./src/types/websockets/advanced-trade-global.ts).
+
+#### Global Derivatives WebSocket API
+
+Use `WebsocketAPIClient` for promise-based Global API requests over WebSocket. Its named methods follow `CBAdvancedTradeGlobalClient`, reusing the REST parameter and result types. Responses preserve the JSON-RPC envelope, with the method's data under `result`:
+
+```typescript
+import { WebsocketAPIClient, WS_KEY_MAP } from 'coinbase-api';
+
+const client = new WebsocketAPIClient({ apiKey, apiSecret });
+
+const time = await client.getTime(); // Public methods need no credentials.
+const positions = await client.getPositions({ currency: 'USDC' });
+console.log(time.result, positions.result);
+
+// Alternatively, use the underlying WebsocketClient's typed request interface:
+const response = await client
+  .getWSClient()
+  .sendWSAPIRequest(WS_KEY_MAP.advTradeGlobalWSAPI, 'private/get_positions', {
+    currency: 'USDC',
+  });
+console.log(response.result);
+
+// When finished:
+await client.logout({ invalidate_token: false });
+```
+
+The dedicated `WS_KEY_MAP.advTradeGlobalWSAPI` connection uses `wss://drb.coinbase.com/ws/api/v2`. Private calls authenticate automatically, concurrent calls share authentication, and sessions renew before expiry. `connectWSAPI()` optionally warms up an authenticated connection. Reauthentication after reconnect is enabled by default; subscriptions use their existing separate connections.
+
+API errors, timeouts and disconnects reject the affected promises. Requests are never replayed automatically. `wsAPITimeout` defaults to 10,000 milliseconds waiting for the RPC reply after sending; individual `sendWSAPIRequest()` calls can override it with `{ requestTimeout: 15000 }` as the fourth argument. Connection and authentication use their own lifecycle handling; `public/auth` uses the authentication timeout. Responses and API errors also emit `response` and `exception` events on `getWSClient()`.
+
+Session methods include heartbeat configuration, cancel-on-disconnect and logout. Connection-scoped settings must be reapplied after reconnecting. Logout waits for the server's normal close because it sends no JSON-RPC response, and prevents automatic reconnect. See the [WS API example](./examples/AdvancedTradeGlobal/WebSockets/wsApi.ts), [named methods](./src/WebsocketAPIClient.ts) and [request/response maps](./src/types/websockets/wsAPI.ts). Block/RFQ methods remain outside this interface for now.
 
 #### Private Websocket
 

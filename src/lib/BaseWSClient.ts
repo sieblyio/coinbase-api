@@ -85,8 +85,8 @@ function getNormalisedTopicRequests(
       continue;
     }
 
-    // already a normalised object, thanks to user
-    normalisedTopicRequests.push(wsTopicRequest);
+    // Match the string form even when an object omits its optional payload.
+    normalisedTopicRequests.push({ payload: undefined, ...wsTopicRequest });
   }
   return normalisedTopicRequests;
 }
@@ -127,7 +127,7 @@ export abstract class BaseWebsocketClient<
       // Automatically include auth/sign with every WS request
       authPrivateRequests: true,
       // Automatically re-auth WS API, if we were auth'd before and get reconnected
-      reauthWSAPIOnReconnect: false,
+      reauthWSAPIOnReconnect: true,
       ...options,
     };
   }
@@ -136,9 +136,9 @@ export abstract class BaseWebsocketClient<
 
   protected abstract sendPongEvent(wsKey: TWSKey, ws: WebSocket): void;
 
-  protected abstract isWsPong(data: any): boolean;
+  protected abstract isWsPong(data: any, wsKey: TWSKey): boolean;
 
-  protected abstract isWsPing(data: any): boolean;
+  protected abstract isWsPing(data: any, wsKey: TWSKey): boolean;
 
   protected abstract getWsAuthRequestEvent(wsKey: TWSKey): Promise<object>;
 
@@ -179,6 +179,13 @@ export abstract class BaseWebsocketClient<
 
   protected isPrivateWsKey(wsKey: TWSKey): boolean {
     return this.getPrivateWSKeys().includes(wsKey);
+  }
+
+  /** Whether this connection needs a separate authentication exchange before subscribing. */
+  protected authPrivateConnectionsOnConnect(wsKey: TWSKey): boolean {
+    return (
+      this.isPrivateWsKey(wsKey) && this.options.authPrivateConnectionsOnConnect
+    );
   }
 
   /** Returns auto-incrementing request ID, used to track promise references for async requests */
@@ -274,9 +281,9 @@ export abstract class BaseWebsocketClient<
   ) {
     const normalisedTopicRequests = getNormalisedTopicRequests(wsTopicRequests);
 
-    // Store topics, so future automation (post-auth, post-reconnect) has everything needed to resubscribe automatically
+    // Remove topics before checking the connection, so reconnect cannot restore cancelled subscriptions.
     for (const topic of normalisedTopicRequests) {
-      this.wsStore.addTopic(wsKey, topic);
+      this.wsStore.deleteTopic(wsKey, topic);
     }
 
     const isConnected = this.wsStore.isConnectionState(
@@ -486,7 +493,18 @@ export abstract class BaseWebsocketClient<
   }
 
   /** Get a signature, build the auth request and send it */
-  private async sendAuthRequest(wsKey: TWSKey): Promise<void> {
+  protected async sendAuthRequest(wsKey: TWSKey): Promise<unknown> {
+    const existing = this.wsStore.getAuthenticationInProgressPromise(wsKey);
+    if (existing) return existing.promise;
+
+    const ws = this.getWs(wsKey);
+    // Create before signing, so concurrent callers await the same exchange.
+    const pending = this.wsStore.createAuthenticationInProgressPromise(
+      wsKey,
+      false,
+    );
+    // Automatic auth is also used without a promise consumer.
+    pending.promise!.catch(() => {});
     try {
       this.logger.info('Sending auth request...', {
         ...WS_LOGGER_CATEGORY,
@@ -495,10 +513,22 @@ export abstract class BaseWebsocketClient<
 
       const request = await this.getWsAuthRequestEvent(wsKey);
 
-      return this.tryWsSend(wsKey, JSON.stringify(request));
+      // Signing is asynchronous. Never send an old connection's auth on a new socket.
+      if (this.getWs(wsKey) !== ws || !this.isConnected(wsKey)) {
+        throw new Error('Connection closed while preparing authentication');
+      }
+
+      this.tryWsSend(wsKey, JSON.stringify(request), true);
     } catch (e) {
+      if (this.wsStore.getAuthenticationInProgressPromise(wsKey) === pending) {
+        this.wsStore.rejectAuthenticationInProgressPromise(wsKey, e);
+      }
       this.logger.trace(e, { ...WS_LOGGER_CATEGORY, wsKey });
+      if (this.getWs(wsKey) === ws && this.isConnected(wsKey)) {
+        this.emit('exception', { wsKey, error: e });
+      }
     }
+    return pending.promise;
   }
 
   private reconnectWithDelay(wsKey: TWSKey, connectionDelayMs: number) {
@@ -543,7 +573,7 @@ export abstract class BaseWebsocketClient<
     }, this.options.pongTimeout);
   }
 
-  private clearTimers(wsKey: TWSKey) {
+  protected clearTimers(wsKey: TWSKey) {
     this.clearPingTimer(wsKey);
     this.clearPongTimer(wsKey);
     const wsState = this.wsStore.get(wsKey);
@@ -644,7 +674,7 @@ export abstract class BaseWebsocketClient<
   /**
    * Try sending a string event on a WS connection (identified by the WS Key)
    */
-  public tryWsSend(wsKey: TWSKey, wsMessage: string) {
+  public tryWsSend(wsKey: TWSKey, wsMessage: string, throwExceptions = false) {
     try {
       this.logger.trace('Sending upstream ws message: ', {
         ...WS_LOGGER_CATEGORY,
@@ -662,6 +692,12 @@ export abstract class BaseWebsocketClient<
           `${wsKey} socket not connected yet, call "connectAll()" first then try again when the "open" event arrives`,
         );
       }
+      if (
+        throwExceptions &&
+        (!this.isConnected(wsKey) || ws.readyState !== ws.OPEN)
+      ) {
+        throw new Error(`Cannot send message: "${wsKey}" socket is not ready`);
+      }
       ws.send(wsMessage);
     } catch (e) {
       this.logger.error('Failed to send WS message', {
@@ -670,6 +706,7 @@ export abstract class BaseWebsocketClient<
         wsKey,
         exception: e,
       });
+      if (throwExceptions) throw e;
     }
   }
 
@@ -767,9 +804,11 @@ export abstract class BaseWebsocketClient<
     // Some websockets require an auth packet to be sent after opening the connection
     if (
       this.isPrivateWsKey(wsKey) &&
-      this.options.authPrivateConnectionsOnConnect
+      this.authPrivateConnectionsOnConnect(wsKey)
     ) {
-      await this.sendAuthRequest(wsKey);
+      // Errors are surfaced by the auth parser or sender; automatic connections
+      // have no caller to consume a rejected auth promise.
+      this.sendAuthRequest(wsKey).catch(() => {});
     }
 
     // Reconnect to topics known before it connected
@@ -782,7 +821,7 @@ export abstract class BaseWebsocketClient<
     this.requestSubscribeTopics(wsKey, publicReqs);
 
     // Request sub to private topics, if auth on connect isn't needed
-    if (!this.options.authPrivateConnectionsOnConnect) {
+    if (!this.authPrivateConnectionsOnConnect(wsKey)) {
       this.requestSubscribeTopics(wsKey, privateReqs);
     }
   }
@@ -797,9 +836,14 @@ export abstract class BaseWebsocketClient<
     event: { isWSAPI?: boolean; WSAPIAuthChannel?: string },
   ) {
     const wsState = this.wsStore.get(wsKey, true);
+    const wasAuthenticated = wsState.isAuthenticated;
     wsState.isAuthenticated = true;
+    this.wsStore.resolveAuthenticationInProgressPromise(wsKey, {
+      wsKey,
+      event,
+    });
 
-    if (this.options.authPrivateConnectionsOnConnect) {
+    if (this.authPrivateConnectionsOnConnect(wsKey) && !wasAuthenticated) {
       const topics = [...this.wsStore.getTopics(wsKey)];
       const privateTopics = topics.filter((topic) =>
         this.isPrivateTopicRequest(topic, wsKey),
@@ -821,11 +865,11 @@ export abstract class BaseWebsocketClient<
       // any message can clear the pong timer - wouldn't get a message if the ws wasn't working
       this.clearPongTimer(wsKey);
 
-      if (this.isWsPong(event)) {
+      if (this.isWsPong(event, wsKey)) {
         return this.onWsPong(event, wsKey, 'onWsMessage');
       }
 
-      if (this.isWsPing(event)) {
+      if (this.isWsPing(event, wsKey)) {
         this.logger.trace('Received ping', {
           ...WS_LOGGER_CATEGORY,
           wsKey,
@@ -858,7 +902,7 @@ export abstract class BaseWebsocketClient<
         }
 
         for (const emittable of emittableEvents) {
-          if (this.isWsPong(emittable)) {
+          if (this.isWsPong(emittable, wsKey)) {
             this.logger.trace('Received pong', {
               ...WS_LOGGER_CATEGORY,
               wsKey,
@@ -880,7 +924,7 @@ export abstract class BaseWebsocketClient<
             if (
               this.isPrivateWsKey(wsKey) &&
               wsState &&
-              !this.options.authPrivateConnectionsOnConnect
+              !this.authPrivateConnectionsOnConnect(wsKey)
             ) {
               wsState.isAuthenticated = true;
             }
@@ -925,7 +969,17 @@ export abstract class BaseWebsocketClient<
     }
   }
 
-  private onWsClose(event: unknown, wsKey: TWSKey) {
+  protected onWsClose(event: unknown, wsKey: TWSKey) {
+    this.wsStore.rejectAuthenticationInProgressPromise(
+      wsKey,
+      'connection closed during authentication',
+    );
+    if (
+      this.authPrivateConnectionsOnConnect(wsKey) ||
+      this.wsStore.get(wsKey)?.didAuthWSAPI
+    ) {
+      this.wsStore.get(wsKey, true).isAuthenticated = false;
+    }
     this.logger.info('Websocket connection closed', {
       ...WS_LOGGER_CATEGORY,
       wsKey,
@@ -1000,5 +1054,20 @@ export abstract class BaseWebsocketClient<
         'sendWSAPIRequest(): New connection promise resolved! ',
       );
     }
+  }
+
+  /**
+   * Wait for the shared authentication exchange, starting it only when needed.
+   * Explicit auth calls can force renewal; an in-progress exchange is still shared.
+   */
+  public async assertIsAuthenticated(
+    wsKey: TWSKey,
+    forceReauth = false,
+  ): Promise<unknown> {
+    await this.assertIsConnected(wsKey);
+    const pending = this.wsStore.getAuthenticationInProgressPromise(wsKey);
+    if (pending) return pending.promise;
+    if (!forceReauth && this.wsStore.get(wsKey)?.isAuthenticated) return;
+    return this.sendAuthRequest(wsKey);
   }
 }

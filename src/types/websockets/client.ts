@@ -72,6 +72,12 @@ export interface WSClientConfigurableOptions {
    * If you authenticated the WS API before, automatically try to re-authenticate the WS API if you're disconnected/reconnected for any reason.
    */
   reauthWSAPIOnReconnect?: boolean;
+
+  /**
+   * Time in milliseconds to wait for a Global WS API reply after sending. Default: 10000.
+   * Connection/authentication use their own lifecycle handling.
+   */
+  wsAPITimeout?: number;
 }
 
 /**
@@ -93,4 +99,9 @@ export interface WebsocketClientOptions extends WSClientConfigurableOptions {
   reauthWSAPIOnReconnect: boolean;
 }
 
-export type WsMarket = 'advancedTrade' | 'exchange' | 'international' | 'prime';
+export type WsMarket =
+  | 'advancedTrade'
+  | 'advancedTradeGlobal'
+  | 'exchange'
+  | 'international'
+  | 'prime';

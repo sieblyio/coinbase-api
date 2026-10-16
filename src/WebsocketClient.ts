@@ -14,15 +14,24 @@ import {
   getCBInternationalWSSign,
   getCBPrimeWSSign,
   getMergedCBExchangeWSRequestOperations,
+  getPromiseRefForWSAPIRequest,
+  isAdvancedTradeGlobalWsKey,
+  isMessageEvent,
   MessageEventLike,
   WS_KEY_MAP,
   WS_URL_MAP,
   WsKey,
   WsTopicRequest,
 } from './lib/websocket/websocket-util.js';
-import { WSConnectedResult } from './lib/websocket/WsStore.types.js';
+import {
+  WSConnectedResult,
+  WsConnectionStateEnum,
+} from './lib/websocket/WsStore.types.js';
+import { AdvTradeGlobalAuthRequest } from './types/request/advanced-trade-global-client.js';
+import { AdvTradeGlobalWSAuthResult } from './types/websockets/advanced-trade-global.js';
 import { WsMarket } from './types/websockets/client.js';
 import {
+  WsAdvTradeGlobalRequestOperation,
   WsAdvTradeRequestOperation,
   WsExchangeAuthenticatedRequestOperation,
   WsExchangeRequestOperation,
@@ -33,6 +42,8 @@ import {
   WsPrimeRequestOperation,
 } from './types/websockets/requests.js';
 import {
+  WSAPIRequest,
+  WSAPIRequestFlags,
   WsAPITopicRequestParamMap,
   WsAPITopicResponseMap,
   WsAPIWsKeyTopicMap,
@@ -46,6 +57,8 @@ export const WS_LOGGER_CATEGORY = { category: 'coinbase-ws' };
 const PRIVATE_WS_KEYS: WsKey[] = [
   // Account data (fills), requires auth.
   WS_KEY_MAP.advTradeUserData,
+  WS_KEY_MAP.advTradeGlobalUserData,
+  WS_KEY_MAP.advTradeGlobalWSAPI,
   // Coinbase Direct Market Data has direct access to Coinbase Exchange servers and requires auth.
   WS_KEY_MAP.exchangeDirectMarketData,
   // The INTX feed always requires auth.
@@ -59,6 +72,7 @@ const PRIVATE_WS_KEYS: WsKey[] = [
  */
 export const PUBLIC_WS_KEYS: WsKey[] = [
   WS_KEY_MAP.advTradeMarketData,
+  WS_KEY_MAP.advTradeGlobalMarketData,
   WS_KEY_MAP.exchangeMarketData,
 ];
 
@@ -68,8 +82,21 @@ export const PUBLIC_WS_KEYS: WsKey[] = [
 type WsTopic = string;
 
 export class WebsocketClient extends BaseWebsocketClient<WsKey> {
+  private globalAuthRequests: Partial<
+    Record<WsKey, { id: number; startedAtMs: number }>
+  > = {};
+
+  /** Tracks either the pending auth reply or the next session renewal. */
+  private globalAuthTimers: Partial<
+    Record<WsKey, ReturnType<typeof setTimeout>>
+  > = {};
+
+  private globalLogoutRequestId?: number;
+
   /**
-   * Request connection of all dependent (public & private) websockets, instead of waiting for automatic connection by library
+   * Preconnect the original product feeds, preserving the existing connection set.
+   * Global connections open on demand and are excluded from this method.
+   * Use connect(wsKey) to preconnect a specific feed, or connectWSAPI() for an authenticated Global WS API session.
    */
   public connectAll(): Promise<(WSConnectedResult | undefined)[]> {
     return Promise.all([
@@ -130,41 +157,139 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
     }
   }
 
+  /** Prepare the Global WS API connection and authenticate before the first private call. */
+  public connectWSAPI(): Promise<unknown> {
+    return this.assertIsAuthenticated(WS_KEY_MAP.advTradeGlobalWSAPI);
+  }
+
   /**
-   * Not supported by this exchange, do not use
+   * Send a Global JSON-RPC method and await its matching reply. Public methods do not require auth.
+   * Pending calls reject on API errors, timeout or disconnect.
+   * The reply timeout starts after sending; connection/authentication use their own lifecycle handling.
+   * public/auth signs automatically and uses the authentication timeout.
+   * private/logout resolves on the server's normal close.
    */
-
-  // This overload allows the caller to omit the 3rd param, if it isn't required (e.g. for the login call)
-  async sendWSAPIRequest<
+  public sendWSAPIRequest<
     TWSKey extends keyof WsAPIWsKeyTopicMap,
-    TWSChannel extends WsAPIWsKeyTopicMap[TWSKey] = WsAPIWsKeyTopicMap[TWSKey],
-    TWSParams extends
-      WsAPITopicRequestParamMap[TWSChannel] = WsAPITopicRequestParamMap[TWSChannel],
-    TWSAPIResponse extends
-      | WsAPITopicResponseMap[TWSChannel]
-      | object = WsAPITopicResponseMap[TWSChannel],
+    TMethod extends WsAPIWsKeyTopicMap[TWSKey],
   >(
     wsKey: TWSKey,
-    channel: TWSChannel,
-    ...params: TWSParams extends undefined ? [] : [TWSParams]
-  ): Promise<TWSAPIResponse>;
+    method: TMethod,
+    ...args: undefined extends WsAPITopicRequestParamMap[TMethod]
+      ? [
+          params?: WsAPITopicRequestParamMap[TMethod],
+          requestFlags?: WSAPIRequestFlags,
+        ]
+      : [
+          params: WsAPITopicRequestParamMap[TMethod],
+          requestFlags?: WSAPIRequestFlags,
+        ]
+  ): Promise<WsAPITopicResponseMap[TMethod]>;
 
-  async sendWSAPIRequest<
-    TWSKey extends keyof WsAPIWsKeyTopicMap = keyof WsAPIWsKeyTopicMap,
-    TWSChannel extends WsAPIWsKeyTopicMap[TWSKey] = WsAPIWsKeyTopicMap[TWSKey],
-    TWSParams extends
-      WsAPITopicRequestParamMap[TWSChannel] = WsAPITopicRequestParamMap[TWSChannel],
-  >(
-    wsKey: TWSKey,
-    channel: TWSChannel,
-    params?: TWSParams,
-  ): Promise<undefined> {
-    this.logger.trace(`sendWSAPIRequest(): assert "${wsKey}" is connected`, {
-      channel,
-      params,
-    });
+  public async sendWSAPIRequest(
+    wsKey: keyof WsAPIWsKeyTopicMap,
+    method: keyof WsAPITopicRequestParamMap,
+    params?: unknown,
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<any> {
+    if (wsKey !== WS_KEY_MAP.advTradeGlobalWSAPI) {
+      throw new Error(`WS API requests are not supported on "${wsKey}"`);
+    }
 
-    return;
+    if (this.globalLogoutRequestId !== undefined) {
+      throw new Error('Global WS API logout is in progress');
+    }
+
+    const timeoutMs =
+      requestFlags?.requestTimeout ?? this.options.wsAPITimeout ?? 10_000;
+
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0)
+      throw new Error('WS API timeout must be positive');
+
+    const timeoutMessage = `WS API request "${method}" timed out`;
+    await this.assertIsConnected(wsKey);
+
+    // An explicit auth call renews the session even if already authenticated.
+    if (method === 'public/auth') {
+      const authenticated = (await this.assertIsAuthenticated(wsKey, true)) as {
+        event: object;
+      };
+      return { ...authenticated.event, wsKey, isWSAPIResponse: true };
+    }
+
+    if (
+      method.startsWith('private/') &&
+      requestFlags?.authIsOptional !== true
+    ) {
+      await this.assertIsAuthenticated(wsKey);
+    }
+
+    const request: WSAPIRequest = {
+      jsonrpc: '2.0',
+      id: Number(this.getNewRequestId()),
+      method,
+      params: params ?? {},
+    };
+
+    const promiseRef = getPromiseRefForWSAPIRequest(request);
+    const store = this.getWsStore();
+    const ws = store.getWs(wsKey);
+    const pending = store.createDeferredPromise(wsKey, promiseRef, true);
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    try {
+      if (method === 'private/logout') {
+        this.globalLogoutRequestId = request.id;
+      }
+
+      try {
+        this.tryWsSend(wsKey, JSON.stringify(request), true);
+        timer = setTimeout(() => {
+          store.rejectDeferredPromise(
+            wsKey,
+            promiseRef,
+            new Error(timeoutMessage),
+            true,
+          );
+        }, timeoutMs);
+        if (method === 'private/logout') {
+          // Let the server process logout and close. Sending our own close first
+          // could trigger cancel-on-disconnect before logout has been processed.
+          store.setConnectionState(wsKey, WsConnectionStateEnum.CLOSING);
+          this.clearTimers(wsKey);
+        }
+      } catch (error) {
+        store.rejectDeferredPromise(wsKey, promiseRef, error, true);
+      }
+
+      const response = await pending.promise;
+
+      if (method === 'private/logout') return;
+
+      return { ...response, request: { ...request, wsKey } };
+    } catch (error) {
+      if (
+        method === 'private/logout' &&
+        store.getWs(wsKey) === ws &&
+        ws?.readyState === ws?.OPEN
+      ) {
+        this.close(wsKey, true);
+      }
+
+      const failure =
+        typeof error === 'object' && error !== null
+          ? error
+          : new Error(String(error));
+
+      Object.assign(failure, { request: { ...request, wsKey } });
+
+      throw failure;
+    } finally {
+      clearTimeout(timer);
+      store.removeDeferredPromise(wsKey, promiseRef);
+      if (method === 'private/logout') this.globalLogoutRequestId = undefined;
+    }
   }
 
   /**
@@ -197,6 +322,20 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
   }
 
   protected sendPongEvent(wsKey: WsKey) {
+    if (isAdvancedTradeGlobalWsKey(wsKey)) {
+      // Reply to the gateway's JSON-RPC test_request. Protocol ping frames are handled by BaseWSClient.
+      this.tryWsSend(
+        wsKey,
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: Number(this.getNewRequestId()),
+          method: 'public/test',
+          params: {},
+        }),
+      );
+      return;
+    }
+
     try {
       this.logger.trace('Sending upstream ws PONG: ', {
         ...WS_LOGGER_CATEGORY,
@@ -224,14 +363,36 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
     }
   }
 
-  protected isWsPing(msg: any): boolean {
+  protected isWsPing(msg: any, wsKey: WsKey): boolean {
+    if (isAdvancedTradeGlobalWsKey(wsKey)) {
+      if (!isMessageEvent(msg)) {
+        return false;
+      }
+
+      try {
+        const parsed = JSON.parse(msg.data);
+        return (
+          parsed?.method === 'heartbeat' &&
+          parsed.params?.type === 'test_request'
+        );
+      } catch {
+        // Let the normal message parser report malformed JSON.
+        return false;
+      }
+    }
+
     if (msg?.data === 'ping') {
       return true;
     }
     return false;
   }
 
-  protected isWsPong(msg: any): boolean {
+  protected isWsPong(msg: any, wsKey: WsKey): boolean {
+    if (isAdvancedTradeGlobalWsKey(wsKey)) {
+      // Global uses native pong frames. JSON payloads can contain "pong" in
+      // tokens, order labels or other user data and must reach the normal parser.
+      return false;
+    }
     if (msg?.data?.includes('pong')) {
       return true;
     }
@@ -248,6 +409,121 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
 
     try {
       const parsed = JSON.parse(event.data);
+
+      if (isAdvancedTradeGlobalWsKey(wsKey)) {
+        if (
+          (wsKey === WS_KEY_MAP.advTradeGlobalUserData ||
+            wsKey === WS_KEY_MAP.advTradeGlobalWSAPI) &&
+          this.globalAuthRequests[wsKey] &&
+          parsed.id === this.globalAuthRequests[wsKey].id
+        ) {
+          const { startedAtMs } = this.globalAuthRequests[wsKey];
+          this.globalAuthRequests[wsKey] = undefined;
+          clearTimeout(this.globalAuthTimers[wsKey]);
+          this.globalAuthTimers[wsKey] = undefined;
+
+          if (parsed.error) {
+            this.handleGlobalAuthFailure(wsKey, { ...parsed, wsKey });
+            return [{ eventType: 'exception', event: parsed }];
+          }
+
+          const result: AdvTradeGlobalWSAuthResult | undefined = parsed.result;
+          if (
+            result?.token_type !== 'bearer' ||
+            !Number.isFinite(result.expires_in) ||
+            result.expires_in <= 0
+          ) {
+            this.handleGlobalAuthFailure(
+              wsKey,
+              new Error('Global WebSocket authentication failed'),
+            );
+            return [
+              {
+                eventType: 'exception',
+                event: {
+                  message: 'Invalid Global WebSocket authentication response',
+                  id: parsed.id,
+                },
+              },
+            ];
+          }
+
+          // Renew on the same socket with a fresh CDP JWT. The session, rather than
+          // an access token attached to each subscription, authorizes requests.
+          const lifetimeMs = Math.min(result.expires_in * 1000, 50 * 60 * 1000);
+          const marginMs = Math.min(30_000, lifetimeMs / 10);
+          const refreshInMs = startedAtMs + lifetimeMs - marginMs - Date.now();
+          if (refreshInMs <= 0) {
+            this.handleGlobalAuthFailure(
+              wsKey,
+              new Error('Global WebSocket authentication failed'),
+            );
+            return [
+              {
+                eventType: 'exception',
+                event: {
+                  message:
+                    'Global WebSocket authentication expired before its reply arrived',
+                  id: parsed.id,
+                },
+              },
+            ];
+          }
+          this.globalAuthTimers[wsKey] = setTimeout(() => {
+            this.sendAuthRequest(wsKey).catch(() => {});
+          }, refreshInMs);
+          return [
+            {
+              eventType: 'authenticated',
+              event: {
+                ...parsed,
+                ...(wsKey === WS_KEY_MAP.advTradeGlobalWSAPI
+                  ? { isWSAPI: true, WSAPIAuthChannel: 'public/auth' }
+                  : {}),
+              },
+            },
+          ];
+        }
+
+        if (wsKey === WS_KEY_MAP.advTradeGlobalWSAPI && 'id' in parsed) {
+          const promiseRef = getPromiseRefForWSAPIRequest(parsed);
+          const response = { ...parsed, wsKey, isWSAPIResponse: true };
+          if (parsed.error) {
+            this.getWsStore().rejectDeferredPromise(
+              wsKey,
+              promiseRef,
+              response,
+              true,
+            );
+            return [{ eventType: 'exception', event: response }];
+          }
+          this.getWsStore().resolveDeferredPromise(
+            wsKey,
+            promiseRef,
+            response,
+            true,
+          );
+          return [{ eventType: 'response', event: response }];
+        }
+
+        if (parsed.error) {
+          return [{ eventType: 'exception', event: parsed }];
+        }
+
+        if (parsed.method === 'subscription') {
+          return [{ eventType: 'update', event: parsed }];
+        }
+
+        if (parsed.method === 'heartbeat') {
+          // Passive heartbeat notification. test_request is handled by the ping/pong hooks.
+          return [{ eventType: 'response', event: parsed }];
+        }
+
+        // Preserve the JSON-RPC envelope for subscription acknowledgements and liveness replies.
+        if ('id' in parsed) {
+          return [{ eventType: 'response', event: parsed }];
+        }
+      }
 
       const responseEvents = ['subscriptions'];
 
@@ -352,6 +628,11 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
           ? WS_KEY_MAP.advTradeUserData
           : WS_KEY_MAP.advTradeMarketData;
       }
+      case 'advancedTradeGlobal': {
+        return isPrivate
+          ? WS_KEY_MAP.advTradeGlobalUserData
+          : WS_KEY_MAP.advTradeGlobalMarketData;
+      }
       case 'exchange': {
         return isPrivate
           ? WS_KEY_MAP.exchangeDirectMarketData
@@ -379,6 +660,11 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
       case WS_KEY_MAP.advTradeUserData: {
         return 'advancedTrade';
       }
+      case WS_KEY_MAP.advTradeGlobalMarketData:
+      case WS_KEY_MAP.advTradeGlobalUserData:
+      case WS_KEY_MAP.advTradeGlobalWSAPI: {
+        return 'advancedTradeGlobal';
+      }
       case WS_KEY_MAP.exchangeMarketData:
       case WS_KEY_MAP.exchangeDirectMarketData: {
         return 'exchange';
@@ -397,6 +683,60 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
 
   protected getPrivateWSKeys(): WsKey[] {
     return PRIVATE_WS_KEYS;
+  }
+
+  protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean {
+    if (wsKey === WS_KEY_MAP.advTradeGlobalWSAPI) {
+      return (
+        this.options.reauthWSAPIOnReconnect !== false &&
+        !!this.getWsStore().get(wsKey)?.didAuthWSAPI
+      );
+    }
+    return (
+      wsKey === WS_KEY_MAP.advTradeGlobalUserData ||
+      super.authPrivateConnectionsOnConnect(wsKey)
+    );
+  }
+
+  protected clearTimers(wsKey: WsKey) {
+    super.clearTimers(wsKey);
+    if (
+      wsKey === WS_KEY_MAP.advTradeGlobalUserData ||
+      wsKey === WS_KEY_MAP.advTradeGlobalWSAPI
+    ) {
+      clearTimeout(this.globalAuthTimers[wsKey]);
+      this.globalAuthTimers[wsKey] = undefined;
+      this.globalAuthRequests[wsKey] = undefined;
+    }
+  }
+
+  protected onWsClose(event: unknown, wsKey: WsKey) {
+    if (
+      wsKey === WS_KEY_MAP.advTradeGlobalWSAPI &&
+      this.globalLogoutRequestId !== undefined
+    ) {
+      const code = (event as { code?: number })?.code;
+      if (code === 1000) {
+        this.getWsStore().resolveDeferredPromise(
+          wsKey,
+          getPromiseRefForWSAPIRequest({ id: this.globalLogoutRequestId }),
+          undefined,
+          true,
+        );
+      }
+    }
+    super.onWsClose(event, wsKey);
+  }
+
+  private handleGlobalAuthFailure(wsKey: WsKey, error: unknown) {
+    this.getWsStore().rejectAuthenticationInProgressPromise(wsKey, error);
+    const state = this.getWsStore().get(wsKey);
+    if (!state) return;
+    const wasAuthenticated = state.isAuthenticated;
+    state.isAuthenticated = false;
+    // A failed renewal cannot leave a stale session looking healthy. Reconnect
+    // and authenticate again; initial auth failures are surfaced without looping.
+    if (wasAuthenticated) state.ws?.close();
   }
 
   /** Force subscription requests to be sent in smaller batches, if a number is returned */
@@ -428,6 +768,17 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
   ): Promise<string[]> {
     if (!topicRequests.length) {
       return [];
+    }
+
+    if (isAdvancedTradeGlobalWsKey(wsKey)) {
+      // Unlike the older Advanced Trade feed, Global accepts all channels in one request.
+      const request: WsAdvTradeGlobalRequestOperation = {
+        jsonrpc: '2.0',
+        id: Number(this.getNewRequestId()),
+        method: `${wsKey === WS_KEY_MAP.advTradeGlobalMarketData ? 'public' : 'private'}/${operation}`,
+        params: { channels: topicRequests.map(({ topic }) => topic) },
+      };
+      return [JSON.stringify(request)];
     }
 
     const apiKey = this.options.apiKey;
@@ -740,9 +1091,65 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
   }
 
   /**
-   * Events are signed per-request, so this function isn't needed for Coinbase.
+   * Global authenticates the socket session; older Coinbase feeds sign per request.
    */
   protected async getWsAuthRequestEvent(wsKey: WsKey): Promise<object> {
+    if (
+      wsKey === WS_KEY_MAP.advTradeGlobalUserData ||
+      wsKey === WS_KEY_MAP.advTradeGlobalWSAPI
+    ) {
+      const { apiKey, apiSecret, jwtExpiresSeconds } = this.options;
+      if (!apiKey || !apiSecret) {
+        throw new Error(
+          'API key and private key are required for Global WebSocket authentication.',
+        );
+      }
+
+      const ws = this.getWsStore().getWs(wsKey);
+      let token: string;
+      try {
+        token = await signWSJWT({
+          timestampMs: Date.now(),
+          jwtExpiresSeconds: Math.min(jwtExpiresSeconds || 120, 120),
+          apiPubKey: apiKey,
+          apiPrivKey: apiSecret,
+        });
+      } catch (error) {
+        if (this.getWsStore().getWs(wsKey) === ws && this.isConnected(wsKey)) {
+          this.handleGlobalAuthFailure(
+            wsKey,
+            new Error('Global WebSocket authentication failed'),
+          );
+        }
+        throw error;
+      }
+      if (this.getWsStore().getWs(wsKey) !== ws || !this.isConnected(wsKey)) {
+        throw new Error(
+          'Global WebSocket closed while signing authentication.',
+        );
+      }
+      const id = Number(this.getNewRequestId());
+      this.globalAuthRequests[wsKey] = { id, startedAtMs: Date.now() };
+      clearTimeout(this.globalAuthTimers[wsKey]);
+      this.globalAuthTimers[wsKey] = setTimeout(() => {
+        this.globalAuthRequests[wsKey] = undefined;
+        this.globalAuthTimers[wsKey] = undefined;
+        this.emit('exception', {
+          wsKey,
+          message: 'Global WebSocket authentication timed out',
+          id,
+        });
+        this.handleGlobalAuthFailure(
+          wsKey,
+          new Error('Global WebSocket authentication failed'),
+        );
+      }, 10_000);
+      const params: AdvTradeGlobalAuthRequest = {
+        grant_type: 'coinbase_cdp',
+        token,
+      };
+      return { jsonrpc: '2.0', id, method: 'public/auth', params };
+    }
     return { wsKey };
   }
 }

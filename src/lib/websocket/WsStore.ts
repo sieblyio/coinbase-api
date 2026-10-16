@@ -57,6 +57,7 @@ export function isDeepObjectMatch(object1: unknown, object2: unknown): boolean {
 
 const DEFERRED_PROMISE_REF = {
   CONNECTION_IN_PROGRESS: 'CONNECTION_IN_PROGRESS',
+  AUTHENTICATION_IN_PROGRESS: 'AUTHENTICATION_IN_PROGRESS',
 } as const;
 
 type DeferredPromiseRef =
@@ -255,7 +256,7 @@ export class WsStore<
 
   rejectAllDeferredPromises(wsKey: WsKey, reason: string): void {
     const storeForKey = this.get(wsKey);
-    const deferredPromiseStore = storeForKey.deferredPromiseStore;
+    const deferredPromiseStore = storeForKey?.deferredPromiseStore;
     if (!storeForKey || !deferredPromiseStore) {
       return;
     }
@@ -310,6 +311,44 @@ export class WsStore<
     return this.removeDeferredPromise(
       wsKey,
       DEFERRED_PROMISE_REF.CONNECTION_IN_PROGRESS,
+    );
+  }
+
+  getAuthenticationInProgressPromise(
+    wsKey: WsKey,
+  ): DeferredPromise | undefined {
+    return this.getDeferredPromise(
+      wsKey,
+      DEFERRED_PROMISE_REF.AUTHENTICATION_IN_PROGRESS,
+    );
+  }
+
+  createAuthenticationInProgressPromise(
+    wsKey: WsKey,
+    throwIfExists: boolean,
+  ): DeferredPromise {
+    return this.createDeferredPromise(
+      wsKey,
+      DEFERRED_PROMISE_REF.AUTHENTICATION_IN_PROGRESS,
+      throwIfExists,
+    );
+  }
+
+  resolveAuthenticationInProgressPromise(wsKey: WsKey, value: unknown): void {
+    this.resolveDeferredPromise(
+      wsKey,
+      DEFERRED_PROMISE_REF.AUTHENTICATION_IN_PROGRESS,
+      value,
+      true,
+    );
+  }
+
+  rejectAuthenticationInProgressPromise(wsKey: WsKey, reason: unknown): void {
+    this.rejectDeferredPromise(
+      wsKey,
+      DEFERRED_PROMISE_REF.AUTHENTICATION_IN_PROGRESS,
+      reason,
+      true,
     );
   }
 
