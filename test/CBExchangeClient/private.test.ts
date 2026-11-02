@@ -76,7 +76,7 @@ describe('CBExchangeClient PRIVATE', () => {
 
           const responseBody = e?.body;
           expect(responseBody).toMatchObject({
-            message: 'Forbidden',
+            message: 'api key permissions not found',
           });
         }
       });
