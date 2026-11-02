@@ -1,4 +1,4 @@
-# Coinbase Advanced Trade - Node.js & JavaScript SDK for Coinbase's Advanced Trade, App, Exchange, International, Prime & Commerce REST APIs and WebSockets
+# Node.js & JavaScript SDK for Coinbase's Advanced Trade, App, Exchange, International, Prime & Commerce REST APIs and WebSockets
 
 <p align="center">
   <a href="https://www.npmjs.com/package/coinbase-api">
