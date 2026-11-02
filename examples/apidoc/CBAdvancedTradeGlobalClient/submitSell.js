@@ -4,7 +4,7 @@ import { CBAdvancedTradeGlobalClient } from 'coinbase-api';
 
 // This example shows how to call this coinbase API endpoint with either node.js, javascript (js) or typescript (ts) with the npm module "coinbase-api" for coinbase exchange
 // This coinbase API SDK is available on npm via "npm install coinbase-api"
-// ENDPOINT: /api/v2 private/sell
+// ENDPOINT: /api/v2/private/sell
 // METHOD: POST
 // PUBLIC: NO
 
