@@ -15,7 +15,7 @@
 [![Build & Test](https://github.com/sieblyio/coinbase-api/actions/workflows/e2etest.yml/badge.svg?branch=master)](https://github.com/sieblyio/coinbase-api/actions/workflows/e2etest.yml)
 [![last commit](https://img.shields.io/github/last-commit/sieblyio/coinbase-api)][1]
 [![Telegram](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/nodetraders)
-[![Coinbase Tutorial](https://img.shields.io/badge/Coinbase%20Tutorial-siebly.io-blue)](https://siebly.io/sdk/coinbase/javascript/tutorial)
+[![Coinbase Documentation](https://img.shields.io/badge/Coinbase%20Documentation-siebly.io-blue)](https://sieblyio.github.io/docs/coinbase/)
 
 [1]: https://www.npmjs.com/package/coinbase-api
 
@@ -45,8 +45,8 @@ Coinbase Advanced Trade SDK for Node.js and JavaScript. Updated & performant Jav
 - Heavy automated end-to-end testing with real API calls.
 - Active community support & collaboration in telegram: [Node.js Algo Traders](https://t.me/nodetraders).
 - Extensive examples for interacting with the Coinbase API offering in Node.js/JavaScript/TypeScript: [/examples/](./examples).
-- QuickStart Guide: [Coinbase JavaScript QuickStart Guide](https://siebly.io/sdk/coinbase/javascript)
-- Coinbase JavaScript Tutorial: [Coinbase JavaScript REST API and WebSocket Tutorial](https://siebly.io/sdk/coinbase/javascript/tutorial)
+- QuickStart Guide: [Coinbase JavaScript QuickStart Guide](https://sieblyio.github.io/docs/coinbase/getting-started)
+- [Coinbase SDK Documentation](https://sieblyio.github.io/docs/coinbase/)
 
 ## Table of Contents
 
