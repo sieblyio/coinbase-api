@@ -1475,7 +1475,7 @@ export class CBCommerceClient extends BaseRestClient
 constructor(
     restClientOptions: RestClientOptions = {},
     requestOptions: AxiosRequestConfig = {},
-)
+  )
 ⋮----
 getClientType(): RestClientType
 ⋮----
@@ -1504,7 +1504,7 @@ createCharge(params: {
     };
     pricing_type: string;
     redirect_url?: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Returns All Charges
@@ -1518,7 +1518,7 @@ getAllCharges(): Promise<any>
    *
    * Returns the charge with the order code.
    */
-getCharge(params:
+getCharge(params: { charge_code_or_charge_id: string }): Promise<any>
 ⋮----
 /**
    *
@@ -1543,7 +1543,7 @@ createCheckout(params: {
     };
     pricing_type: string;
     requested_info?: string[];
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Returns All Checkout Sessions
@@ -1557,7 +1557,7 @@ getAllCheckouts(): Promise<any>
    *
    * Returns a specific checkout session.
    */
-getCheckout(params:
+getCheckout(params: { checkout_id: string }): Promise<any>
 ⋮----
 /**
    *
@@ -1570,7 +1570,7 @@ getCheckout(params:
    *
    * Lists all events.
    */
-listEvents(headers:
+listEvents(headers: { 'X-CC-Version': string }): Promise<any>
 ⋮----
 /**
    * Show an Event
@@ -1580,7 +1580,7 @@ listEvents(headers:
 showEvent(
     params: { event_id: string },
     headers: { 'X-CC-Version': string },
-): Promise<any>
+  ): Promise<any>
 
 ================
 File: src/CBInternationalClient.ts
@@ -1621,7 +1621,7 @@ export class CBInternationalClient extends BaseRestClient
 constructor(
     restClientOptions: RestClientOptions = {},
     requestOptions: AxiosRequestConfig = {},
-)
+  )
 ⋮----
 getClientType(): RestClientType
 ⋮----
@@ -1643,14 +1643,14 @@ getAssets(): Promise<any>
    *
    * Retrieves information for a specific asset.
    */
-getAssetDetails(params:
+getAssetDetails(params: { asset: string }): Promise<any>
 ⋮----
 /**
    * Get supported networks per asset
    *
    * Returns a list of supported networks and network information for a specific asset.
    */
-getSupportedNetworksPerAsset(params:
+getSupportedNetworksPerAsset(params: { asset: string }): Promise<any>
 ⋮----
 /**
    *
@@ -1663,7 +1663,7 @@ getSupportedNetworksPerAsset(params:
    *
    * Retrieves the latest index composition (metadata) with an ordered set of constituents.
    */
-getIndexComposition(params:
+getIndexComposition(params: { index: string }): Promise<any>
 ⋮----
 /**
    * Get index composition history
@@ -1673,14 +1673,14 @@ getIndexComposition(params:
    */
 getIndexCompositionHistory(
     params: GetINTXIndexCompositionHistory,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get index price
    *
    * Retrieves the latest index price.
    */
-getIndexPrice(params:
+getIndexPrice(params: { index: string }): Promise<any>
 ⋮----
 /**
    * Get index candles
@@ -1708,14 +1708,14 @@ getInstruments(): Promise<any>
    *
    * Retrieves market information for a specific instrument.
    */
-getInstrumentDetails(params:
+getInstrumentDetails(params: { instrument: string }): Promise<any>
 ⋮----
 /**
    * Get quote per instrument
    *
    * Retrieves the current quote for a specific instrument.
    */
-getQuotePerInstrument(params:
+getQuotePerInstrument(params: { instrument: string }): Promise<any>
 ⋮----
 /**
    * Get daily trading volumes
@@ -1740,7 +1740,7 @@ getHistoricalFundingRates(params: {
     instrument: string;
     result_limit?: number;
     result_offset?: number;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -1795,14 +1795,14 @@ updateOpenOrder(params: UpdateINTXOpenOrderRequest): Promise<any>
    *
    * Retrieves a single order. The order retrieved can be either active or inactive.
    */
-getOrderDetails(params:
+getOrderDetails(params: { id: string; portfolio: string }): Promise<any>
 ⋮----
 /**
    * Cancel order
    *
    * Cancels a single open order.
    */
-cancelOrder(params:
+cancelOrder(params: { id: string; portfolio: string }): Promise<any>
 ⋮----
 /**
    *
@@ -1822,7 +1822,7 @@ getUserPortfolios(): Promise<any>
    *
    * Create a new portfolio. Request will fail if no name is provided or if user already has max number of portfolios. Max number of portfolios is 20.
    */
-createPortfolio(params:
+createPortfolio(params: { name: string }): Promise<any>
 ⋮----
 /**
    * Patch portfolio
@@ -1831,42 +1831,42 @@ createPortfolio(params:
    */
 updatePortfolioParameters(
     params: UpdateINTXPortfolioParametersRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get user portfolio
    *
    * Returns the user's specified portfolio.
    */
-getUserPortfolio(params:
+getUserPortfolio(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * Update portfolio
    *
    * Update existing user portfolio.
    */
-updatePortfolio(params:
+updatePortfolio(params: { portfolio: string; name: string }): Promise<any>
 ⋮----
 /**
    * Get portfolio details
    *
    * Retrieves the summary, positions, and balances of a portfolio.
    */
-getPortfolioDetails(params:
+getPortfolioDetails(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * Get portfolio summary
    *
    * Retrieves the high level overview of a portfolio.
    */
-getPortfolioSummary(params:
+getPortfolioSummary(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * List portfolio balances
    *
    * Returns all of the balances for a given portfolio.
    */
-getPortfolioBalances(params:
+getPortfolioBalances(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * Get balance for portfolio/asset
@@ -1876,14 +1876,14 @@ getPortfolioBalances(params:
 getBalanceForPortfolioAsset(params: {
     portfolio: string;
     asset: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * List active loans for the portfolio
    *
    * Retrieves all loan info for a given portfolio.
    */
-getActiveLoansForPortfolio(params:
+getActiveLoansForPortfolio(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * Get loan info for portfolio/asset
@@ -1893,7 +1893,7 @@ getActiveLoansForPortfolio(params:
 getLoanInfoForPortfolioAsset(params: {
     portfolio: string;
     asset: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Acquire/repay loan
@@ -1905,7 +1905,7 @@ acquireOrRepayLoan(params: {
     asset: string;
     amount: number;
     action: 'ACQUIRE' | 'REPAY';
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Preview loan update
@@ -1917,7 +1917,7 @@ previewLoanUpdate(params: {
     asset: string;
     action: 'ACQUIRE' | 'REPAY';
     amount: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * View max loan availability
@@ -1927,14 +1927,14 @@ previewLoanUpdate(params: {
 getMaxLoanAvailability(params: {
     portfolio: string;
     asset: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * List portfolio positions
    *
    * Returns all of the positions for a given portfolio.
    */
-getPortfolioPositions(params:
+getPortfolioPositions(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * Get position for portfolio/instrument
@@ -1944,14 +1944,14 @@ getPortfolioPositions(params:
 getPositionForPortfolioInstrument(params: {
     portfolio: string;
     instrument: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get total open position limit
    *
    * Retrieves the total open position limit across instruments for a given portfolio.
    */
-getTotalOpenPositionLimit(params:
+getTotalOpenPositionLimit(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * List open position limits for all instruments
@@ -1960,7 +1960,7 @@ getTotalOpenPositionLimit(params:
    */
 getOpenPositionLimitsForAllInstruments(params: {
     portfolio: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get open position limits for portfolio instrument
@@ -1970,7 +1970,7 @@ getOpenPositionLimitsForAllInstruments(params: {
 getOpenPositionLimitsForInstrument(params: {
     portfolio: string;
     instrument: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * List fills by portfolios
@@ -1994,7 +1994,7 @@ getPortfolioFills(params: GetINTXPortfolioFillsRequest): Promise<any>
 setCrossCollateral(params: {
     portfolio: string;
     enabled: boolean;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Enable/Disable portfolio auto margin mode
@@ -2002,7 +2002,7 @@ setCrossCollateral(params: {
    * Enable or disable the auto margin feature, which lets the portfolio automatically
    * post margin amounts required to exceed the high leverage position restrictions.
    */
-setAutoMargin(params:
+setAutoMargin(params: { portfolio: string; enabled: boolean }): Promise<any>
 ⋮----
 /**
    * Set portfolio margin override
@@ -2012,7 +2012,7 @@ setAutoMargin(params:
 setPortfolioMarginOverride(params: {
     portfolio_id: string;
     margin_override: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get fund transfer limit between portfolios
@@ -2023,7 +2023,7 @@ setPortfolioMarginOverride(params: {
 getFundTransferLimit(params: {
     portfolio: string;
     asset: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Transfer funds between portfolios
@@ -2032,7 +2032,7 @@ getFundTransferLimit(params: {
    */
 transferFundsBetweenPortfolios(
     params: TransferINTXFundsBetweenPortfoliosRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Transfer positions between portfolios
@@ -2042,7 +2042,7 @@ transferFundsBetweenPortfolios(
    */
 transferPositionsBetweenPortfolios(
     params: TransferINTXPositionsBetweenPortfoliosRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * List portfolio fee rates
@@ -2065,7 +2065,7 @@ getRankings(params: {
     instrument_type: string;
     period?: string;
     instruments?: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -2085,7 +2085,7 @@ getMatchingTransfers(params?: GetINTXMatchingTransfersRequest): Promise<any>
    *
    * Get transfer.
    */
-getTransfer(params:
+getTransfer(params: { transfer_uuid: string }): Promise<any>
 ⋮----
 /**
    * Withdraw to crypto address
@@ -2094,7 +2094,7 @@ getTransfer(params:
    */
 withdrawToCryptoAddress(
     params: INTXWithdrawToCryptoAddressRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Create crypto address
@@ -2105,21 +2105,21 @@ createCryptoAddress(params: {
     portfolio: string;
     asset: string;
     network_arn_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Create counterparty Id
    *
    * Create counterparty Id.
    */
-createCounterpartyId(params:
+createCounterpartyId(params: { portfolio: string }): Promise<any>
 ⋮----
 /**
    * Validate counterparty Id
    *
    * Validate counterparty Id.
    */
-validateCounterpartyId(params:
+validateCounterpartyId(params: { counterparty_id: string }): Promise<any>
 ⋮----
 /**
    * Get counterparty withdrawal limit
@@ -2130,7 +2130,7 @@ validateCounterpartyId(params:
 getCounterpartyWithdrawalLimit(params: {
     portfolio: string;
     asset: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Withdraw to counterparty Id
@@ -2139,7 +2139,7 @@ getCounterpartyWithdrawalLimit(params: {
    */
 withdrawToCounterpartyId(
     params: INTXWithdrawToCounterpartyIdRequest,
-): Promise<any>
+  ): Promise<any>
 /**
    *
    * Fee Rates Endpoints
@@ -2973,6 +2973,11 @@ function redactCredentials(value: any, secrets: string[]): any
 export class AdvancedTradeGlobalAuth
 ⋮----
 constructor(
+    private readonly authOptions: GlobalAuthOptions,
+    private readonly requestAuth: (
+      params: AdvTradeGlobalAuthRequest,
+    ) => Promise<AdvTradeGlobalAuthResult>,
+  )
 ⋮----
 getAccessToken(): Promise<string>
 ⋮----
@@ -4064,7 +4069,7 @@ export class CBAdvancedTradeClient extends BaseRestClient
 constructor(
     restClientOptions: RestClientOptions = {},
     requestOptions: AxiosRequestConfig = {},
-)
+  )
 ⋮----
 /**
    *
@@ -4102,7 +4107,7 @@ getAccounts(params?: {
     limit?: number;
     cursor?: string;
     retail_portfolio_id?: string; // deprecated
-}): Promise<AdvTradeAccountsList>
+  }): Promise<AdvTradeAccountsList>
 ⋮----
 retail_portfolio_id?: string; // deprecated
 ⋮----
@@ -4112,7 +4117,9 @@ retail_portfolio_id?: string; // deprecated
    * Get a list of information about single account, given an account UUID.
    * Tip: Use List Accounts (getAccounts funcion) to find account UUIDs.
    */
-getAccount(params:
+getAccount(params: { account_id: string }): Promise<{
+    account: AdvTradeAccount;
+  }>
 ⋮----
 /**
    *
@@ -4125,7 +4132,9 @@ getAccount(params:
    *
    * Get the best bid/ask for all products. A subset of all products can be returned instead by using the product_ids input.
    */
-getBestBidAsk(params?:
+getBestBidAsk(params?: { product_ids?: string[] }): Promise<{
+    pricebooks: AdvTradePricebook[];
+  }>
 ⋮----
 /**
    * Get Product Book
@@ -4136,7 +4145,7 @@ getProductBook(params: {
     product_id: string;
     limit?: number;
     aggregation_price_increment?: string;
-}): Promise<
+  }): Promise<{ pricebook: AdvTradePricebook }>
 ⋮----
 /**
    * List Products
@@ -4144,7 +4153,10 @@ getProductBook(params: {
    * Get a list of the available currency pairs for trading.
    *
    */
-getProducts(params?: GetAdvTradeProductsRequest): Promise<
+getProducts(params?: GetAdvTradeProductsRequest): Promise<{
+    products: AdvTradeProduct[];
+    num_products: number;
+  }>
 ⋮----
 /**
    * Get Product
@@ -4154,14 +4166,16 @@ getProducts(params?: GetAdvTradeProductsRequest): Promise<
 getProduct(params: {
     product_id: string;
     get_tradability_status?: boolean;
-}): Promise<AdvTradeProduct>
+  }): Promise<AdvTradeProduct>
 ⋮----
 /**
    * Get Product Candles
    *
    * Get rates for a single product by product ID, grouped in buckets.
    */
-getProductCandles(params: GetAdvTradeProductCandlesRequest): Promise<
+getProductCandles(params: GetAdvTradeProductCandlesRequest): Promise<{
+    candles: AdvTradeCandle[];
+  }>
 ⋮----
 /**
    * Get Market Trades
@@ -4170,7 +4184,7 @@ getProductCandles(params: GetAdvTradeProductCandlesRequest): Promise<
    */
 getMarketTrades(
     params: GetAdvTradeMarketTradesRequest,
-): Promise<AdvTradeMarketTrades>
+  ): Promise<AdvTradeMarketTrades>
 ⋮----
 /**
    *
@@ -4186,7 +4200,7 @@ getMarketTrades(
    */
 submitOrder(
     params: SubmitAdvTradeOrderRequest,
-): Promise<AdvTradeSubmitOrderResponse>
+  ): Promise<AdvTradeSubmitOrderResponse>
 ⋮----
 /**
    * Cancel Orders
@@ -4198,7 +4212,7 @@ submitOrder(
    */
 cancelOrders(params: {
     order_ids: string[];
-}): Promise<AdvTradeCancelOrdersResponse>
+  }): Promise<AdvTradeCancelOrdersResponse>
 ⋮----
 /**
    * Edit Order
@@ -4211,7 +4225,7 @@ cancelOrders(params: {
    */
 updateOrder(
     params: UpdateAdvTradeOrderRequest,
-): Promise<AdvTradeEditOrderResponse>
+  ): Promise<AdvTradeEditOrderResponse>
 ⋮----
 /**
    * Edit Order Preview
@@ -4221,7 +4235,7 @@ updateOrder(
    */
 updateOrderPreview(
     params: UpdateAdvTradeOrderRequest,
-): Promise<AdvTradeEditOrderPreviewResponse>
+  ): Promise<AdvTradeEditOrderPreviewResponse>
 ⋮----
 /**
    * List Orders
@@ -4233,7 +4247,12 @@ updateOrderPreview(
    * - You cannot pair open orders with other order types.
    * - You cannot query for OPEN orders with other order types.
    */
-getOrders(params?: GetAdvTradeOrdersRequest): Promise<
+getOrders(params?: GetAdvTradeOrdersRequest): Promise<{
+    orders: AdvTradeOrder[];
+    sequence?: number;
+    has_next: boolean;
+    cursor?: string;
+  }>
 ⋮----
 /**
    * List Fills
@@ -4241,7 +4260,10 @@ getOrders(params?: GetAdvTradeOrdersRequest): Promise<
    * Get a list of fills filtered by optional query parameters (product_id, order_id, etc).
    *
    */
-getFills(params?: GetAdvTradeFillsRequest): Promise<
+getFills(params?: GetAdvTradeFillsRequest): Promise<{
+    fills: AdvTradeFill[];
+    cursor?: string;
+  }>
 ⋮----
 /**
    * Get Order
@@ -4252,7 +4274,7 @@ getOrder(params: {
     order_id: string;
     client_order_id?: string;
     user_native_currency?: string;
-}): Promise<
+  }): Promise<{ order: AdvTradeOrder }>
 ⋮----
 /**
    * Preview Order
@@ -4262,7 +4284,7 @@ getOrder(params: {
    */
 previewOrder(
     params: PreviewAdvTradeOrderRequest,
-): Promise<AdvTradeOrderPreview>
+  ): Promise<AdvTradeOrderPreview>
 ⋮----
 /**
    * Close Position
@@ -4272,7 +4294,7 @@ previewOrder(
    */
 closePosition(
     params: CloseAdvTradePositionRequest,
-): Promise<AdvTradeClosePositionResponse>
+  ): Promise<AdvTradeClosePositionResponse>
 ⋮----
 /**
    *
@@ -4287,21 +4309,28 @@ closePosition(
    */
 getPortfolios(params?: {
     portfolio_type?: 'UNDEFINED' | 'DEFAULT' | 'CONSUMER' | 'INTX';
-}): Promise<
+  }): Promise<{
+    portfolios: AdvTradePortfolio[];
+  }>
 ⋮----
 /**
    * Create Portfolio
    *
    * Create a portfolio.
    */
-createPortfolio(params:
+createPortfolio(params: { name: string }): Promise<{
+    portfolio: AdvTradePortfolio;
+  }>
 ⋮----
 /**
    * Move Portfolio Funds
    *
    * Move funds between portfolios.
    */
-movePortfolioFunds(params: MoveAdvTradePortfolioFundsRequest): Promise<
+movePortfolioFunds(params: MoveAdvTradePortfolioFundsRequest): Promise<{
+    source_portfolio_uuid: string;
+    target_portfolio_uuid: string;
+  }>
 ⋮----
 /**
    * Get Portfolio Breakdown
@@ -4311,14 +4340,14 @@ movePortfolioFunds(params: MoveAdvTradePortfolioFundsRequest): Promise<
 getPortfolioBreakdown(params: {
     portfolio_uuid: string;
     currency?: string;
-}): Promise<
+  }): Promise<{ breakdown: AdvTradePortfolioBreakdown }>
 ⋮----
 /**
    * Delete Portfolio
    *
    * Delete a portfolio.
    */
-deletePortfolio(params:
+deletePortfolio(params: { portfolio_uuid: string }): Promise<any>
 ⋮----
 /**
    * Edit Portfolio
@@ -4329,7 +4358,7 @@ deletePortfolio(params:
 updatePortfolio(params: {
     portfolio_uuid: string;
     name: string;
-}): Promise<
+  }): Promise<{ portfolio: AdvTradePortfolio }>
 ⋮----
 /**
    *
@@ -4352,14 +4381,21 @@ updatePortfolio(params: {
    * Intraday vs. Overnight Margin Health:
    * - If you are opted in to receive increased leverage on futures trades during the intraday window (from 8am-4pm ET), this endpoint will return your intraday and overnight margin health.
    */
-getFuturesBalanceSummary(): Promise<
+getFuturesBalanceSummary(): Promise<{
+    balance_summary: AdvTradeFuturesBalance;
+  }>
 ⋮----
 /**
    * Get Intraday Margin Setting
    *
    * Get the futures intraday margin setting.
    */
-getIntradayMarginSetting(): Promise<
+getIntradayMarginSetting(): Promise<{
+    setting:
+      | 'INTRADAY_MARGIN_SETTING_UNSPECIFIED'
+      | 'INTRADAY_MARGIN_SETTING_STANDARD'
+      | 'INTRADAY_MARGIN_SETTING_INTRADAY';
+  }>
 ⋮----
 /**
    * Set Intraday Margin Setting
@@ -4371,7 +4407,7 @@ setIntradayMarginSetting(params?: {
       | 'INTRADAY_MARGIN_SETTING_UNSPECIFIED'
       | 'INTRADAY_MARGIN_SETTING_STANDARD'
       | 'INTRADAY_MARGIN_SETTING_INTRADAY';
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get Current Margin Window
@@ -4383,14 +4419,14 @@ getCurrentMarginWindow(params?: {
       | 'MARGIN_PROFILE_TYPE_UNSPECIFIED'
       | 'MARGIN_PROFILE_TYPE_RETAIL_REGULAR'
       | 'MARGIN_PROFILE_TYPE_RETAIL_INTRADAY_MARGIN_1';
-}): Promise<AdvTradeCurrentMarginWindow>
+  }): Promise<AdvTradeCurrentMarginWindow>
 ⋮----
 /**
    * List Futures Positions
    *
    * Get a list of positions in CFM products.
    */
-getFuturesPositions(): Promise<
+getFuturesPositions(): Promise<{ positions: AdvTradeFuturesPosition[] }>
 ⋮----
 /**
    * Get Futures Position
@@ -4399,7 +4435,7 @@ getFuturesPositions(): Promise<
    */
 getFuturesPosition(params: {
     product_id: string;
-}): Promise<
+  }): Promise<{ position: AdvTradeFuturesPosition }>
 ⋮----
 /**
    * Schedule Futures Sweep
@@ -4416,7 +4452,7 @@ getFuturesPosition(params: {
    */
 scheduleFuturesSweep(params?: {
     usd_amount?: string;
-}): Promise<
+  }): Promise<{ success: boolean }>
 ⋮----
 /**
    * List Futures Sweeps
@@ -4428,14 +4464,14 @@ scheduleFuturesSweep(params?: {
    * - A processing sweep is a sweep that is currently being processed and cannot be cancelled.
    * - Once a sweep is complete, it no longer appears in the list of sweeps.
    */
-getFuturesSweeps(): Promise<
+getFuturesSweeps(): Promise<{ sweeps: AdvTradeFuturesSweep[] }>
 ⋮----
 /**
    * Cancel Pending Futures Sweep
    *
    * Cancel the pending sweep of funds from FCM wallet to USD Spot wallet.
    */
-cancelPendingFuturesSweep(): Promise<
+cancelPendingFuturesSweep(): Promise<{ success: boolean }>
 ⋮----
 /**
    *
@@ -4458,7 +4494,7 @@ allocatePortfolio(params: AllocateAdvTradePortfolioRequest): Promise<any>
    */
 getPerpetualsPortfolioSummary(params: {
     portfolio_uuid: string;
-}): Promise<AdvTradePerpetualsPortfolio>
+  }): Promise<AdvTradePerpetualsPortfolio>
 ⋮----
 /**
    * List Perpetuals Positions
@@ -4467,7 +4503,7 @@ getPerpetualsPortfolioSummary(params: {
    */
 getPerpetualsPositions(params: {
     portfolio_uuid: string;
-}): Promise<AdvTradePerpetualsPositionSummary>
+  }): Promise<AdvTradePerpetualsPositionSummary>
 ⋮----
 /**
    * Get Perpetuals Position
@@ -4478,14 +4514,16 @@ getPerpetualsPositions(params: {
 getPerpetualsPosition(params: {
     portfolio_uuid: string;
     symbol: string;
-}): Promise<
+  }): Promise<{ position: AdvTradePerpetualsPosition }>
 ⋮----
 /**
    * Get Portfolios Balances
    *
    * Get a list of asset balances on Intx for a given Portfolio.
    */
-getPortfoliosBalances(params:
+getPortfoliosBalances(params: { portfolio_uuid: string }): Promise<{
+    portfolio_balances: AdvTradePortfolioBalance[];
+  }>
 ⋮----
 /**
    * Opt In or Out of Multi Asset Collateral
@@ -4495,7 +4533,7 @@ getPortfoliosBalances(params:
 updateMultiAssetCollateral(params?: {
     portfolio_uuid?: string;
     multi_asset_collateral_enabled?: boolean;
-}): Promise<
+  }): Promise<{ multi_asset_collateral_enabled: boolean }>
 ⋮----
 /**
    *
@@ -4510,7 +4548,7 @@ updateMultiAssetCollateral(params?: {
    */
 getTransactionSummary(
     params?: GetAdvTradeTransactionSummaryRequest,
-): Promise<AdvTradeTransactionSummary>
+  ): Promise<AdvTradeTransactionSummary>
 ⋮----
 /**
    *
@@ -4535,7 +4573,7 @@ getConvertTrade(params: {
     trade_id: string;
     from_account: string;
     to_account: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Commit Convert Trade
@@ -4546,7 +4584,7 @@ commitConvertTrade(params: {
     trade_id: string;
     from_account: string;
     to_account: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -4554,7 +4592,11 @@ commitConvertTrade(params: {
    *
    */
 ⋮----
-getServerTime(): Promise<
+getServerTime(): Promise<{
+    iso: string;
+    epochSeconds: string;
+    epochMillis: string;
+  }>
 ⋮----
 /**
    * Get Public Product Book
@@ -4565,14 +4607,17 @@ getPublicProductBook(params: {
     product_id: string;
     limit?: number;
     aggregation_price_increment?: string;
-}): Promise<
+  }): Promise<{ pricebook: AdvTradePricebook }>
 ⋮----
 /**
    * List Public Products
    *
    * Get a list of the available currency pairs for trading.
    */
-getPublicProducts(params?: GetAdvTradePublicProductsRequest): Promise<
+getPublicProducts(params?: GetAdvTradePublicProductsRequest): Promise<{
+    products: AdvTradePublicProduct[];
+    num_products: number;
+  }>
 ⋮----
 /**
    * Get Public Product
@@ -4581,7 +4626,7 @@ getPublicProducts(params?: GetAdvTradePublicProductsRequest): Promise<
    */
 getPublicProduct(params: {
     product_id: string;
-}): Promise<AdvTradePublicProduct>
+  }): Promise<AdvTradePublicProduct>
 ⋮----
 /**
    * Get Public Product Candles
@@ -4590,7 +4635,7 @@ getPublicProduct(params: {
    */
 getPublicProductCandles(
     params: GetAdvTradePublicProductCandlesRequest,
-): Promise<
+  ): Promise<{ candles: AdvTradeCandle[] }>
 ⋮----
 /**
    * Get Public Market Trades
@@ -4599,7 +4644,7 @@ getPublicProductCandles(
    */
 getPublicMarketTrades(
     params: GetAdvTradePublicMarketTradesRequest,
-): Promise<AdvTradeMarketTrades>
+  ): Promise<AdvTradeMarketTrades>
 ⋮----
 /**
    *
@@ -4612,14 +4657,18 @@ getPublicMarketTrades(
    *
    * Get a list of payment methods for the current user.
    */
-getPaymentMethods(): Promise<
+getPaymentMethods(): Promise<{
+    payment_methods: AdvTradePaymentMethod[];
+  }>
 ⋮----
 /**
    * Get Payment Method
    *
    * Get information about a payment method for the current user.
    */
-getPaymentMethod(params:
+getPaymentMethod(params: { payment_method_id: string }): Promise<{
+    payment_method: AdvTradePaymentMethod;
+  }>
 ⋮----
 /**
    *
@@ -4673,7 +4722,7 @@ export class CBAppClient extends BaseRestClient
 constructor(
     restClientOptions: RestClientOptions = {},
     requestOptions: AxiosRequestConfig = {},
-)
+  )
 ⋮----
 // Some endpoints return a warning if a version header isn't included: https://docs.cdp.coinbase.com/coinbase-app/docs/versioning
 // Currently set to a date from the changelog: https://docs.cdp.coinbase.com/coinbase-app/docs/changelog
@@ -4697,14 +4746,19 @@ getClientType(): RestClientType
 getAccounts(params?: {
     paginationURL?: string;
     starting_after?: string;
-}): Promise<
+  }): Promise<{
+    data: CBAppAccount[];
+    pagination: CBAppPagination;
+  }>
 ⋮----
 /**
    * Show Account
    *
    * Get a current user's account by account ID or currency string.
    */
-getAccount(params:
+getAccount(params: { account_id: string }): Promise<{
+    data: CBAppAccount;
+  }>
 ⋮----
 /**
    *
@@ -4717,7 +4771,9 @@ getAccount(params:
    *
    * Creates a new address for an account. Addresses can be created for wallet account types.
    */
-createAddress(params:
+createAddress(params: { account_id: string; name?: string }): Promise<{
+    data: CBAppAddress;
+  }>
 ⋮----
 /**
    * List Addresses
@@ -4730,7 +4786,10 @@ createAddress(params:
 getAddresses(params: {
     account_id: string;
     paginationURL?: string;
-}): Promise<
+  }): Promise<{
+    pagination: CBAppPagination;
+    data: CBAppAddress[];
+  }>
 ⋮----
 /**
    * Show Address
@@ -4740,7 +4799,9 @@ getAddresses(params: {
    *
    * !! An address can only be associated with one account. See Create Address to create new addresses.
    */
-getAddress(params:
+getAddress(params: { account_id: string; addressId: string }): Promise<{
+    data: CBAppAddress;
+  }>
 ⋮----
 /**
    * List Address Transactions
@@ -4755,7 +4816,10 @@ getAddressTransactions(params: {
     account_id: string;
     addressId: string;
     paginationURL?: string;
-}): Promise<
+  }): Promise<{
+    pagination: CBAppPagination;
+    data: CBAppTransaction[];
+  }>
 ⋮----
 /**
    *
@@ -4773,7 +4837,7 @@ getAddressTransactions(params: {
    */
 sendMoney(
     params: CBAppSendMoneyRequest,
-): Promise<
+  ): Promise<{ data: CBAppTransaction }>
 ⋮----
 /**
    * Transfer Money
@@ -4783,7 +4847,7 @@ sendMoney(
    */
 transferMoney(
     params: CBAppTransferMoneyRequest,
-): Promise<
+  ): Promise<{ data: CBAppTransaction }>
 ⋮----
 /**
    * List Transactions
@@ -4796,7 +4860,10 @@ transferMoney(
 getTransactions(params: {
     account_id: string;
     paginationURL?: string;
-}): Promise<
+  }): Promise<{
+    pagination: CBAppPagination;
+    data: CBAppTransaction[];
+  }>
 ⋮----
 /**
    * Show Transaction
@@ -4806,7 +4873,9 @@ getTransactions(params: {
 getTransaction(params: {
     account_id: string;
     transactionId: string;
-}): Promise<
+  }): Promise<{
+    data: CBAppTransaction;
+  }>
 ⋮----
 /**
    *
@@ -4829,7 +4898,7 @@ depositFunds(params: CBAppDepositFundsRequest): Promise<CBAppTransfer>
 commitDeposit(params: {
     account_id: string;
     deposit_id: string;
-}): Promise<CBAppTransfer>
+  }): Promise<CBAppTransfer>
 ⋮----
 /**
    * List Deposits
@@ -4839,14 +4908,19 @@ commitDeposit(params: {
    * This endpoint is paginated. In case you are calling it first time, leave paginationURL empty.
    * If you are paginating, provide the paginationURL value from the previous response and you will receive the next page of deposits.
    */
-getDeposits(params:
+getDeposits(params: { account_id: string; paginationURL?: string }): Promise<{
+    pagination: CBAppPagination;
+    data: CBAppDepositWithdrawal[];
+  }>
 ⋮----
 /**
    * Show Deposit
    *
    * Get one deposit by deposit Id.
    */
-getDeposit(params:
+getDeposit(params: { account_id: string; deposit_id: string }): Promise<{
+    data: CBAppDepositWithdrawal;
+  }>
 ⋮----
 /**
    *
@@ -4869,7 +4943,7 @@ withdrawFunds(params: CBAppWithdrawFundsRequest): Promise<CBAppTransfer>
 commitWithdrawal(params: {
     account_id: string;
     withdrawal_id: string;
-}): Promise<CBAppTransfer>
+  }): Promise<CBAppTransfer>
 ⋮----
 /**
    * List Withdrawals
@@ -4882,7 +4956,10 @@ commitWithdrawal(params: {
 getWithdrawals(params: {
     account_id: string;
     paginationURL?: string;
-}): Promise<
+  }): Promise<{
+    pagination: CBAppPagination;
+    data: CBAppDepositWithdrawal[];
+  }>
 ⋮----
 /**
    * Show Withdrawal
@@ -4892,7 +4969,9 @@ getWithdrawals(params: {
 getWithdrawal(params: {
     account_id: string;
     withdrawal_id: string;
-}): Promise<
+  }): Promise<{
+    data: CBAppDepositWithdrawal;
+  }>
 ⋮----
 /**
    *
@@ -4906,7 +4985,9 @@ getWithdrawal(params: {
    * Returns a user's Coinbase One subscription status, tier, and current period end.
    * Requires OAuth2 scope: wallet:subscription:read
    */
-getCoinbaseOneSubscription(): Promise<
+getCoinbaseOneSubscription(): Promise<{
+    data: CBAppCoinbaseOneSubscription;
+  }>
 ⋮----
 /**
    *
@@ -4920,7 +5001,9 @@ getCoinbaseOneSubscription(): Promise<
    * Lists known fiat currencies. Currency codes conform to the ISO 4217 standard where possible.
    * Currencies with no representation in ISO 4217 may use a custom code.
    */
-getFiatCurrencies(): Promise<
+getFiatCurrencies(): Promise<{
+    data: CBAppFiatCurrency[];
+  }>
 ⋮----
 /**
    * Get Cryptocurrencies
@@ -4941,7 +5024,12 @@ getCryptocurrencies(): Promise<CBAppCryptocurrency[]>
    * Get current exchange rates. Default base currency is USD but it can be defined as any supported currency.
    * Returned rates will define the exchange rate for one unit of the base currency.
    */
-getExchangeRates(params?:
+getExchangeRates(params?: { currency?: string }): Promise<{
+    data: {
+      currency: string;
+      rates: { [key: string]: string };
+    };
+  }>
 ⋮----
 /**
    *
@@ -4955,7 +5043,12 @@ getExchangeRates(params?:
    * Get the total price to buy one bitcoin or ether.
    * This endpoint doesn't require authentication.
    */
-getBuyPrice(params:
+getBuyPrice(params: { currencyPair: string }): Promise<{
+    data: {
+      amount: string;
+      currency: string;
+    };
+  }>
 ⋮----
 /**
    * Get Sell Price
@@ -4963,7 +5056,12 @@ getBuyPrice(params:
    * Get the total price to sell one bitcoin or ether.
    * This endpoint doesn't require authentication.
    */
-getSellPrice(params:
+getSellPrice(params: { currencyPair: string }): Promise<{
+    data: {
+      amount: string;
+      currency: string;
+    };
+  }>
 ⋮----
 /**
    * Get Spot Price
@@ -4971,7 +5069,12 @@ getSellPrice(params:
    * Get the current market price for bitcoin. This is usually somewhere in between the buy and sell price.
    * This endpoint doesn't require authentication.
    */
-getSpotPrice(params:
+getSpotPrice(params: { currencyPair: string; date?: string }): Promise<{
+    data: {
+      amount: string;
+      currency: string;
+    };
+  }>
 ⋮----
 /**
    *
@@ -4985,7 +5088,12 @@ getSpotPrice(params:
    * Get the API server time.
    * This endpoint doesn't require authentication.
    */
-getCurrentTime(): Promise<
+getCurrentTime(): Promise<{
+    data: {
+      iso: string;
+      epoch: number;
+    };
+  }>
 
 ================
 File: src/CBExchangeClient.ts
@@ -5041,7 +5149,7 @@ export class CBExchangeClient extends BaseRestClient
 constructor(
     restClientOptions: RestClientOptions = {},
     requestOptions: AxiosRequestConfig = {},
-)
+  )
 ⋮----
 getClientType(): RestClientType
 ⋮----
@@ -5064,7 +5172,7 @@ getAccounts(): Promise<any>
    *
    * Information for a single account. Use this endpoint when you know the account_id. API key must belong to the same profile as the account.
    */
-getAccount(params:
+getAccount(params: { account_id: string }): Promise<any>
 ⋮----
 /**
    * Get a single account's holds
@@ -5123,7 +5231,7 @@ addAddresses(params: GetCBExchAddressBookRequest): Promise<any>
    *
    * Delete address from address book.
    */
-deleteAddress(params:
+deleteAddress(params: { id: string }): Promise<any>
 ⋮----
 /**
    * Get counterparty address book
@@ -5139,7 +5247,7 @@ getCounterpartyAddressBook(): Promise<CBExchCounterpartyAddress[]>
    */
 updateAddressBookEntry(
     params: UpdateCBExchAddressBookEntryRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    *
@@ -5189,7 +5297,7 @@ getConversionFeeRates(): Promise<any>
 getConversion(params: {
     conversion_id: string;
     profile_id?: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get all conversions
@@ -5201,7 +5309,7 @@ getAllConversions(params: {
     before?: string;
     after?: string;
     limit?: number;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -5236,7 +5344,7 @@ getCurrency(currency_id: string): Promise<any>
    */
 depositFromCoinbaseAccount(
     params: CBExchDepositFromCoinbaseAccount,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Deposit from payment method
@@ -5246,7 +5354,7 @@ depositFromCoinbaseAccount(
    */
 depositFromPaymentMethod(
     params: CBExchDepositFromPaymentMethod,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get all payment methods
@@ -5267,7 +5375,7 @@ getTransfers(params?: CBExchGetTransfersRequest): Promise<any>
    *
    * Get information on a single transfer.
    */
-getTransfer(params:
+getTransfer(params: { transfer_id: string }): Promise<any>
 ⋮----
 /**
    * Submit travel information for a transfer
@@ -5299,7 +5407,7 @@ withdrawToCryptoAddress(params: CBExchWithdrawToCryptoAddress): Promise<any>
    */
 getCryptoWithdrawalFeeEstimate(
     params: CBExchGetCryptoWithdrawalFeeEstimate,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Withdraw to payment method
@@ -5352,7 +5460,7 @@ getOrders(params?: GetCBExchOrdersRequest): Promise<any>
 cancelAllOrders(params?: {
     profile_id?: string;
     product_id?: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Create a new order
@@ -5367,7 +5475,7 @@ submitOrder(params: SubmitCBExchOrderRequest): Promise<any>
    *
    * Get a single order by id.
    */
-getOrder(params:
+getOrder(params: { order_id: string; market_type?: string }): Promise<any>
 ⋮----
 /**
    * Cancel an order
@@ -5387,7 +5495,7 @@ cancelOrder(params: CancelCBExchOrderRequest): Promise<any>
    *
    * Accepts zero or more loan IDs as input. If no loan IDs are specified, it returns all loans for the user. Otherwise, it returns only the loan IDs specified.
    */
-getLoans(params?:
+getLoans(params?: { ids?: string }): Promise<any>
 ⋮----
 /**
    * List loan assets
@@ -5408,14 +5516,14 @@ getInterestSummaries(): Promise<any>
    *
    * List interest rate history for a loan.
    */
-getInterestRateHistory(params:
+getInterestRateHistory(params: { loan_id: string }): Promise<any>
 ⋮----
 /**
    * List interest charges
    *
    * List interest charges for a loan.
    */
-getInterestCharges(params:
+getInterestCharges(params: { loan_id: string }): Promise<any>
 ⋮----
 /**
    * Get lending overview
@@ -5437,7 +5545,7 @@ getLendingOverview(): Promise<any>
 getNewLoanPreview(params: {
     currency: string;
     native_amount: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Open new loan
@@ -5476,7 +5584,7 @@ repayLoanPrincipal(params: RepayCBExchLoanPrincipal): Promise<any>
    */
 getPrincipalRepaymentPreview(
     params: GetCBExchPrincipalRepaymentPreview,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    *
@@ -5502,7 +5610,7 @@ getSignedPrices(): Promise<any>
    *
    * Gets a list of available currency pairs for trading.
    */
-getAllTradingPairs(params?:
+getAllTradingPairs(params?: { type?: string }): Promise<any>
 ⋮----
 /**
    * Get all product volume
@@ -5516,7 +5624,7 @@ getAllProductVolume(): Promise<any>
    *
    * Get information on a single product.
    */
-getProduct(params:
+getProduct(params: { product_id: string }): Promise<any>
 ⋮----
 /**
    * Get product book
@@ -5525,7 +5633,7 @@ getProduct(params:
    * By default, only the inside (i.e., the best) bid and ask are returned. This is equivalent to a book depth of 1 level.
    * To see a larger order book, specify the level query parameter.
    */
-getProductBook(params:
+getProductBook(params: { product_id: string; level?: number }): Promise<any>
 ⋮----
 /**
    * Get product candles
@@ -5540,14 +5648,14 @@ getProductCandles(params: GetCBExchProductCandles): Promise<any>
    *
    * Gets 30-day and 24-hour stats for a product.
    */
-getProductStats(params:
+getProductStats(params: { product_id: string }): Promise<any>
 ⋮----
 /**
    * Get product ticker
    *
    * Gets snapshot information about the last trade (tick), best bid/ask, and 24h volume.
    */
-getProductTicker(params:
+getProductTicker(params: { product_id: string }): Promise<any>
 ⋮----
 /**
    * Get product trades
@@ -5567,14 +5675,14 @@ getProductTrades(params: GetCBExchProductTrades): Promise<any>
    *
    * Gets a list of all of the current user's profiles.
    */
-getProfiles(params?:
+getProfiles(params?: { active?: boolean }): Promise<any>
 ⋮----
 /**
    * Create a profile
    *
    * Create a new profile. Will fail if no name is provided or if user already has max number of profiles.
    */
-createProfile(params:
+createProfile(params: { name: string }): Promise<any>
 ⋮----
 /**
    * Transfer funds between profiles
@@ -5583,7 +5691,7 @@ createProfile(params:
    */
 transferFundsBetweenProfiles(
     params: TransferCBExchFundsBetweenProfiles,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get profile by id
@@ -5593,14 +5701,14 @@ transferFundsBetweenProfiles(
 getProfileById(params: {
     profile_id: string;
     active?: boolean;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Rename a profile
    *
    * Rename a profile. Names 'default' and 'margin' are reserved.
    */
-renameProfile(params:
+renameProfile(params: { profile_id: string; name: string }): Promise<any>
 ⋮----
 /**
    * Delete a profile
@@ -5608,7 +5716,7 @@ renameProfile(params:
    * Deletes the profile specified by profile_id and transfers all funds to the profile specified by to.
    * Fails if there are any open orders on the profile to be deleted.
    */
-deleteProfile(params:
+deleteProfile(params: { profile_id: string; to: string }): Promise<any>
 ⋮----
 /**
    *
@@ -5636,7 +5744,7 @@ createReport(params: CreateCBExchReport): Promise<any>
    *
    * Get a specific report by report_id.
    */
-getReport(params:
+getReport(params: { report_id: string }): Promise<any>
 ⋮----
 /**
    *
@@ -5651,7 +5759,7 @@ getReport(params:
    */
 getTravelRuleInformation(
     params?: GetCBExchTravelRuleInformation,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Create travel rule entry
@@ -5662,14 +5770,14 @@ createTravelRuleEntry(params: {
     address: string;
     originator_name: string;
     originator_country: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Delete existing travel rule entry
    *
    * Delete existing travel rule entry.
    */
-deleteTravelRuleEntry(params:
+deleteTravelRuleEntry(params: { id: string }): Promise<any>
 ⋮----
 /**
    *
@@ -5682,7 +5790,7 @@ deleteTravelRuleEntry(params:
    *
    * Gets exchange limits information for a single user.
    */
-getUserExchangeLimits(params:
+getUserExchangeLimits(params: { user_id: string }): Promise<any>
 ⋮----
 /**
    * Update settlement preference
@@ -5692,14 +5800,14 @@ getUserExchangeLimits(params:
 updateSettlementPreference(params: {
     user_id: string;
     settlement_preference: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get user trading volume
    *
    * Gets aggregated and individual trading volumes for users.
    */
-getUserTradingVolume(params:
+getUserTradingVolume(params: { user_id: string }): Promise<any>
 ⋮----
 /**
    *
@@ -5730,21 +5838,21 @@ createStakeWrap(params: {
     from_currency: string;
     to_currency: string;
     amount: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get a single stake-wrap
    *
    * Get details for a specific stake-wrap in the profile associated with the API key.
    */
-getStakeWrap(params:
+getStakeWrap(params: { stake_wrap_id: string }): Promise<any>
 ⋮----
 /**
    * Get wrapped asset details
    *
    * Returns the circulating and total supply of a wrapped asset, and its conversion rate.
    */
-getWrappedAssetDetails(params:
+getWrappedAssetDetails(params: { wrapped_asset_id: string }): Promise<any>
 ⋮----
 /**
    * Get wrapped asset conversion rate
@@ -5753,7 +5861,7 @@ getWrappedAssetDetails(params:
    */
 getWrappedAssetConversionRate(params: {
     wrapped_asset_id: string;
-}): Promise<any>
+  }): Promise<any>
 
 ================
 File: src/WebsocketAPIClient.ts
@@ -5781,7 +5889,7 @@ constructor(
     options?: WSClientConfigurableOptions &
       Partial<WSAPIClientConfigurableOptions>,
     logger?: typeof DefaultLogger,
-)
+  )
 ⋮----
 public getWSClient(): WebsocketClient
 ⋮----
@@ -5794,37 +5902,37 @@ auth(): Promise<WsAPITopicResponseMap['public/auth']>
 /** public/get_announcements */
 getAnnouncements(
     params?: WsAPITopicRequestParamMap['public/get_announcements'],
-): Promise<WsAPITopicResponseMap['public/get_announcements']>
+  ): Promise<WsAPITopicResponseMap['public/get_announcements']>
 ⋮----
 /** public/get_book_summary_by_currency */
 getBookSummaryByCurrency(
     params: WsAPITopicRequestParamMap['public/get_book_summary_by_currency'],
-): Promise<WsAPITopicResponseMap['public/get_book_summary_by_currency']>
+  ): Promise<WsAPITopicResponseMap['public/get_book_summary_by_currency']>
 ⋮----
 /** public/get_book_summary_by_instrument */
 getBookSummaryByInstrument(
     params: WsAPITopicRequestParamMap['public/get_book_summary_by_instrument'],
-): Promise<WsAPITopicResponseMap['public/get_book_summary_by_instrument']>
+  ): Promise<WsAPITopicResponseMap['public/get_book_summary_by_instrument']>
 ⋮----
 /** public/get_combo_details */
 getComboDetails(
     params: WsAPITopicRequestParamMap['public/get_combo_details'],
-): Promise<WsAPITopicResponseMap['public/get_combo_details']>
+  ): Promise<WsAPITopicResponseMap['public/get_combo_details']>
 ⋮----
 /** public/get_combo_ids */
 getComboIds(
     params: WsAPITopicRequestParamMap['public/get_combo_ids'],
-): Promise<WsAPITopicResponseMap['public/get_combo_ids']>
+  ): Promise<WsAPITopicResponseMap['public/get_combo_ids']>
 ⋮----
 /** public/get_combos */
 getCombos(
     params: WsAPITopicRequestParamMap['public/get_combos'],
-): Promise<WsAPITopicResponseMap['public/get_combos']>
+  ): Promise<WsAPITopicResponseMap['public/get_combos']>
 ⋮----
 /** public/get_contract_size */
 getContractSize(
     params: WsAPITopicRequestParamMap['public/get_contract_size'],
-): Promise<WsAPITopicResponseMap['public/get_contract_size']>
+  ): Promise<WsAPITopicResponseMap['public/get_contract_size']>
 ⋮----
 /** public/get_currencies */
 getCurrencies(): Promise<WsAPITopicResponseMap['public/get_currencies']>
@@ -5832,128 +5940,113 @@ getCurrencies(): Promise<WsAPITopicResponseMap['public/get_currencies']>
 /** public/get_delivery_prices */
 getDeliveryPrices(
     params: WsAPITopicRequestParamMap['public/get_delivery_prices'],
-): Promise<WsAPITopicResponseMap['public/get_delivery_prices']>
+  ): Promise<WsAPITopicResponseMap['public/get_delivery_prices']>
 ⋮----
 /** public/get_expirations */
 getExpirations(
     params: WsAPITopicRequestParamMap['public/get_expirations'],
-): Promise<WsAPITopicResponseMap['public/get_expirations']>
+  ): Promise<WsAPITopicResponseMap['public/get_expirations']>
 ⋮----
 /** public/get_funding_chart_data */
 getFundingChartData(
     params: WsAPITopicRequestParamMap['public/get_funding_chart_data'],
-): Promise<WsAPITopicResponseMap['public/get_funding_chart_data']>
+  ): Promise<WsAPITopicResponseMap['public/get_funding_chart_data']>
 ⋮----
 /** public/get_funding_rate_history */
 getFundingRateHistory(
     params: WsAPITopicRequestParamMap['public/get_funding_rate_history'],
-): Promise<WsAPITopicResponseMap['public/get_funding_rate_history']>
+  ): Promise<WsAPITopicResponseMap['public/get_funding_rate_history']>
 ⋮----
 /** public/get_funding_rate_value */
 getFundingRateValue(
     params: WsAPITopicRequestParamMap['public/get_funding_rate_value'],
-): Promise<WsAPITopicResponseMap['public/get_funding_rate_value']>
+  ): Promise<WsAPITopicResponseMap['public/get_funding_rate_value']>
 ⋮----
 /** public/get_historical_volatility */
 getHistoricalVolatility(
     params: WsAPITopicRequestParamMap['public/get_historical_volatility'],
-): Promise<WsAPITopicResponseMap['public/get_historical_volatility']>
+  ): Promise<WsAPITopicResponseMap['public/get_historical_volatility']>
 ⋮----
 /** public/get_index_chart_data */
 getIndexChartData(
     params: WsAPITopicRequestParamMap['public/get_index_chart_data'],
-): Promise<WsAPITopicResponseMap['public/get_index_chart_data']>
+  ): Promise<WsAPITopicResponseMap['public/get_index_chart_data']>
 ⋮----
 /** public/get_index_price */
 getIndexPrice(
     params: WsAPITopicRequestParamMap['public/get_index_price'],
-): Promise<WsAPITopicResponseMap['public/get_index_price']>
+  ): Promise<WsAPITopicResponseMap['public/get_index_price']>
 ⋮----
 /** public/get_index_price_names */
 getIndexPriceNames(
     params?: WsAPITopicRequestParamMap['public/get_index_price_names'],
-): Promise<WsAPITopicResponseMap['public/get_index_price_names']>
+  ): Promise<WsAPITopicResponseMap['public/get_index_price_names']>
 ⋮----
 /** public/get_instrument */
 getInstrument(
     params: WsAPITopicRequestParamMap['public/get_instrument'],
-): Promise<WsAPITopicResponseMap['public/get_instrument']>
+  ): Promise<WsAPITopicResponseMap['public/get_instrument']>
 ⋮----
 /** public/get_instruments */
 getInstruments(
     params: WsAPITopicRequestParamMap['public/get_instruments'],
-): Promise<WsAPITopicResponseMap['public/get_instruments']>
+  ): Promise<WsAPITopicResponseMap['public/get_instruments']>
 ⋮----
 /** public/get_last_settlements_by_currency */
 getLastSettlementsByCurrency(
     params: WsAPITopicRequestParamMap['public/get_last_settlements_by_currency'],
-): Promise<WsAPITopicResponseMap['public/get_last_settlements_by_currency']>
+  ): Promise<WsAPITopicResponseMap['public/get_last_settlements_by_currency']>
 ⋮----
 /** public/get_last_settlements_by_instrument */
 getLastSettlementsByInstrument(
     params: WsAPITopicRequestParamMap['public/get_last_settlements_by_instrument'],
   ): Promise<
     WsAPITopicResponseMap['public/get_last_settlements_by_instrument']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'public/get_last_settlements_by_instrument',
-      params,
-    );
+  >
 ⋮----
 /** public/get_last_trades_by_currency */
 getLastTradesByCurrency(
     params: WsAPITopicRequestParamMap['public/get_last_trades_by_currency'],
-): Promise<WsAPITopicResponseMap['public/get_last_trades_by_currency']>
+  ): Promise<WsAPITopicResponseMap['public/get_last_trades_by_currency']>
 ⋮----
 /** public/get_last_trades_by_currency_and_time */
 getLastTradesByCurrencyAndTime(
     params: WsAPITopicRequestParamMap['public/get_last_trades_by_currency_and_time'],
   ): Promise<
     WsAPITopicResponseMap['public/get_last_trades_by_currency_and_time']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'public/get_last_trades_by_currency_and_time',
-      params,
-    );
+  >
 ⋮----
 /** public/get_last_trades_by_instrument */
 getLastTradesByInstrument(
     params: WsAPITopicRequestParamMap['public/get_last_trades_by_instrument'],
-): Promise<WsAPITopicResponseMap['public/get_last_trades_by_instrument']>
+  ): Promise<WsAPITopicResponseMap['public/get_last_trades_by_instrument']>
 ⋮----
 /** public/get_last_trades_by_instrument_and_time */
 getLastTradesByInstrumentAndTime(
     params: WsAPITopicRequestParamMap['public/get_last_trades_by_instrument_and_time'],
   ): Promise<
     WsAPITopicResponseMap['public/get_last_trades_by_instrument_and_time']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'public/get_last_trades_by_instrument_and_time',
-      params,
-    );
+  >
 ⋮----
 /** public/get_mark_price_history */
 getMarkPriceHistory(
     params: WsAPITopicRequestParamMap['public/get_mark_price_history'],
-): Promise<WsAPITopicResponseMap['public/get_mark_price_history']>
+  ): Promise<WsAPITopicResponseMap['public/get_mark_price_history']>
 ⋮----
 /** public/get_order_book */
 getOrderBook(
     params: WsAPITopicRequestParamMap['public/get_order_book'],
-): Promise<WsAPITopicResponseMap['public/get_order_book']>
+  ): Promise<WsAPITopicResponseMap['public/get_order_book']>
 ⋮----
 /** public/get_order_book_by_instrument_id */
 getOrderBookByInstrumentId(
     params: WsAPITopicRequestParamMap['public/get_order_book_by_instrument_id'],
-): Promise<WsAPITopicResponseMap['public/get_order_book_by_instrument_id']>
+  ): Promise<WsAPITopicResponseMap['public/get_order_book_by_instrument_id']>
 ⋮----
 /** public/get_supported_index_names */
 getSupportedIndexNames(
     params?: WsAPITopicRequestParamMap['public/get_supported_index_names'],
-): Promise<WsAPITopicResponseMap['public/get_supported_index_names']>
+  ): Promise<WsAPITopicResponseMap['public/get_supported_index_names']>
 ⋮----
 /** public/get_time */
 getTime(): Promise<WsAPITopicResponseMap['public/get_time']>
@@ -5961,17 +6054,17 @@ getTime(): Promise<WsAPITopicResponseMap['public/get_time']>
 /** public/get_trade_volumes */
 getTradeVolumes(
     params?: WsAPITopicRequestParamMap['public/get_trade_volumes'],
-): Promise<WsAPITopicResponseMap['public/get_trade_volumes']>
+  ): Promise<WsAPITopicResponseMap['public/get_trade_volumes']>
 ⋮----
 /** public/get_tradingview_chart_data */
 getTradingviewChartData(
     params: WsAPITopicRequestParamMap['public/get_tradingview_chart_data'],
-): Promise<WsAPITopicResponseMap['public/get_tradingview_chart_data']>
+  ): Promise<WsAPITopicResponseMap['public/get_tradingview_chart_data']>
 ⋮----
 /** public/get_volatility_index_data */
 getVolatilityIndexData(
     params: WsAPITopicRequestParamMap['public/get_volatility_index_data'],
-): Promise<WsAPITopicResponseMap['public/get_volatility_index_data']>
+  ): Promise<WsAPITopicResponseMap['public/get_volatility_index_data']>
 ⋮----
 /** public/status */
 getStatus(): Promise<WsAPITopicResponseMap['public/status']>
@@ -5979,285 +6072,265 @@ getStatus(): Promise<WsAPITopicResponseMap['public/status']>
 /** public/test */
 testConnection(
     params?: WsAPITopicRequestParamMap['public/test'],
-): Promise<WsAPITopicResponseMap['public/test']>
+  ): Promise<WsAPITopicResponseMap['public/test']>
 ⋮----
 /** public/ticker */
 getTicker(
     params: WsAPITopicRequestParamMap['public/ticker'],
-): Promise<WsAPITopicResponseMap['public/ticker']>
+  ): Promise<WsAPITopicResponseMap['public/ticker']>
 ⋮----
 /** private/buy */
 submitBuy(
     params: WsAPITopicRequestParamMap['private/buy'],
-): Promise<WsAPITopicResponseMap['private/buy']>
+  ): Promise<WsAPITopicResponseMap['private/buy']>
 ⋮----
 /** private/sell */
 submitSell(
     params: WsAPITopicRequestParamMap['private/sell'],
-): Promise<WsAPITopicResponseMap['private/sell']>
+  ): Promise<WsAPITopicResponseMap['private/sell']>
 ⋮----
 /** private/edit */
 updateOrder(
     params: WsAPITopicRequestParamMap['private/edit'],
-): Promise<WsAPITopicResponseMap['private/edit']>
+  ): Promise<WsAPITopicResponseMap['private/edit']>
 ⋮----
 /** private/edit_by_label */
 updateOrderByLabel(
     params: WsAPITopicRequestParamMap['private/edit_by_label'],
-): Promise<WsAPITopicResponseMap['private/edit_by_label']>
+  ): Promise<WsAPITopicResponseMap['private/edit_by_label']>
 ⋮----
 /** private/cancel */
 cancelOrder(
     params: WsAPITopicRequestParamMap['private/cancel'],
-): Promise<WsAPITopicResponseMap['private/cancel']>
+  ): Promise<WsAPITopicResponseMap['private/cancel']>
 ⋮----
 /** private/cancel_by_label */
 cancelByLabel(
     params: WsAPITopicRequestParamMap['private/cancel_by_label'],
-): Promise<WsAPITopicResponseMap['private/cancel_by_label']>
+  ): Promise<WsAPITopicResponseMap['private/cancel_by_label']>
 ⋮----
 /** private/cancel_all */
 cancelAll(
     params?: WsAPITopicRequestParamMap['private/cancel_all'],
-): Promise<WsAPITopicResponseMap['private/cancel_all']>
+  ): Promise<WsAPITopicResponseMap['private/cancel_all']>
 ⋮----
 /** private/cancel_all_by_currency */
 cancelAllByCurrency(
     params: WsAPITopicRequestParamMap['private/cancel_all_by_currency'],
-): Promise<WsAPITopicResponseMap['private/cancel_all_by_currency']>
+  ): Promise<WsAPITopicResponseMap['private/cancel_all_by_currency']>
 ⋮----
 /** private/cancel_all_by_currency_pair */
 cancelAllByCurrencyPair(
     params: WsAPITopicRequestParamMap['private/cancel_all_by_currency_pair'],
-): Promise<WsAPITopicResponseMap['private/cancel_all_by_currency_pair']>
+  ): Promise<WsAPITopicResponseMap['private/cancel_all_by_currency_pair']>
 ⋮----
 /** private/cancel_all_by_instrument */
 cancelAllByInstrument(
     params: WsAPITopicRequestParamMap['private/cancel_all_by_instrument'],
-): Promise<WsAPITopicResponseMap['private/cancel_all_by_instrument']>
+  ): Promise<WsAPITopicResponseMap['private/cancel_all_by_instrument']>
 ⋮----
 /** private/cancel_all_by_kind_or_type */
 cancelAllByKindOrType(
     params: WsAPITopicRequestParamMap['private/cancel_all_by_kind_or_type'],
-): Promise<WsAPITopicResponseMap['private/cancel_all_by_kind_or_type']>
+  ): Promise<WsAPITopicResponseMap['private/cancel_all_by_kind_or_type']>
 ⋮----
 /** private/close_position */
 closePosition(
     params: WsAPITopicRequestParamMap['private/close_position'],
-): Promise<WsAPITopicResponseMap['private/close_position']>
+  ): Promise<WsAPITopicResponseMap['private/close_position']>
 ⋮----
 /** private/get_open_orders */
 getOpenOrders(
     params?: WsAPITopicRequestParamMap['private/get_open_orders'],
-): Promise<WsAPITopicResponseMap['private/get_open_orders']>
+  ): Promise<WsAPITopicResponseMap['private/get_open_orders']>
 ⋮----
 /** private/get_open_orders_by_currency */
 getOpenOrdersByCurrency(
     params: WsAPITopicRequestParamMap['private/get_open_orders_by_currency'],
-): Promise<WsAPITopicResponseMap['private/get_open_orders_by_currency']>
+  ): Promise<WsAPITopicResponseMap['private/get_open_orders_by_currency']>
 ⋮----
 /** private/get_open_orders_by_instrument */
 getOpenOrdersByInstrument(
     params: WsAPITopicRequestParamMap['private/get_open_orders_by_instrument'],
-): Promise<WsAPITopicResponseMap['private/get_open_orders_by_instrument']>
+  ): Promise<WsAPITopicResponseMap['private/get_open_orders_by_instrument']>
 ⋮----
 /** private/get_open_orders_by_label */
 getOpenOrdersByLabel(
     params: WsAPITopicRequestParamMap['private/get_open_orders_by_label'],
-): Promise<WsAPITopicResponseMap['private/get_open_orders_by_label']>
+  ): Promise<WsAPITopicResponseMap['private/get_open_orders_by_label']>
 ⋮----
 /** private/get_order_state */
 getOrderState(
     params: WsAPITopicRequestParamMap['private/get_order_state'],
-): Promise<WsAPITopicResponseMap['private/get_order_state']>
+  ): Promise<WsAPITopicResponseMap['private/get_order_state']>
 ⋮----
 /** private/get_order_state_by_label */
 getOrderStateByLabel(
     params: WsAPITopicRequestParamMap['private/get_order_state_by_label'],
-): Promise<WsAPITopicResponseMap['private/get_order_state_by_label']>
+  ): Promise<WsAPITopicResponseMap['private/get_order_state_by_label']>
 ⋮----
 /** private/get_order_history_by_currency */
 getOrderHistoryByCurrency(
     params: WsAPITopicRequestParamMap['private/get_order_history_by_currency'],
-): Promise<WsAPITopicResponseMap['private/get_order_history_by_currency']>
+  ): Promise<WsAPITopicResponseMap['private/get_order_history_by_currency']>
 ⋮----
 /** private/get_order_history_by_instrument */
 getOrderHistoryByInstrument(
     params: WsAPITopicRequestParamMap['private/get_order_history_by_instrument'],
-): Promise<WsAPITopicResponseMap['private/get_order_history_by_instrument']>
+  ): Promise<WsAPITopicResponseMap['private/get_order_history_by_instrument']>
 ⋮----
 /** private/get_order_margin_by_ids */
 getOrderMarginByIds(
     params: WsAPITopicRequestParamMap['private/get_order_margin_by_ids'],
-): Promise<WsAPITopicResponseMap['private/get_order_margin_by_ids']>
+  ): Promise<WsAPITopicResponseMap['private/get_order_margin_by_ids']>
 ⋮----
 /** private/get_trigger_order_history */
 getTriggerOrderHistory(
     params: WsAPITopicRequestParamMap['private/get_trigger_order_history'],
-): Promise<WsAPITopicResponseMap['private/get_trigger_order_history']>
+  ): Promise<WsAPITopicResponseMap['private/get_trigger_order_history']>
 ⋮----
 /** private/get_user_trades_by_currency */
 getUserTradesByCurrency(
     params: WsAPITopicRequestParamMap['private/get_user_trades_by_currency'],
-): Promise<WsAPITopicResponseMap['private/get_user_trades_by_currency']>
+  ): Promise<WsAPITopicResponseMap['private/get_user_trades_by_currency']>
 ⋮----
 /** private/get_user_trades_by_currency_and_time */
 getUserTradesByCurrencyAndTime(
     params: WsAPITopicRequestParamMap['private/get_user_trades_by_currency_and_time'],
   ): Promise<
     WsAPITopicResponseMap['private/get_user_trades_by_currency_and_time']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'private/get_user_trades_by_currency_and_time',
-      params,
-    );
+  >
 ⋮----
 /** private/get_user_trades_by_instrument */
 getUserTradesByInstrument(
     params: WsAPITopicRequestParamMap['private/get_user_trades_by_instrument'],
-): Promise<WsAPITopicResponseMap['private/get_user_trades_by_instrument']>
+  ): Promise<WsAPITopicResponseMap['private/get_user_trades_by_instrument']>
 ⋮----
 /** private/get_user_trades_by_instrument_and_time */
 getUserTradesByInstrumentAndTime(
     params: WsAPITopicRequestParamMap['private/get_user_trades_by_instrument_and_time'],
   ): Promise<
     WsAPITopicResponseMap['private/get_user_trades_by_instrument_and_time']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'private/get_user_trades_by_instrument_and_time',
-      params,
-    );
+  >
 ⋮----
 /** private/get_user_trades_by_order */
 getUserTradesByOrder(
     params: WsAPITopicRequestParamMap['private/get_user_trades_by_order'],
-): Promise<WsAPITopicResponseMap['private/get_user_trades_by_order']>
+  ): Promise<WsAPITopicResponseMap['private/get_user_trades_by_order']>
 ⋮----
 /** private/get_margins */
 getMargins(
     params: WsAPITopicRequestParamMap['private/get_margins'],
-): Promise<WsAPITopicResponseMap['private/get_margins']>
+  ): Promise<WsAPITopicResponseMap['private/get_margins']>
 ⋮----
 /** private/get_account_summaries */
 getAccountSummaries(
     params?: WsAPITopicRequestParamMap['private/get_account_summaries'],
-): Promise<WsAPITopicResponseMap['private/get_account_summaries']>
+  ): Promise<WsAPITopicResponseMap['private/get_account_summaries']>
 ⋮----
 /** private/get_account_summary */
 getAccountSummary(
     params: WsAPITopicRequestParamMap['private/get_account_summary'],
-): Promise<WsAPITopicResponseMap['private/get_account_summary']>
+  ): Promise<WsAPITopicResponseMap['private/get_account_summary']>
 ⋮----
 /** private/get_position */
 getPosition(
     params: WsAPITopicRequestParamMap['private/get_position'],
-): Promise<WsAPITopicResponseMap['private/get_position']>
+  ): Promise<WsAPITopicResponseMap['private/get_position']>
 ⋮----
 /** private/get_positions */
 getPositions(
     params?: WsAPITopicRequestParamMap['private/get_positions'],
-): Promise<WsAPITopicResponseMap['private/get_positions']>
+  ): Promise<WsAPITopicResponseMap['private/get_positions']>
 ⋮----
 /** private/change_margin_model */
 changeMarginModel(
     params: WsAPITopicRequestParamMap['private/change_margin_model'],
-): Promise<WsAPITopicResponseMap['private/change_margin_model']>
+  ): Promise<WsAPITopicResponseMap['private/change_margin_model']>
 ⋮----
 /** private/get_access_log */
 getAccessLog(
     params?: WsAPITopicRequestParamMap['private/get_access_log'],
-): Promise<WsAPITopicResponseMap['private/get_access_log']>
+  ): Promise<WsAPITopicResponseMap['private/get_access_log']>
 ⋮----
 /** private/get_transaction_log */
 getTransactionLog(
     params: WsAPITopicRequestParamMap['private/get_transaction_log'],
-): Promise<WsAPITopicResponseMap['private/get_transaction_log']>
+  ): Promise<WsAPITopicResponseMap['private/get_transaction_log']>
 ⋮----
 /** private/get_settlement_history_by_currency */
 getSettlementHistoryByCurrency(
     params: WsAPITopicRequestParamMap['private/get_settlement_history_by_currency'],
   ): Promise<
     WsAPITopicResponseMap['private/get_settlement_history_by_currency']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'private/get_settlement_history_by_currency',
-      params,
-    );
+  >
 ⋮----
 /** private/get_settlement_history_by_instrument */
 getSettlementHistoryByInstrument(
     params: WsAPITopicRequestParamMap['private/get_settlement_history_by_instrument'],
   ): Promise<
     WsAPITopicResponseMap['private/get_settlement_history_by_instrument']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'private/get_settlement_history_by_instrument',
-      params,
-    );
+  >
 ⋮----
 /** private/simulate_portfolio */
 simulatePortfolio(
     params: WsAPITopicRequestParamMap['private/simulate_portfolio'],
-): Promise<WsAPITopicResponseMap['private/simulate_portfolio']>
+  ): Promise<WsAPITopicResponseMap['private/simulate_portfolio']>
 ⋮----
 /** private/pme/simulate */
 simulatePme(
     params: WsAPITopicRequestParamMap['private/pme/simulate'],
-): Promise<WsAPITopicResponseMap['private/pme/simulate']>
+  ): Promise<WsAPITopicResponseMap['private/pme/simulate']>
 ⋮----
 /** private/enable_cancel_on_disconnect */
 enableCancelOnDisconnect(
     params?: WsAPITopicRequestParamMap['private/enable_cancel_on_disconnect'],
-): Promise<WsAPITopicResponseMap['private/enable_cancel_on_disconnect']>
+  ): Promise<WsAPITopicResponseMap['private/enable_cancel_on_disconnect']>
 ⋮----
 /** private/disable_cancel_on_disconnect */
 disableCancelOnDisconnect(
     params?: WsAPITopicRequestParamMap['private/disable_cancel_on_disconnect'],
-): Promise<WsAPITopicResponseMap['private/disable_cancel_on_disconnect']>
+  ): Promise<WsAPITopicResponseMap['private/disable_cancel_on_disconnect']>
 ⋮----
 /** private/get_cancel_on_disconnect */
 getCancelOnDisconnect(
     params?: WsAPITopicRequestParamMap['private/get_cancel_on_disconnect'],
-): Promise<WsAPITopicResponseMap['private/get_cancel_on_disconnect']>
+  ): Promise<WsAPITopicResponseMap['private/get_cancel_on_disconnect']>
 ⋮----
 /** private/create_combo */
 createCombo(
     params: WsAPITopicRequestParamMap['private/create_combo'],
-): Promise<WsAPITopicResponseMap['private/create_combo']>
+  ): Promise<WsAPITopicResponseMap['private/create_combo']>
 ⋮----
 /** private/get_leg_prices */
 getLegPrices(
     params: WsAPITopicRequestParamMap['private/get_leg_prices'],
-): Promise<WsAPITopicResponseMap['private/get_leg_prices']>
+  ): Promise<WsAPITopicResponseMap['private/get_leg_prices']>
 ⋮----
 /** public/tickers_by_currency */
 getTickersByCurrency(
     params: WsAPITopicRequestParamMap['public/tickers_by_currency'],
-): Promise<WsAPITopicResponseMap['public/tickers_by_currency']>
+  ): Promise<WsAPITopicResponseMap['public/tickers_by_currency']>
 ⋮----
 /** private/get_leverage */
 getLeverage(
     params?: WsAPITopicRequestParamMap['private/get_leverage'],
-): Promise<WsAPITopicResponseMap['private/get_leverage']>
+  ): Promise<WsAPITopicResponseMap['private/get_leverage']>
 ⋮----
 /** private/set_leverage */
 setLeverage(
     params: WsAPITopicRequestParamMap['private/set_leverage'],
-): Promise<WsAPITopicResponseMap['private/set_leverage']>
+  ): Promise<WsAPITopicResponseMap['private/set_leverage']>
 ⋮----
 /** private/get_max_order_size */
 getMaxOrderSize(
     params: WsAPITopicRequestParamMap['private/get_max_order_size'],
-): Promise<WsAPITopicResponseMap['private/get_max_order_size']>
+  ): Promise<WsAPITopicResponseMap['private/get_max_order_size']>
 ⋮----
 /** private/get_pme_params */
 getPmeParams(
     params: WsAPITopicRequestParamMap['private/get_pme_params'],
-): Promise<WsAPITopicResponseMap['private/get_pme_params']>
+  ): Promise<WsAPITopicResponseMap['private/get_pme_params']>
 ⋮----
 /** private/get_risk_profile */
 getRiskProfile(): Promise<WsAPITopicResponseMap['private/get_risk_profile']>
@@ -6265,17 +6338,17 @@ getRiskProfile(): Promise<WsAPITopicResponseMap['private/get_risk_profile']>
 /** private/get_subaccounts */
 getSubaccounts(
     params?: WsAPITopicRequestParamMap['private/get_subaccounts'],
-): Promise<WsAPITopicResponseMap['private/get_subaccounts']>
+  ): Promise<WsAPITopicResponseMap['private/get_subaccounts']>
 ⋮----
 /** private/get_subaccounts_details */
 getSubaccountsDetails(
     params: WsAPITopicRequestParamMap['private/get_subaccounts_details'],
-): Promise<WsAPITopicResponseMap['private/get_subaccounts_details']>
+  ): Promise<WsAPITopicResponseMap['private/get_subaccounts_details']>
 ⋮----
 /** private/get_trading_limits */
 getTradingLimits(
     params: WsAPITopicRequestParamMap['private/get_trading_limits'],
-): Promise<WsAPITopicResponseMap['private/get_trading_limits']>
+  ): Promise<WsAPITopicResponseMap['private/get_trading_limits']>
 ⋮----
 /** private/get_user_locks */
 getUserLocks(): Promise<WsAPITopicResponseMap['private/get_user_locks']>
@@ -6285,36 +6358,27 @@ submitTransferBetweenSubaccounts(
     params: WsAPITopicRequestParamMap['private/submit_transfer_between_subaccounts'],
   ): Promise<
     WsAPITopicResponseMap['private/submit_transfer_between_subaccounts']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'private/submit_transfer_between_subaccounts',
-      params,
-    );
+  >
 ⋮----
 /** public/set_heartbeat */
 setHeartbeat(
     params: WsAPITopicRequestParamMap['public/set_heartbeat'],
-): Promise<WsAPITopicResponseMap['public/set_heartbeat']>
+  ): Promise<WsAPITopicResponseMap['public/set_heartbeat']>
 ⋮----
 /** public/disable_heartbeat */
 disableHeartbeat(): Promise<
     WsAPITopicResponseMap['public/disable_heartbeat']
-  > {
-    return this.wsClient.sendWSAPIRequest(
-      WS_KEY_MAP.advTradeGlobalWSAPI,
-      'public/disable_heartbeat',
-    );
+  >
 ⋮----
 /** public/hello */
 hello(
     params: WsAPITopicRequestParamMap['public/hello'],
-): Promise<WsAPITopicResponseMap['public/hello']>
+  ): Promise<WsAPITopicResponseMap['public/hello']>
 ⋮----
 /** private/logout. Resolves on the server close; prevents automatic reconnect. */
 logout(
     params?: WsAPITopicRequestParamMap['private/logout'],
-): Promise<WsAPITopicResponseMap['private/logout']>
+  ): Promise<WsAPITopicResponseMap['private/logout']>
 ⋮----
 private setupDefaultEventListeners()
 
@@ -6323,219 +6387,6 @@ File: .npmrc
 ================
 min-release-age=30
 save-exact=true
-
-================
-File: .nvmrc
-================
-v24.18.0
-
-================
-File: src/lib/websocket/websocket-util.ts
-================
-import WebSocket from 'isomorphic-ws';
-⋮----
-import {
-  WsExchangeRequestOperation,
-  WsInternationalRequestOperation,
-} from '../../types/websockets/requests.js';
-import { signMessage } from '../webCryptoAPI.js';
-⋮----
-/**
- * Each websocket connection is represented as a "WS Key". Authentication is handled automatically if required.
- */
-⋮----
-/**
-   * Market Data is the traditional feed that provides updates for both orders and trades.
-   * Most channels are now available without authentication.
-   *
-   * https://docs.cdp.coinbase.com/advanced-trade/docs/ws-overview
-   */
-⋮----
-/**
-   * Coinbase Advanced Trade User Order Data provides updates for the orders of the user.
-   *
-   * https://docs.cdp.coinbase.com/advanced-trade/docs/ws-overview
-   */
-⋮----
-/**
-   * Unauthenticated Coinbase Global Derivatives market data on the public streams host.
-   * Channel parameters are part of the topic name. See Global Derivatives > Public:
-   *
-   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
-   */
-⋮----
-/**
-   * Coinbase Global Derivatives private subscriptions on the main DRB gateway.
-   * Uses public/auth followed by private/subscribe. See Global Derivatives > Private:
-   *
-   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
-   */
-⋮----
-/**
-   * Dedicated Global JSON-RPC API connection to the same main DRB gateway as private subscriptions.
-   * Uses a separate connection. See Global Derivatives > Private:
-   *
-   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
-   */
-⋮----
-/**
-   * Coinbase Market Data (part of Coinbase Exchange API) is the traditional feed which is available without authentication.
-   *
-   * https://docs.cdp.coinbase.com/exchange/docs/websocket-overview
-   */
-⋮----
-/**
-   * Coinbase Direct Market Data has direct access to Coinbase Exchange servers and requires Authentication.
-   *
-   * https://docs.cdp.coinbase.com/exchange/docs/websocket-overview
-   */
-⋮----
-/**
-   * The INTX WebSocket feed is publicly available and provides real-time market data updates for orders and trades.
-   * The SDK must authenticate when subscribing to the WebSocket Feed the very first time.
-   *
-   * https://docs.cdp.coinbase.com/intx/docs/websocket-overview
-   */
-⋮----
-/**
-   * The Prime WebSocket feed provides real-time market data updates for orders and trades. To begin
-   * receiving feed messages, you must send a signed subscribe message to the server indicating
-   * which channels and products to receive. The SDK will handle this automatically.
-   *
-   * https://docs.cdp.coinbase.com/prime/docs/websocket-feed
-   */
-⋮----
-/** This is used to differentiate between each of the available websocket streams */
-export type WsKey = (typeof WS_KEY_MAP)[keyof typeof WS_KEY_MAP];
-⋮----
-/**
- * Normalised internal format for a request (subscribe/unsubscribe/etc) on a topic, with optional parameters.
- *
- * - Topic: the topic this event is for
- * - Payload: the parameters to include, optional. E.g. auth requires key + sign. Some topics allow configurable parameters.
- */
-export interface WsTopicRequest<
-  TWSTopic extends string = string,
-  TWSPayload = any,
-> {
-  topic: TWSTopic;
-  /**
-   * Any parameters to include with the request. These are automatically merged into the request.
-   */
-  payload?: TWSPayload;
-}
-⋮----
-/**
-   * Any parameters to include with the request. These are automatically merged into the request.
-   */
-⋮----
-/**
- * Conveniently allow users to request a topic either as string topics or objects (containing string topic + params)
- */
-export type WsTopicRequestOrStringTopic<
-  TWSTopic extends string,
-  TWSPayload = any,
-> = WsTopicRequest<TWSTopic, TWSPayload> | string;
-⋮----
-export interface MessageEventLike {
-  target: WebSocket;
-  type: 'message';
-  data: string;
-}
-⋮----
-export function isMessageEvent(msg: unknown): msg is MessageEventLike
-⋮----
-/**
- * Some exchanges have two livenet environments, some have test environments, some dont. This allows easy flexibility for different exchanges.
- * Examples:
- *  - One livenet and one testnet: NetworkMap<'livenet' | 'testnet'>
- *  - One livenet, sometimes two, one testnet: NetworkMap<'livenet' | 'testnet', 'livenet2'>
- *  - Only one livenet, no other networks: NetworkMap<'livenet'>
- */
-type NetworkMap<
-  TRequiredKeys extends string,
-  TOptionalKeys extends string | undefined = undefined,
-> = Record<TRequiredKeys, string> &
-  (TOptionalKeys extends string
-    ? Record<TOptionalKeys, string | undefined>
-    : Record<TRequiredKeys, string>);
-⋮----
-/** Global JSON-RPC request IDs are unique within each connection. Replies omit the method. */
-export function getPromiseRefForWSAPIRequest(request: {
-  id: string | number;
-}): string
-⋮----
-export function isAdvancedTradeGlobalWsKey(
-  wsKey: WsKey,
-): wsKey is
-  | typeof WS_KEY_MAP.advTradeGlobalMarketData
-  | typeof WS_KEY_MAP.advTradeGlobalUserData
-  | typeof WS_KEY_MAP.advTradeGlobalWSAPI {
-  return (
-    wsKey === WS_KEY_MAP.advTradeGlobalMarketData ||
-    wsKey === WS_KEY_MAP.advTradeGlobalUserData ||
-    wsKey === WS_KEY_MAP.advTradeGlobalWSAPI
-  );
-⋮----
-/**
- * Merge one or more WS Request operations (e.g. subscribe request) for
- * CB Exchange into one, allowing them to be sent as one request
- */
-export function getMergedCBExchangeWSRequestOperations<
-  TWSTopic extends string = string,
->(operations: WsExchangeRequestOperation<TWSTopic>[])
-⋮----
-// The CB Exchange WS supports sending multiple topics in one request.
-// Merge all requests into one
-⋮----
-/**
- * Merge one or more WS Request operations (e.g. subscribe request) for
- * CB Exchange into one, allowing them to be sent as one request
- */
-export function getMergedCBINTXRequestOperations<
-  TWSTopic extends string = string,
->(operations: WsInternationalRequestOperation<TWSTopic>[])
-⋮----
-// The CB Exchange WS supports sending multiple topics in one request.
-// Merge all requests into one
-⋮----
-/**
- * Return sign used to authenticate CB Exchange WS requests
- */
-export async function getCBExchangeWSSign(apiSecret: string): Promise<
-⋮----
-/**
- * Return sign used to authenticate CB INTX WS requests
- */
-export async function getCBInternationalWSSign(
-  apiKey: string,
-  apiSecret: string,
-  apiPassphrase: string,
-): Promise<
-⋮----
-/**
- * Return sign used to authenticate CB Prime WS requests
- */
-export async function getCBPrimeWSSign(params: {
-  channelName: string;
-  svcAccountId: string;
-  portfolioId: string;
-  apiKey: string;
-  apiSecret: string;
-  product_ids?: string[];
-}): Promise<
-⋮----
-// channelName + accessKey + svcAccountId + timestamp + portfolioId + products
-⋮----
-/**
- * ws.terminate() is undefined in browsers.
- * This only works in node.js, not in browsers.
- * Does nothing if `ws` is undefined. Does nothing in browsers.
- */
-export function safeTerminateWs(
-  ws?: WebSocket | any,
-  fallbackToClose?: boolean,
-): boolean
 
 ================
 File: src/lib/websocket/WsStore.ts
@@ -6577,7 +6428,7 @@ get(
 get(
     key: WsKey,
     createIfMissing?: boolean,
-): WsStoredState<TWSTopicSubscribeEventArgs> | undefined
+  ): WsStoredState<TWSTopicSubscribeEventArgs> | undefined
 ⋮----
 getKeys(): WsKey[]
 ⋮----
@@ -6598,13 +6449,13 @@ setWs(key: WsKey, wsConnection: WebSocket): WebSocket
 getDeferredPromise<TSuccessResult = any>(
     wsKey: WsKey,
     promiseRef: string | DeferredPromiseRef,
-): DeferredPromise<TSuccessResult> | undefined
+  ): DeferredPromise<TSuccessResult> | undefined
 ⋮----
 createDeferredPromise<TSuccessResult = any>(
     wsKey: WsKey,
     promiseRef: string | DeferredPromiseRef,
     throwIfExists: boolean,
-): DeferredPromise<TSuccessResult>
+  ): DeferredPromise<TSuccessResult>
 ⋮----
 // console.log('existing promise');
 ⋮----
@@ -6617,19 +6468,19 @@ resolveDeferredPromise(
     promiseRef: string | DeferredPromiseRef,
     value: unknown,
     removeAfter: boolean,
-): void
+  ): void
 ⋮----
 rejectDeferredPromise(
     wsKey: WsKey,
     promiseRef: string | DeferredPromiseRef,
     value: unknown,
     removeAfter: boolean,
-): void
+  ): void
 ⋮----
 removeDeferredPromise(
     wsKey: WsKey,
     promiseRef: string | DeferredPromiseRef,
-): void
+  ): void
 ⋮----
 // Just in case it's pending
 ⋮----
@@ -6640,7 +6491,7 @@ rejectAllDeferredPromises(wsKey: WsKey, reason: string): void
 /** Get promise designed to track a connection attempt in progress. Resolves once connected. */
 getConnectionInProgressPromise(
     wsKey: WsKey,
-): DeferredPromise<WSConnectedResult> | undefined
+  ): DeferredPromise<WSConnectedResult> | undefined
 ⋮----
 /**
    * Create a deferred promise designed to track a connection attempt in progress.
@@ -6650,19 +6501,19 @@ getConnectionInProgressPromise(
 createConnectionInProgressPromise(
     wsKey: WsKey,
     throwIfExists: boolean,
-): DeferredPromise<WSConnectedResult>
+  ): DeferredPromise<WSConnectedResult>
 ⋮----
 /** Remove promise designed to track a connection attempt in progress */
 removeConnectingInProgressPromise(wsKey: WsKey): void
 ⋮----
 getAuthenticationInProgressPromise(
     wsKey: WsKey,
-): DeferredPromise | undefined
+  ): DeferredPromise | undefined
 ⋮----
 createAuthenticationInProgressPromise(
     wsKey: WsKey,
     throwIfExists: boolean,
-): DeferredPromise
+  ): DeferredPromise
 ⋮----
 resolveAuthenticationInProgressPromise(wsKey: WsKey, value: unknown): void
 ⋮----
@@ -16648,6 +16499,231 @@ function generateConfig(name)
 // Code is already transpiled from TypeScript, no additional loaders needed
 
 ================
+File: .nvmrc
+================
+v24.22.3
+
+================
+File: src/lib/websocket/websocket-util.ts
+================
+import WebSocket from 'isomorphic-ws';
+⋮----
+import { WSClientConfigurableOptions } from '../../types/websockets/client.js';
+import {
+  WsExchangeRequestOperation,
+  WsInternationalRequestOperation,
+} from '../../types/websockets/requests.js';
+import { signMessage } from '../webCryptoAPI.js';
+⋮----
+/**
+ * Each websocket connection is represented as a "WS Key". Authentication is handled automatically if required.
+ */
+⋮----
+/**
+   * Market Data is the traditional feed that provides updates for both orders and trades.
+   * Most channels are now available without authentication.
+   *
+   * https://docs.cdp.coinbase.com/advanced-trade/docs/ws-overview
+   */
+⋮----
+/**
+   * Coinbase Advanced Trade User Order Data provides updates for the orders of the user.
+   *
+   * https://docs.cdp.coinbase.com/advanced-trade/docs/ws-overview
+   */
+⋮----
+/**
+   * Unauthenticated Coinbase Global Derivatives market data on the public streams host.
+   * Channel parameters are part of the topic name. See Global Derivatives > Public:
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
+   */
+⋮----
+/**
+   * Coinbase Global Derivatives private subscriptions on the main DRB gateway.
+   * Uses public/auth followed by private/subscribe. See Global Derivatives > Private:
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
+   */
+⋮----
+/**
+   * Dedicated Global JSON-RPC API connection to the same main DRB gateway as private subscriptions.
+   * Uses a separate connection. See Global Derivatives > Private:
+   *
+   * https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/websocket/websocket-endpoints
+   */
+⋮----
+/**
+   * Coinbase Market Data (part of Coinbase Exchange API) is the traditional feed which is available without authentication.
+   *
+   * https://docs.cdp.coinbase.com/exchange/docs/websocket-overview
+   */
+⋮----
+/**
+   * Coinbase Direct Market Data has direct access to Coinbase Exchange servers and requires Authentication.
+   *
+   * https://docs.cdp.coinbase.com/exchange/docs/websocket-overview
+   */
+⋮----
+/**
+   * The INTX WebSocket feed is publicly available and provides real-time market data updates for orders and trades.
+   * The SDK must authenticate when subscribing to the WebSocket Feed the very first time.
+   *
+   * https://docs.cdp.coinbase.com/intx/docs/websocket-overview
+   */
+⋮----
+/**
+   * The Prime WebSocket feed provides real-time market data updates for orders and trades. To begin
+   * receiving feed messages, you must send a signed subscribe message to the server indicating
+   * which channels and products to receive. The SDK will handle this automatically.
+   *
+   * https://docs.cdp.coinbase.com/prime/docs/websocket-feed
+   */
+⋮----
+/** This is used to differentiate between each of the available websocket streams */
+export type WsKey = (typeof WS_KEY_MAP)[keyof typeof WS_KEY_MAP];
+⋮----
+/**
+ * Normalised internal format for a request (subscribe/unsubscribe/etc) on a topic, with optional parameters.
+ *
+ * - Topic: the topic this event is for
+ * - Payload: the parameters to include, optional. E.g. auth requires key + sign. Some topics allow configurable parameters.
+ */
+export interface WsTopicRequest<
+  TWSTopic extends string = string,
+  TWSPayload = any,
+> {
+  topic: TWSTopic;
+  /**
+   * Any parameters to include with the request. These are automatically merged into the request.
+   */
+  payload?: TWSPayload;
+}
+⋮----
+/**
+   * Any parameters to include with the request. These are automatically merged into the request.
+   */
+⋮----
+/**
+ * Conveniently allow users to request a topic either as string topics or objects (containing string topic + params)
+ */
+export type WsTopicRequestOrStringTopic<
+  TWSTopic extends string,
+  TWSPayload = any,
+> = WsTopicRequest<TWSTopic, TWSPayload> | string;
+⋮----
+export interface MessageEventLike {
+  target: WebSocket;
+  type: 'message';
+  data: string;
+}
+⋮----
+export function isMessageEvent(msg: unknown): msg is MessageEventLike
+⋮----
+/**
+ * Some exchanges have two livenet environments, some have test environments, some dont. This allows easy flexibility for different exchanges.
+ * Examples:
+ *  - One livenet and one testnet: NetworkMap<'livenet' | 'testnet'>
+ *  - One livenet, sometimes two, one testnet: NetworkMap<'livenet' | 'testnet', 'livenet2'>
+ *  - Only one livenet, no other networks: NetworkMap<'livenet'>
+ */
+type NetworkMap<
+  TRequiredKeys extends string,
+  TOptionalKeys extends string | undefined = undefined,
+> = Record<TRequiredKeys, string> &
+  (TOptionalKeys extends string
+    ? Record<TOptionalKeys, string | undefined>
+    : Record<TRequiredKeys, string>);
+⋮----
+/** Global JSON-RPC request IDs are unique within each connection. Replies omit the method. */
+export function getPromiseRefForWSAPIRequest(request: {
+  id: string | number;
+}): string
+⋮----
+export function isAdvancedTradeGlobalWsKey(
+  wsKey: WsKey,
+): wsKey is
+  | typeof WS_KEY_MAP.advTradeGlobalMarketData
+  | typeof WS_KEY_MAP.advTradeGlobalUserData
+  | typeof WS_KEY_MAP.advTradeGlobalWSAPI
+⋮----
+/**
+ * Merge one or more WS Request operations (e.g. subscribe request) for
+ * CB Exchange into one, allowing them to be sent as one request
+ */
+export function getMergedCBExchangeWSRequestOperations<
+  TWSTopic extends string = string,
+>(operations: WsExchangeRequestOperation<TWSTopic>[])
+⋮----
+// The CB Exchange WS supports sending multiple topics in one request.
+// Merge all requests into one
+⋮----
+/**
+ * Merge one or more WS Request operations (e.g. subscribe request) for
+ * CB Exchange into one, allowing them to be sent as one request
+ */
+export function getMergedCBINTXRequestOperations<
+  TWSTopic extends string = string,
+>(operations: WsInternationalRequestOperation<TWSTopic>[])
+⋮----
+// The CB Exchange WS supports sending multiple topics in one request.
+// Merge all requests into one
+⋮----
+/**
+ * Return sign used to authenticate CB Exchange WS requests
+ */
+export async function getCBExchangeWSSign(
+  apiSecret: string,
+  customSignMessageFn?: WSClientConfigurableOptions['customSignMessageFn'],
+): Promise<{
+  timestampInSeconds: string;
+  sign: string;
+}>
+⋮----
+/**
+ * Return sign used to authenticate CB INTX WS requests
+ */
+export async function getCBInternationalWSSign(
+  apiKey: string,
+  apiSecret: string,
+  apiPassphrase: string,
+  customSignMessageFn?: WSClientConfigurableOptions['customSignMessageFn'],
+): Promise<{
+  timestampInSeconds: string;
+  sign: string;
+}>
+⋮----
+/**
+ * Return sign used to authenticate CB Prime WS requests
+ */
+export async function getCBPrimeWSSign(
+  params: {
+    channelName: string;
+    svcAccountId: string;
+    portfolioId: string;
+    apiKey: string;
+    apiSecret: string;
+    product_ids?: string[];
+  },
+  customSignMessageFn?: WSClientConfigurableOptions['customSignMessageFn'],
+): Promise<{
+  timestampInSeconds: string;
+  sign: string;
+}>
+⋮----
+// channelName + accessKey + svcAccountId + timestamp + portfolioId + products
+⋮----
+/**
+ * ws.terminate() is undefined in browsers.
+ * This only works in node.js, not in browsers.
+ * Does nothing if `ws` is undefined. Does nothing in browsers.
+ */
+export function safeTerminateWs(
+  ws?: WebSocket | any,
+  fallbackToClose?: boolean,
+): boolean
+
+================
 File: src/lib/BaseWSClient.ts
 ================
 import EventEmitter from 'events';
@@ -16766,7 +16842,7 @@ TWSKey extends string,
 constructor(
     options?: WSClientConfigurableOptions,
     logger?: typeof DefaultLogger,
-)
+  )
 ⋮----
 // Requires a confirmation "response" from the ws connection before assuming it is ready
 ⋮----
@@ -16855,7 +16931,7 @@ protected abstract sendWSAPIRequest(
 public subscribeTopicsForWsKey(
     wsTopicRequests: WsTopicRequestOrStringTopic<WSTopic>[],
     wsKey: TWSKey,
-)
+  )
 ⋮----
 // Store topics, so future automation (post-auth, post-reconnect) has everything needed to resubscribe automatically
 ⋮----
@@ -16880,7 +16956,7 @@ public subscribeTopicsForWsKey(
 protected unsubscribeTopicsForWsKey(
     wsTopicRequests: WsTopicRequestOrStringTopic<string>[],
     wsKey: TWSKey,
-)
+  )
 ⋮----
 // Remove topics before checking the connection, so reconnect cannot restore cancelled subscriptions.
 ⋮----
@@ -16902,7 +16978,10 @@ protected unsubscribeTopicsForWsKey(
 private sortTopicRequestsIntoPublicPrivate(
     wsTopicRequests: WsTopicRequest<string>[],
     wsKey: TWSKey,
-):
+  ): {
+    publicReqs: WsTopicRequest<string>[];
+    privateReqs: WsTopicRequest<string>[];
+  }
 ⋮----
 /** Get the WsStore that tracks websockets & topics */
 public getWsStore(): WsStore<TWSKey, WsTopicRequest<string>>
@@ -16957,7 +17036,7 @@ private clearPongTimer(wsKey: TWSKey)
 private async requestSubscribeTopics(
     wsKey: TWSKey,
     topics: WsTopicRequest<string>[],
-)
+  )
 ⋮----
 // Automatically splits requests into smaller batches, if needed
 ⋮----
@@ -16971,7 +17050,7 @@ private async requestSubscribeTopics(
 private async requestUnsubscribeTopics(
     wsKey: TWSKey,
     wsTopicRequests: WsTopicRequest<string>[],
-)
+  )
 ⋮----
 /**
    * Try sending a string event on a WS connection (identified by the WS Key)
@@ -17016,7 +17095,7 @@ private async onWsReadyForEvents(wsKey: TWSKey)
 private onWsAuthenticated(
     wsKey: TWSKey,
     event: { isWSAPI?: boolean; WSAPIAuthChannel?: string },
-)
+  )
 ⋮----
 private onWsMessage(event: unknown, wsKey: TWSKey, ws: WebSocket)
 ⋮----
@@ -17052,7 +17131,7 @@ protected async assertIsConnected(wsKey: TWSKey): Promise<unknown>
 public async assertIsAuthenticated(
     wsKey: TWSKey,
     forceReauth = false,
-): Promise<unknown>
+  ): Promise<unknown>
 
 ================
 File: src/types/request/coinbase-prime.ts
@@ -18387,7 +18466,7 @@ export class CBPrimeClient extends BaseRestClient
 constructor(
     restClientOptions: RestClientOptions = {},
     requestOptions: AxiosRequestConfig = {},
-)
+  )
 ⋮----
 getClientType(): RestClientType
 ⋮----
@@ -18409,7 +18488,7 @@ getActivities(params: GetPrimeActivitiesRequest): Promise<any>
    *
    * Retrieve an activity by its activity ID - this endpoint can retrieve both portfolio and entity activities when passed the appropriate API key.
    */
-getActivityById(params:
+getActivityById(params: { activity_id: string }): Promise<any>
 ⋮----
 /**
    * List Entity Activities
@@ -18426,7 +18505,7 @@ getEntityActivities(params: GetPrimeEntityActivitiesRequest): Promise<any>
 getPortfolioActivityById(params: {
     portfolio_id: string;
     activity_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -18441,7 +18520,7 @@ getPortfolioActivityById(params: {
    */
 createPortfolioAllocations(
     params: CreatePrimePortfolioAllocationsRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Create Portfolio Net Allocations
@@ -18450,7 +18529,7 @@ createPortfolioAllocations(
    */
 createPortfolioNetAllocations(
     params: CreatePrimePortfolioNetAllocationsRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * List Portfolio Allocations
@@ -18459,7 +18538,7 @@ createPortfolioNetAllocations(
    */
 getPortfolioAllocations(
     params: GetPrimePortfolioAllocationsRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get Allocation By ID
@@ -18469,7 +18548,7 @@ getPortfolioAllocations(
 getAllocationById(params: {
     portfolio_id: string;
     allocation_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get Net Allocations By Netting ID
@@ -18479,7 +18558,7 @@ getAllocationById(params: {
 getNetAllocationsByNettingId(params: {
     portfolio_id: string;
     netting_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -18501,14 +18580,14 @@ getEntityAccruals(params: GetPrimeEntityAccrualsRequest): Promise<any>
    */
 getEntityLocateAvailabilities(
     params: GetPrimeEntityLocateAvailabilitiesRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get Margin Information
    *
    * Gets real-time evaluation of the margin model based on current positions and spot rates.
    */
-getEntityMargin(params:
+getEntityMargin(params: { entity_id: string }): Promise<any>
 ⋮----
 /**
    * List Margin Call Summaries
@@ -18517,7 +18596,7 @@ getEntityMargin(params:
    */
 getEntityMarginSummaries(
     params: GetPrimeEntityMarginSummariesRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get Trade Finance Tiered Pricing Fees
@@ -18526,7 +18605,7 @@ getEntityMarginSummaries(
    */
 getEntityTFTieredFees(
     params: GetPrimeEntityTFTieredFeesRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * List Interest Accruals For Portfolio
@@ -18542,7 +18621,7 @@ getPortfolioAccruals(params: GetPrimePortfolioAccrualsRequest): Promise<any>
    */
 getPortfolioBuyingPower(
     params: GetPrimePortfolioBuyingPowerRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * List Existing Locates
@@ -18559,7 +18638,7 @@ getPortfolioLocates(params: GetPrimePortfolioLocatesRequest): Promise<any>
    */
 getPortfolioMarginConversions(
     params: GetPrimePortfolioMarginConversionsRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get Portfolio Withdrawal Power
@@ -18568,7 +18647,7 @@ getPortfolioMarginConversions(
    */
 getPortfolioWithdrawalPower(
     params: GetPrimePortfolioWithdrawalPowerRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get Conversion Fees
@@ -18606,7 +18685,7 @@ getEntityAggregatePositions(params: {
     entity_id: string;
     cursor?: string;
     limit?: number;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * List Entity Positions
@@ -18617,7 +18696,7 @@ getEntityPositions(params: {
     entity_id: string;
     cursor?: string;
     limit?: number;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -18633,7 +18712,7 @@ getEntityPositions(params: {
    */
 getPortfolioDerivativePositions(
     params: GetPrimePortfolioDerivativePositionsRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get Portfolio Derivatives Currency Summary
@@ -18643,7 +18722,7 @@ getPortfolioDerivativePositions(
    */
 getPortfolioDerivativesCurrencySummary(
     params: GetPrimePortfolioDerivativesCurrencySummaryRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    *
@@ -18656,7 +18735,7 @@ getPortfolioDerivativesCurrencySummary(
    *
    * List all assets available for a given entity.
    */
-getAssets(params:
+getAssets(params: { entity_id: string }): Promise<any>
 ⋮----
 /**
    *
@@ -18669,7 +18748,7 @@ getAssets(params:
    *
    * Retrieve all payment methods for a given entity.
    */
-getEntityPaymentMethods(params:
+getEntityPaymentMethods(params: { entity_id: string }): Promise<any>
 ⋮----
 /**
    * Get Entity Payment Method
@@ -18679,7 +18758,7 @@ getEntityPaymentMethods(params:
 getEntityPaymentMethod(params: {
     entity_id: string;
     payment_method_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -18719,7 +18798,7 @@ getPortfolios(): Promise<any>
    *
    * Retrieve a given portfolio by its portfolio ID.
    */
-getPortfolioById(params:
+getPortfolioById(params: { portfolio_id: string }): Promise<any>
 ⋮----
 /**
    * Get Portfolio Credit Information
@@ -18728,7 +18807,7 @@ getPortfolioById(params:
    */
 getPortfolioCreditInformation(params: {
     portfolio_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -18750,7 +18829,7 @@ getAddressBook(params: GetPrimeAddressBookRequest): Promise<any>
    */
 createAddressBookEntry(
     params: CreatePrimeAddressBookEntryRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    *
@@ -18767,7 +18846,7 @@ getPortfolioBalances(params: {
     portfolio_id: string;
     symbols?: string[];
     balance_type?: 'TRADING_BALANCES' | 'VAULT_BALANCES' | 'TOTAL_BALANCES';
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get Wallet Balance
@@ -18777,7 +18856,7 @@ getPortfolioBalances(params: {
 getWalletBalance(params: {
     portfolio_id: string;
     wallet_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * List Web3 Wallet Balances
@@ -18786,7 +18865,7 @@ getWalletBalance(params: {
    */
 getWeb3WalletBalances(
     params: GetPrimeWeb3WalletBalancesRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    *
@@ -18799,7 +18878,7 @@ getWeb3WalletBalances(
    *
    * Retrieve commission associated with a given portfolio.
    */
-getPortfolioCommission(params:
+getPortfolioCommission(params: { portfolio_id: string }): Promise<any>
 ⋮----
 /**
    *
@@ -18853,7 +18932,7 @@ getPortfolioOrders(params: GetPrimePortfolioOrdersRequest): Promise<any>
 getOrderById(params: {
     portfolio_id: string;
     order_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Cancel Order
@@ -18863,7 +18942,7 @@ getOrderById(params: {
 cancelOrder(params: {
     portfolio_id: string;
     order_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * List Order Fills
@@ -18913,7 +18992,7 @@ getPortfolioProducts(params: GetPrimePortfolioProductsRequest): Promise<any>
    */
 getPortfolioTransactions(
     params: GetPrimePortfolioTransactionsRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Get Transaction by Transaction ID
@@ -18923,7 +19002,7 @@ getPortfolioTransactions(
 getTransactionById(params: {
     portfolio_id: string;
     transaction_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    *
@@ -18938,7 +19017,7 @@ getTransactionById(params: {
    */
 getTransactionTravelRuleData(
     params: GetPrimeTransactionTravelRuleDataRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Create Conversion
@@ -18954,7 +19033,7 @@ createConversion(params: CreatePrimeConversionRequest): Promise<any>
    */
 getWalletTransactions(
     params: GetPrimeWalletTransactionsRequest,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 /**
    * Create Transfer
@@ -18998,7 +19077,7 @@ createWallet(params: CreatePrimeWalletRequest): Promise<any>
 getWalletById(params: {
     portfolio_id: string;
     wallet_id: string;
-}): Promise<any>
+  }): Promise<any>
 ⋮----
 /**
    * Get Wallet Deposit Instructions
@@ -19007,314 +19086,7 @@ getWalletById(params: {
    */
 getWalletDepositInstructions(
     params: GetPrimeWalletDepositInstructionsRequest,
-): Promise<any>
-
-================
-File: src/WebsocketClient.ts
-================
-import { BaseWebsocketClient, EmittableEvent } from './lib/BaseWSClient.js';
-import { signWSJWT } from './lib/jwtNode.js';
-import { neverGuard } from './lib/misc-util.js';
-import {
-  isCBAdvancedTradeErrorEvent,
-  isCBAdvancedTradeWSEvent,
-  isCBExchangeWSEvent,
-  isCBExchangeWSRequestOperation,
-  isCBINTXWSRequestOperation,
-  isCBPrimeWSRequestOperation,
-} from './lib/websocket/typeGuards.js';
-import {
-  getCBExchangeWSSign,
-  getCBInternationalWSSign,
-  getCBPrimeWSSign,
-  getMergedCBExchangeWSRequestOperations,
-  getPromiseRefForWSAPIRequest,
-  isAdvancedTradeGlobalWsKey,
-  isMessageEvent,
-  MessageEventLike,
-  WS_KEY_MAP,
-  WS_URL_MAP,
-  WsKey,
-  WsTopicRequest,
-} from './lib/websocket/websocket-util.js';
-import {
-  WSConnectedResult,
-  WsConnectionStateEnum,
-} from './lib/websocket/WsStore.types.js';
-import { AdvTradeGlobalAuthRequest } from './types/request/advanced-trade-global-client.js';
-import { AdvTradeGlobalWSAuthResult } from './types/websockets/advanced-trade-global.js';
-import { WsMarket } from './types/websockets/client.js';
-import {
-  WsAdvTradeGlobalRequestOperation,
-  WsAdvTradeRequestOperation,
-  WsExchangeAuthenticatedRequestOperation,
-  WsExchangeRequestOperation,
-  WsInternationalAuthenticatedRequestOperation,
-  WsInternationalRequestOperation,
-  WsOperation,
-  WsPrimeAuthenticatedRequestOperation,
-  WsPrimeRequestOperation,
-} from './types/websockets/requests.js';
-import {
-  WSAPIRequest,
-  WSAPIRequestFlags,
-  WsAPITopicRequestParamMap,
-  WsAPITopicResponseMap,
-  WsAPIWsKeyTopicMap,
-} from './types/websockets/wsAPI.js';
-⋮----
-/**
- * Any WS keys in this list will trigger automatic auth as required, if credentials are available
- */
-⋮----
-// Account data (fills), requires auth.
-⋮----
-// Coinbase Direct Market Data has direct access to Coinbase Exchange servers and requires auth.
-⋮----
-// The INTX feed always requires auth.
-⋮----
-// The Prime feed always requires auth.
-⋮----
-/**
- * Any WS keys in this list will ALWAYS skip the authentication process, even if credentials are available
- */
-⋮----
-/**
- * WS topics are always a string for this exchange. Some exchanges use complex objects.
- */
-type WsTopic = string;
-⋮----
-export class WebsocketClient extends BaseWebsocketClient<WsKey>
-⋮----
-/** Tracks either the pending auth reply or the next session renewal. */
-⋮----
-/**
-   * Preconnect the original product feeds, preserving the existing connection set.
-   * Global connections open on demand and are excluded from this method.
-   * Use connect(wsKey) to preconnect a specific feed, or connectWSAPI() for an authenticated Global WS API session.
-   */
-public connectAll(): Promise<(WSConnectedResult | undefined)[]>
-⋮----
-/**
-   * Request subscription to one or more topics. Pass topics as either an array of strings, or array of objects (if the topic has parameters).
-   * Objects should be formatted as {topic: string, params: object}.
-   *
-   * - Subscriptions are automatically routed to the correct websocket connection.
-   * - Authentication/connection is automatic.
-   * - Resubscribe after network issues is automatic.
-   *
-   * Call `unsubscribe(topics)` to remove topics
-   */
-public subscribe(
-    requests:
-      | (WsTopicRequest<WsTopic> | WsTopic)
-      | (WsTopicRequest<WsTopic> | WsTopic)[],
-    wsKey: WsKey,
-)
-⋮----
-/**
-   * Unsubscribe from one or more topics. Similar to subscribe() but in reverse.
-   *
-   * - Requests are automatically routed to the correct websocket connection.
-   * - These topics will be removed from the topic cache, so they won't be subscribed to again.
-   */
-public unsubscribe(
-    requests:
-      | (WsTopicRequest<WsTopic> | WsTopic)
-      | (WsTopicRequest<WsTopic> | WsTopic)[],
-    wsKey: WsKey,
-)
-⋮----
-/** Prepare the Global WS API connection and authenticate before the first private call. */
-public connectWSAPI(): Promise<unknown>
-⋮----
-/**
-   * Send a Global JSON-RPC method and await its matching reply. Public methods do not require auth.
-   * Pending calls reject on API errors, timeout or disconnect.
-   * The reply timeout starts after sending; connection/authentication use their own lifecycle handling.
-   * public/auth signs automatically and uses the authentication timeout.
-   * private/logout resolves on the server's normal close.
-   */
-public sendWSAPIRequest<
-    TWSKey extends keyof WsAPIWsKeyTopicMap,
-    TMethod extends WsAPIWsKeyTopicMap[TWSKey],
-  >(
-    wsKey: TWSKey,
-    method: TMethod,
-    ...args: undefined extends WsAPITopicRequestParamMap[TMethod]
-      ? [
-          params?: WsAPITopicRequestParamMap[TMethod],
-          requestFlags?: WSAPIRequestFlags,
-        ]
-      : [
-          params: WsAPITopicRequestParamMap[TMethod],
-          requestFlags?: WSAPIRequestFlags,
-        ]
-  ): Promise<WsAPITopicResponseMap[TMethod]>;
-⋮----
-public async sendWSAPIRequest(
-    wsKey: keyof WsAPIWsKeyTopicMap,
-    method: keyof WsAPITopicRequestParamMap,
-    params?: unknown,
-    requestFlags?: WSAPIRequestFlags,
-): Promise<any>
-⋮----
-// An explicit auth call renews the session even if already authenticated.
-⋮----
-// Let the server process logout and close. Sending our own close first
-// could trigger cancel-on-disconnect before logout has been processed.
-⋮----
-/**
-   *
-   * Internal methods
-   *
-   */
-⋮----
-/**
-   * Return a websocket URL, which is connected to as-is.
-   * If a token or anything else is needed in the URL, this is a good place to add it.
-   */
-protected async getWsUrl(wsKey: WsKey): Promise<string>
-⋮----
-protected sendPingEvent(wsKey: WsKey)
-⋮----
-protected sendPongEvent(wsKey: WsKey)
-⋮----
-// Reply to the gateway's JSON-RPC test_request. Protocol ping frames are handled by BaseWSClient.
-⋮----
-// Send a protocol layer pong
-⋮----
-protected isWsPing(msg: any, wsKey: WsKey): boolean
-⋮----
-// Let the normal message parser report malformed JSON.
-⋮----
-protected isWsPong(msg: any, wsKey: WsKey): boolean
-⋮----
-// Global uses native pong frames. JSON payloads can contain "pong" in
-// tokens, order labels or other user data and must reach the normal parser.
-⋮----
-// this.logger.info(`Not a pong: `, msg);
-⋮----
-protected resolveEmittableEvents(
-    wsKey: WsKey,
-    event: MessageEventLike,
-): EmittableEvent[]
-⋮----
-// Renew on the same socket with a fresh CDP JWT. The session, rather than
-// an access token attached to each subscription, authorizes requests.
-⋮----
-// Passive heartbeat notification. test_request is handled by the ping/pong hooks.
-⋮----
-// Preserve the JSON-RPC envelope for subscription acknowledgements and liveness replies.
-⋮----
-// E.g. {"type":"error","message":"rate limit exceeded","wsKey":"advTradeMarketData"}
-⋮----
-// Parse Advanced Trade WS events (update & response)
-⋮----
-// These are request/reply pattern events (e.g. after subscribing to topics or authenticating)
-⋮----
-// Generic data for a channel
-⋮----
-// Parse CB Exchange WS events
-⋮----
-// Generic data for a channel
-⋮----
-/**
-   * Determines if a topic is for a private channel, using a hardcoded list of strings
-   */
-protected isPrivateTopicRequest(
-    request: WsTopicRequest<string>,
-    wsKey: WsKey,
-): boolean
-⋮----
-protected getWsKeyForMarket(market: WsMarket, isPrivate: boolean): WsKey
-⋮----
-protected getWsMarketForWsKey(wsKey: WsKey): WsMarket
-⋮----
-protected getPrivateWSKeys(): WsKey[]
-⋮----
-protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean
-⋮----
-protected clearTimers(wsKey: WsKey)
-⋮----
-protected onWsClose(event: unknown, wsKey: WsKey)
-⋮----
-private handleGlobalAuthFailure(wsKey: WsKey, error: unknown)
-⋮----
-// A failed renewal cannot leave a stale session looking healthy. Reconnect
-// and authenticate again; initial auth failures are surfaced without looping.
-⋮----
-/** Force subscription requests to be sent in smaller batches, if a number is returned */
-protected getMaxTopicsPerSubscribeEvent(wsKey: WsKey): number | null
-⋮----
-// Technically, INTX supports request batching but not with nested parameters, so we'll send one at a time
-⋮----
-// Exchange supports request batching, no known limit to max topics per request
-⋮----
-/**
-   * Map one or more topics into fully prepared "subscribe request" events (already stringified and ready to send)
-   */
-protected async getWsOperationEventsForTopics(
-    topicRequests: WsTopicRequest<string>[],
-    wsKey: WsKey,
-    operation: WsOperation,
-): Promise<string[]>
-⋮----
-// Unlike the older Advanced Trade feed, Global accepts all channels in one request.
-⋮----
-/**
-     * Operations need to be structured in a way that this exchange understands.
-     * Parse the internal format into the format expected by the exchange. One request per operation.
-     */
-⋮----
-// In case there's ever more operation types than "subscribe" and "unsubscribe"
-⋮----
-// As of Sep 2024, parameters (such as product_id[]) cannot be nested with the channels array
-⋮----
-// This merges parametrs (such as product_id[]) into the top level request object
-⋮----
-/**
-     * - Merge commands into one if the exchange supports batch requests,
-     * - Apply auth/sign, if needed,
-     * - Apply any final formatting to return a string array, ready to be sent upstream.
-     */
-⋮----
-// Events that are ready to send (usually stringified JSON)
-// ADV trade only supports sending one at a time, so we don't try to merge them
-// These are already signed, if needed.
-⋮----
-/**
-           * No batching is supported for this product group, so we can already
-           * handle sign here and return it as is
-           */
-⋮----
-// Don't expect this to ever happen, but just to please typescript...
-⋮----
-// We're under the max topics per request limit.
-// Send operation requests as one merged request
-⋮----
-// We're over the max topics per request limit. Break into batches.
-⋮----
-// Don't expect this to ever happen, but just to please typescript...
-⋮----
-// We're over the max topics per request limit. Break into batches.
-⋮----
-// throw new Error(
-//   'CB INTX is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
-// );
-⋮----
-// Don't expect this to ever happen, but just to please typescript...
-⋮----
-// throw new Error(
-//   'CB Prime is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
-// );
-⋮----
-// throw new Error(`Not implemented for "${wsKey}" yet`);
-⋮----
-/**
-   * Global authenticates the socket session; older Coinbase feeds sign per request.
-   */
-protected async getWsAuthRequestEvent(wsKey: WsKey): Promise<object>
+  ): Promise<any>
 
 ================
 File: .gitignore
@@ -19589,12 +19361,322 @@ export function getRestBaseUrl(
  * @param url endpoint containing params in query string; "/v2/accounts/123123213?someParam=xyz"
  * @returns
  */
-export function getParamsFromURL(url: string):
+export function getParamsFromURL(url: string): {
+  endpoint: string;
+  params: any;
+}
 
 ================
 File: src/index.ts
 ================
 
+
+================
+File: src/WebsocketClient.ts
+================
+import { BaseWebsocketClient, EmittableEvent } from './lib/BaseWSClient.js';
+import { signWSJWT } from './lib/jwtNode.js';
+import { neverGuard } from './lib/misc-util.js';
+import {
+  isCBAdvancedTradeErrorEvent,
+  isCBAdvancedTradeWSEvent,
+  isCBExchangeWSEvent,
+  isCBExchangeWSRequestOperation,
+  isCBINTXWSRequestOperation,
+  isCBPrimeWSRequestOperation,
+} from './lib/websocket/typeGuards.js';
+import {
+  getCBExchangeWSSign,
+  getCBInternationalWSSign,
+  getCBPrimeWSSign,
+  getMergedCBExchangeWSRequestOperations,
+  getPromiseRefForWSAPIRequest,
+  isAdvancedTradeGlobalWsKey,
+  isMessageEvent,
+  MessageEventLike,
+  WS_KEY_MAP,
+  WS_URL_MAP,
+  WsKey,
+  WsTopicRequest,
+} from './lib/websocket/websocket-util.js';
+import {
+  WSConnectedResult,
+  WsConnectionStateEnum,
+} from './lib/websocket/WsStore.types.js';
+import { AdvTradeGlobalAuthRequest } from './types/request/advanced-trade-global-client.js';
+import { AdvTradeGlobalWSAuthResult } from './types/websockets/advanced-trade-global.js';
+import { WsMarket } from './types/websockets/client.js';
+import {
+  WsAdvTradeGlobalRequestOperation,
+  WsAdvTradeRequestOperation,
+  WsExchangeAuthenticatedRequestOperation,
+  WsExchangeRequestOperation,
+  WsInternationalAuthenticatedRequestOperation,
+  WsInternationalRequestOperation,
+  WsOperation,
+  WsPrimeAuthenticatedRequestOperation,
+  WsPrimeRequestOperation,
+} from './types/websockets/requests.js';
+import {
+  WSAPIRequest,
+  WSAPIRequestFlags,
+  WsAPITopicRequestParamMap,
+  WsAPITopicResponseMap,
+  WsAPIWsKeyTopicMap,
+} from './types/websockets/wsAPI.js';
+⋮----
+/**
+ * Any WS keys in this list will trigger automatic auth as required, if credentials are available
+ */
+⋮----
+// Account data (fills), requires auth.
+⋮----
+// Coinbase Direct Market Data has direct access to Coinbase Exchange servers and requires auth.
+⋮----
+// The INTX feed always requires auth.
+⋮----
+// The Prime feed always requires auth.
+⋮----
+/**
+ * Any WS keys in this list will ALWAYS skip the authentication process, even if credentials are available
+ */
+⋮----
+/**
+ * WS topics are always a string for this exchange. Some exchanges use complex objects.
+ */
+type WsTopic = string;
+⋮----
+export class WebsocketClient extends BaseWebsocketClient<WsKey>
+⋮----
+/** Tracks either the pending auth reply or the next session renewal. */
+⋮----
+/**
+   * Preconnect the original product feeds, preserving the existing connection set.
+   * Global connections open on demand and are excluded from this method.
+   * Use connect(wsKey) to preconnect a specific feed, or connectWSAPI() for an authenticated Global WS API session.
+   */
+public connectAll(): Promise<(WSConnectedResult | undefined)[]>
+⋮----
+/**
+   * Request subscription to one or more topics. Pass topics as either an array of strings, or array of objects (if the topic has parameters).
+   * Objects should be formatted as {topic: string, params: object}.
+   *
+   * - Subscriptions are automatically routed to the correct websocket connection.
+   * - Authentication/connection is automatic.
+   * - Resubscribe after network issues is automatic.
+   *
+   * Call `unsubscribe(topics)` to remove topics
+   */
+public subscribe(
+    requests:
+      | (WsTopicRequest<WsTopic> | WsTopic)
+      | (WsTopicRequest<WsTopic> | WsTopic)[],
+    wsKey: WsKey,
+  )
+⋮----
+/**
+   * Unsubscribe from one or more topics. Similar to subscribe() but in reverse.
+   *
+   * - Requests are automatically routed to the correct websocket connection.
+   * - These topics will be removed from the topic cache, so they won't be subscribed to again.
+   */
+public unsubscribe(
+    requests:
+      | (WsTopicRequest<WsTopic> | WsTopic)
+      | (WsTopicRequest<WsTopic> | WsTopic)[],
+    wsKey: WsKey,
+  )
+⋮----
+/** Prepare the Global WS API connection and authenticate before the first private call. */
+public connectWSAPI(): Promise<unknown>
+⋮----
+/**
+   * Send a Global JSON-RPC method and await its matching reply. Public methods do not require auth.
+   * Pending calls reject on API errors, timeout or disconnect.
+   * The reply timeout starts after sending; connection/authentication use their own lifecycle handling.
+   * public/auth signs automatically and uses the authentication timeout.
+   * private/logout resolves on the server's normal close.
+   */
+public sendWSAPIRequest<
+    TWSKey extends keyof WsAPIWsKeyTopicMap,
+    TMethod extends WsAPIWsKeyTopicMap[TWSKey],
+  >(
+    wsKey: TWSKey,
+    method: TMethod,
+    ...args: undefined extends WsAPITopicRequestParamMap[TMethod]
+      ? [
+          params?: WsAPITopicRequestParamMap[TMethod],
+          requestFlags?: WSAPIRequestFlags,
+        ]
+      : [
+          params: WsAPITopicRequestParamMap[TMethod],
+          requestFlags?: WSAPIRequestFlags,
+        ]
+  ): Promise<WsAPITopicResponseMap[TMethod]>;
+⋮----
+public async sendWSAPIRequest(
+    wsKey: keyof WsAPIWsKeyTopicMap,
+    method: keyof WsAPITopicRequestParamMap,
+    params?: unknown,
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<any>
+⋮----
+// An explicit auth call renews the session even if already authenticated.
+⋮----
+// Let the server process logout and close. Sending our own close first
+// could trigger cancel-on-disconnect before logout has been processed.
+⋮----
+/**
+   *
+   * Internal methods
+   *
+   */
+⋮----
+/**
+   * Return a websocket URL, which is connected to as-is.
+   * If a token or anything else is needed in the URL, this is a good place to add it.
+   */
+protected async getWsUrl(wsKey: WsKey): Promise<string>
+⋮----
+protected sendPingEvent(wsKey: WsKey)
+⋮----
+protected sendPongEvent(wsKey: WsKey)
+⋮----
+// Reply to the gateway's JSON-RPC test_request. Protocol ping frames are handled by BaseWSClient.
+⋮----
+// Send a protocol layer pong
+⋮----
+protected isWsPing(msg: any, wsKey: WsKey): boolean
+⋮----
+// Let the normal message parser report malformed JSON.
+⋮----
+protected isWsPong(msg: any, wsKey: WsKey): boolean
+⋮----
+// Global uses native pong frames. JSON payloads can contain "pong" in
+// tokens, order labels or other user data and must reach the normal parser.
+⋮----
+// this.logger.info(`Not a pong: `, msg);
+⋮----
+protected resolveEmittableEvents(
+    wsKey: WsKey,
+    event: MessageEventLike,
+  ): EmittableEvent[]
+⋮----
+// Renew on the same socket with a fresh CDP JWT. The session, rather than
+// an access token attached to each subscription, authorizes requests.
+⋮----
+// Passive heartbeat notification. test_request is handled by the ping/pong hooks.
+⋮----
+// Preserve the JSON-RPC envelope for subscription acknowledgements and liveness replies.
+⋮----
+// E.g. {"type":"error","message":"rate limit exceeded","wsKey":"advTradeMarketData"}
+⋮----
+// Parse Advanced Trade WS events (update & response)
+⋮----
+// These are request/reply pattern events (e.g. after subscribing to topics or authenticating)
+⋮----
+// Generic data for a channel
+⋮----
+// Parse CB Exchange WS events
+⋮----
+// Generic data for a channel
+⋮----
+/**
+   * Determines if a topic is for a private channel, using a hardcoded list of strings
+   */
+protected isPrivateTopicRequest(
+    request: WsTopicRequest<string>,
+    wsKey: WsKey,
+  ): boolean
+⋮----
+protected getWsKeyForMarket(market: WsMarket, isPrivate: boolean): WsKey
+⋮----
+protected getWsMarketForWsKey(wsKey: WsKey): WsMarket
+⋮----
+protected getPrivateWSKeys(): WsKey[]
+⋮----
+protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean
+⋮----
+protected clearTimers(wsKey: WsKey)
+⋮----
+protected onWsClose(event: unknown, wsKey: WsKey)
+⋮----
+private handleGlobalAuthFailure(wsKey: WsKey, error: unknown)
+⋮----
+// A failed renewal cannot leave a stale session looking healthy. Reconnect
+// and authenticate again; initial auth failures are surfaced without looping.
+⋮----
+/** Force subscription requests to be sent in smaller batches, if a number is returned */
+protected getMaxTopicsPerSubscribeEvent(wsKey: WsKey): number | null
+⋮----
+// Technically, INTX supports request batching but not with nested parameters, so we'll send one at a time
+⋮----
+// Exchange supports request batching, no known limit to max topics per request
+⋮----
+/**
+   * Map one or more topics into fully prepared "subscribe request" events (already stringified and ready to send)
+   */
+protected async getWsOperationEventsForTopics(
+    topicRequests: WsTopicRequest<string>[],
+    wsKey: WsKey,
+    operation: WsOperation,
+  ): Promise<string[]>
+⋮----
+// Unlike the older Advanced Trade feed, Global accepts all channels in one request.
+⋮----
+/**
+     * Operations need to be structured in a way that this exchange understands.
+     * Parse the internal format into the format expected by the exchange. One request per operation.
+     */
+⋮----
+// In case there's ever more operation types than "subscribe" and "unsubscribe"
+⋮----
+// As of Sep 2024, parameters (such as product_id[]) cannot be nested with the channels array
+⋮----
+// This merges parametrs (such as product_id[]) into the top level request object
+⋮----
+/**
+     * - Merge commands into one if the exchange supports batch requests,
+     * - Apply auth/sign, if needed,
+     * - Apply any final formatting to return a string array, ready to be sent upstream.
+     */
+⋮----
+// Events that are ready to send (usually stringified JSON)
+// ADV trade only supports sending one at a time, so we don't try to merge them
+// These are already signed, if needed.
+⋮----
+/**
+           * No batching is supported for this product group, so we can already
+           * handle sign here and return it as is
+           */
+⋮----
+// Don't expect this to ever happen, but just to please typescript...
+⋮----
+// We're under the max topics per request limit.
+// Send operation requests as one merged request
+⋮----
+// We're over the max topics per request limit. Break into batches.
+⋮----
+// Don't expect this to ever happen, but just to please typescript...
+⋮----
+// We're over the max topics per request limit. Break into batches.
+⋮----
+// throw new Error(
+//   'CB INTX is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
+// );
+⋮----
+// Don't expect this to ever happen, but just to please typescript...
+⋮----
+// throw new Error(
+//   'CB Prime is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
+// );
+⋮----
+// throw new Error(`Not implemented for "${wsKey}" yet`);
+⋮----
+/**
+   * Global authenticates the socket session; older Coinbase feeds sign per request.
+   */
+protected async getWsAuthRequestEvent(wsKey: WsKey): Promise<object>
 
 ================
 File: src/CBAdvancedTradeGlobalClient.ts
@@ -19783,7 +19865,7 @@ auth(params?: AdvTradeGlobalAuthRequest): Promise<AdvTradeGlobalAuthResult>
    */
 getAnnouncements(
     params?: AdvTradeGlobalGetAnnouncementsRequest,
-): Promise<AdvTradeGlobalGetAnnouncementsItem[]>
+  ): Promise<AdvTradeGlobalGetAnnouncementsItem[]>
 ⋮----
 /**
    * Get Block RFQ Trades
@@ -19811,7 +19893,7 @@ getBlockRfqTrades(params?: any): Promise<any>
    */
 getBookSummaryByCurrency(
     params: AdvTradeGlobalGetBookSummaryByCurrencyRequest,
-): Promise<AdvTradeGlobalBookSummary[]>
+  ): Promise<AdvTradeGlobalBookSummary[]>
 ⋮----
 /**
    * Get Book Summary By Instrument
@@ -19825,7 +19907,7 @@ getBookSummaryByCurrency(
    */
 getBookSummaryByInstrument(
     params: AdvTradeGlobalGetBookSummaryByInstrumentRequest,
-): Promise<AdvTradeGlobalBookSummary[]>
+  ): Promise<AdvTradeGlobalBookSummary[]>
 ⋮----
 /**
    * Get Combo Details
@@ -19838,7 +19920,7 @@ getBookSummaryByInstrument(
    */
 getComboDetails(
     params: AdvTradeGlobalGetComboDetailsRequest,
-): Promise<AdvTradeGlobalCombo>
+  ): Promise<AdvTradeGlobalCombo>
 ⋮----
 /**
    * Get Combo Ids
@@ -19863,7 +19945,7 @@ getComboIds(params: AdvTradeGlobalGetComboIdsRequest): Promise<string[]>
    */
 getCombos(
     params: AdvTradeGlobalGetCombosRequest,
-): Promise<AdvTradeGlobalCombo[]>
+  ): Promise<AdvTradeGlobalCombo[]>
 ⋮----
 /**
    * Get Contract Size
@@ -19879,7 +19961,7 @@ getCombos(
    */
 getContractSize(
     params: AdvTradeGlobalGetContractSizeRequest,
-): Promise<AdvTradeGlobalGetContractSizeResult>
+  ): Promise<AdvTradeGlobalGetContractSizeResult>
 ⋮----
 /**
    * Get Currencies
@@ -19906,7 +19988,7 @@ getCurrencies(): Promise<AdvTradeGlobalCurrencyWithApr[]>
    */
 getDeliveryPrices(
     params: AdvTradeGlobalGetDeliveryPricesRequest,
-): Promise<AdvTradeGlobalGetDeliveryPricesResult>
+  ): Promise<AdvTradeGlobalGetDeliveryPricesResult>
 ⋮----
 /**
    * Get Expirations
@@ -19921,7 +20003,7 @@ getDeliveryPrices(
    */
 getExpirations(
     params: AdvTradeGlobalGetExpirationsRequest,
-): Promise<AdvTradeGlobalExpirations[]>
+  ): Promise<AdvTradeGlobalExpirations[]>
 ⋮----
 /**
    * Get Funding Chart Data
@@ -19936,7 +20018,7 @@ getExpirations(
    */
 getFundingChartData(
     params: AdvTradeGlobalGetFundingChartDataRequest,
-): Promise<AdvTradeGlobalGetFundingChartDataResult>
+  ): Promise<AdvTradeGlobalGetFundingChartDataResult>
 ⋮----
 /**
    * Get Funding Rate History
@@ -19952,7 +20034,7 @@ getFundingChartData(
    */
 getFundingRateHistory(
     params: AdvTradeGlobalGetFundingRateHistoryRequest,
-): Promise<AdvTradeGlobalGetFundingRateHistoryItem[]>
+  ): Promise<AdvTradeGlobalGetFundingRateHistoryItem[]>
 ⋮----
 /**
    * Get Funding Rate Value
@@ -19968,7 +20050,7 @@ getFundingRateHistory(
    */
 getFundingRateValue(
     params: AdvTradeGlobalGetFundingRateValueRequest,
-): Promise<number>
+  ): Promise<number>
 ⋮----
 /**
    * Get Historical Volatility
@@ -19983,7 +20065,7 @@ getFundingRateValue(
    */
 getHistoricalVolatility(
     params: AdvTradeGlobalGetHistoricalVolatilityRequest,
-): Promise<AdvTradeGlobalGetHistoricalVolatilityItem[]>
+  ): Promise<AdvTradeGlobalGetHistoricalVolatilityItem[]>
 ⋮----
 /**
    * Get Index Chart Data
@@ -19998,7 +20080,7 @@ getHistoricalVolatility(
    */
 getIndexChartData(
     params: AdvTradeGlobalGetIndexChartDataRequest,
-): Promise<number[][]>
+  ): Promise<number[][]>
 ⋮----
 /**
    * Get Index Price
@@ -20012,7 +20094,7 @@ getIndexChartData(
    */
 getIndexPrice(
     params: AdvTradeGlobalGetIndexPriceRequest,
-): Promise<AdvTradeGlobalGetIndexPriceResult>
+  ): Promise<AdvTradeGlobalGetIndexPriceResult>
 ⋮----
 /**
    * Get Index Price Names
@@ -20027,7 +20109,7 @@ getIndexPrice(
    */
 getIndexPriceNames(
     params?: AdvTradeGlobalGetIndexPriceNamesRequest,
-): Promise<AdvTradeGlobalGetIndexPriceNamesItem[]>
+  ): Promise<AdvTradeGlobalGetIndexPriceNamesItem[]>
 ⋮----
 /**
    * Get Instrument
@@ -20042,7 +20124,7 @@ getIndexPriceNames(
    */
 getInstrument(
     params: AdvTradeGlobalGetInstrumentRequest,
-): Promise<AdvTradeGlobalInstrument>
+  ): Promise<AdvTradeGlobalInstrument>
 ⋮----
 /**
    * Get Instruments
@@ -20064,7 +20146,7 @@ getInstrument(
    */
 getInstruments(
     params: AdvTradeGlobalGetInstrumentsRequest,
-): Promise<AdvTradeGlobalInstrument[]>
+  ): Promise<AdvTradeGlobalInstrument[]>
 ⋮----
 /**
    * Get Last Settlements By Currency
@@ -20090,7 +20172,7 @@ getInstruments(
    */
 getLastSettlementsByCurrency(
     params: AdvTradeGlobalGetLastSettlementsByCurrencyRequest,
-): Promise<AdvTradeGlobalGetLastSettlementsByCurrencyResult>
+  ): Promise<AdvTradeGlobalGetLastSettlementsByCurrencyResult>
 ⋮----
 /**
    * Get Last Settlements By Instrument
@@ -20115,7 +20197,7 @@ getLastSettlementsByCurrency(
    */
 getLastSettlementsByInstrument(
     params: AdvTradeGlobalGetLastSettlementsByInstrumentRequest,
-): Promise<AdvTradeGlobalGetLastSettlementsByInstrumentResult>
+  ): Promise<AdvTradeGlobalGetLastSettlementsByInstrumentResult>
 ⋮----
 /**
    * Get Last Trades By Currency
@@ -20135,7 +20217,7 @@ getLastSettlementsByInstrument(
    */
 getLastTradesByCurrency(
     params: AdvTradeGlobalGetLastTradesByCurrencyRequest,
-): Promise<AdvTradeGlobalGetLastTradesByCurrencyResult>
+  ): Promise<AdvTradeGlobalGetLastTradesByCurrencyResult>
 ⋮----
 /**
    * Get Last Trades By Currency And Time
@@ -20154,7 +20236,7 @@ getLastTradesByCurrency(
    */
 getLastTradesByCurrencyAndTime(
     params: AdvTradeGlobalGetLastTradesByCurrencyAndTimeRequest,
-): Promise<AdvTradeGlobalGetLastTradesByCurrencyAndTimeResult>
+  ): Promise<AdvTradeGlobalGetLastTradesByCurrencyAndTimeResult>
 ⋮----
 /**
    * Get Last Trades By Instrument
@@ -20171,7 +20253,7 @@ getLastTradesByCurrencyAndTime(
    */
 getLastTradesByInstrument(
     params: AdvTradeGlobalGetLastTradesByInstrumentRequest,
-): Promise<AdvTradeGlobalGetLastTradesByInstrumentResult>
+  ): Promise<AdvTradeGlobalGetLastTradesByInstrumentResult>
 ⋮----
 /**
    * Get Last Trades By Instrument And Time
@@ -20188,7 +20270,7 @@ getLastTradesByInstrument(
    */
 getLastTradesByInstrumentAndTime(
     params: AdvTradeGlobalGetLastTradesByInstrumentAndTimeRequest,
-): Promise<AdvTradeGlobalGetLastTradesByInstrumentAndTimeResult>
+  ): Promise<AdvTradeGlobalGetLastTradesByInstrumentAndTimeResult>
 ⋮----
 /**
    * Get Mark Price History
@@ -20203,7 +20285,7 @@ getLastTradesByInstrumentAndTime(
    */
 getMarkPriceHistory(
     params: AdvTradeGlobalGetMarkPriceHistoryRequest,
-): Promise<number[][]>
+  ): Promise<number[][]>
 ⋮----
 /**
    * Get Order Book
@@ -20220,7 +20302,7 @@ getMarkPriceHistory(
    */
 getOrderBook(
     params: AdvTradeGlobalGetOrderBookRequest,
-): Promise<AdvTradeGlobalTickerNotificationWithBidsAndAsks>
+  ): Promise<AdvTradeGlobalTickerNotificationWithBidsAndAsks>
 ⋮----
 /**
    * Get Order Book By Instrument Id
@@ -20235,7 +20317,7 @@ getOrderBook(
    */
 getOrderBookByInstrumentId(
     params: AdvTradeGlobalGetOrderBookByInstrumentIdRequest,
-): Promise<AdvTradeGlobalTickerNotificationWithBidsAndAsks>
+  ): Promise<AdvTradeGlobalTickerNotificationWithBidsAndAsks>
 ⋮----
 /**
    * Get Supported Index Names
@@ -20250,7 +20332,7 @@ getOrderBookByInstrumentId(
    */
 getSupportedIndexNames(
     params?: AdvTradeGlobalGetSupportedIndexNamesRequest,
-): Promise<AdvTradeGlobalGetSupportedIndexNamesItem[]>
+  ): Promise<AdvTradeGlobalGetSupportedIndexNamesItem[]>
 ⋮----
 /**
    * Get Time
@@ -20278,7 +20360,7 @@ getTime(): Promise<number>
    */
 getTradeVolumes(
     params?: AdvTradeGlobalGetTradeVolumesRequest,
-): Promise<AdvTradeGlobalTradesVolumes[]>
+  ): Promise<AdvTradeGlobalTradesVolumes[]>
 ⋮----
 /**
    * Get Tradingview Chart Data
@@ -20297,7 +20379,7 @@ getTradeVolumes(
    */
 getTradingviewChartData(
     params: AdvTradeGlobalGetTradingviewChartDataRequest,
-): Promise<AdvTradeGlobalGetTradingviewChartDataResult>
+  ): Promise<AdvTradeGlobalGetTradingviewChartDataResult>
 ⋮----
 /**
    * Get Volatility Index Data
@@ -20312,7 +20394,7 @@ getTradingviewChartData(
    */
 getVolatilityIndexData(
     params: AdvTradeGlobalGetVolatilityIndexDataRequest,
-): Promise<AdvTradeGlobalGetVolatilityIndexDataResult>
+  ): Promise<AdvTradeGlobalGetVolatilityIndexDataResult>
 ⋮----
 /**
    * Get Status
@@ -20333,7 +20415,7 @@ getStatus(): Promise<AdvTradeGlobalGetStatusResult>
    */
 testConnection(
     params?: AdvTradeGlobalTestRequest,
-): Promise<AdvTradeGlobalTestResult>
+  ): Promise<AdvTradeGlobalTestResult>
 ⋮----
 /**
    * Get Ticker
@@ -20350,7 +20432,7 @@ testConnection(
    */
 getTicker(
     params: AdvTradeGlobalGetTickerRequest,
-): Promise<AdvTradeGlobalTickerNotification>
+  ): Promise<AdvTradeGlobalTickerNotification>
 ⋮----
 /**
    *
@@ -20375,7 +20457,7 @@ getTicker(
    */
 submitBuy(
     params: AdvTradeGlobalPlaceOrderRequest,
-): Promise<AdvTradeGlobalBuyResult>
+  ): Promise<AdvTradeGlobalBuyResult>
 ⋮----
 /**
    * Sell
@@ -20395,7 +20477,7 @@ submitBuy(
    */
 submitSell(
     params: AdvTradeGlobalPlaceOrderRequest,
-): Promise<AdvTradeGlobalSellResult>
+  ): Promise<AdvTradeGlobalSellResult>
 ⋮----
 /**
    * Edit
@@ -20414,7 +20496,7 @@ submitSell(
    */
 updateOrder(
     params: AdvTradeGlobalEditRequest,
-): Promise<AdvTradeGlobalEditResult>
+  ): Promise<AdvTradeGlobalEditResult>
 ⋮----
 /**
    * Edit By Label
@@ -20432,7 +20514,7 @@ updateOrder(
    */
 updateOrderByLabel(
     params: AdvTradeGlobalEditByLabelRequest,
-): Promise<AdvTradeGlobalEditByLabelResult>
+  ): Promise<AdvTradeGlobalEditByLabelResult>
 ⋮----
 /**
    * Cancel
@@ -20448,7 +20530,7 @@ updateOrderByLabel(
    */
 cancelOrder(
     params: AdvTradeGlobalCancelRequest,
-): Promise<AdvTradeGlobalOrder>
+  ): Promise<AdvTradeGlobalOrder>
 ⋮----
 /**
    * Cancel By Label
@@ -20498,7 +20580,7 @@ cancelAll(params?: AdvTradeGlobalCancelAllRequest): Promise<number>
    */
 cancelAllByCurrency(
     params: AdvTradeGlobalCancelAllByCurrencyRequest,
-): Promise<number>
+  ): Promise<number>
 ⋮----
 /**
    * Cancel All By Currency Pair
@@ -20515,7 +20597,7 @@ cancelAllByCurrency(
    */
 cancelAllByCurrencyPair(
     params: AdvTradeGlobalCancelAllByCurrencyPairRequest,
-): Promise<number>
+  ): Promise<number>
 ⋮----
 /**
    * Cancel All By Instrument
@@ -20532,7 +20614,7 @@ cancelAllByCurrencyPair(
    */
 cancelAllByInstrument(
     params: AdvTradeGlobalCancelAllByInstrumentRequest,
-): Promise<number>
+  ): Promise<number>
 ⋮----
 /**
    * Cancel All By Kind Or Type
@@ -20549,7 +20631,7 @@ cancelAllByInstrument(
    */
 cancelAllByKindOrType(
     params: AdvTradeGlobalCancelAllByKindOrTypeRequest,
-): Promise<number>
+  ): Promise<number>
 ⋮----
 /**
    * Close Position
@@ -20566,7 +20648,7 @@ cancelAllByKindOrType(
    */
 closePosition(
     params: AdvTradeGlobalClosePositionRequest,
-): Promise<AdvTradeGlobalClosePositionResult>
+  ): Promise<AdvTradeGlobalClosePositionResult>
 ⋮----
 /**
    * Get Open Orders
@@ -20580,7 +20662,7 @@ closePosition(
    */
 getOpenOrders(
     params?: AdvTradeGlobalGetOpenOrdersRequest,
-): Promise<AdvTradeGlobalOrder[]>
+  ): Promise<AdvTradeGlobalOrder[]>
 ⋮----
 /**
    * Get Open Orders By Currency
@@ -20594,7 +20676,7 @@ getOpenOrders(
    */
 getOpenOrdersByCurrency(
     params: AdvTradeGlobalGetOpenOrdersByCurrencyRequest,
-): Promise<AdvTradeGlobalOrder[]>
+  ): Promise<AdvTradeGlobalOrder[]>
 ⋮----
 /**
    * Get Open Orders By Instrument
@@ -20608,7 +20690,7 @@ getOpenOrdersByCurrency(
    */
 getOpenOrdersByInstrument(
     params: AdvTradeGlobalGetOpenOrdersByInstrumentRequest,
-): Promise<AdvTradeGlobalOrder[]>
+  ): Promise<AdvTradeGlobalOrder[]>
 ⋮----
 /**
    * Get Open Orders By Label
@@ -20622,7 +20704,7 @@ getOpenOrdersByInstrument(
    */
 getOpenOrdersByLabel(
     params: AdvTradeGlobalGetOpenOrdersByLabelRequest,
-): Promise<AdvTradeGlobalOrder[]>
+  ): Promise<AdvTradeGlobalOrder[]>
 ⋮----
 /**
    * Get Order State
@@ -20644,7 +20726,7 @@ getOpenOrdersByLabel(
    */
 getOrderState(
     params: AdvTradeGlobalGetOrderStateRequest,
-): Promise<AdvTradeGlobalOrder>
+  ): Promise<AdvTradeGlobalOrder>
 ⋮----
 /**
    * Get Order State By Label
@@ -20665,7 +20747,7 @@ getOrderState(
    */
 getOrderStateByLabel(
     params: AdvTradeGlobalGetOrderStateByLabelRequest,
-): Promise<AdvTradeGlobalOrder[]>
+  ): Promise<AdvTradeGlobalOrder[]>
 ⋮----
 /**
    * Get Order History By Currency
@@ -20683,7 +20765,7 @@ getOrderStateByLabel(
    */
 getOrderHistoryByCurrency(
     params: AdvTradeGlobalGetOrderHistoryByCurrencyRequest,
-): Promise<AdvTradeGlobalOrder[]>
+  ): Promise<AdvTradeGlobalOrder[]>
 ⋮----
 /**
    * Get Order History By Instrument
@@ -20701,7 +20783,7 @@ getOrderHistoryByCurrency(
    */
 getOrderHistoryByInstrument(
     params: AdvTradeGlobalGetOrderHistoryByInstrumentRequest,
-): Promise<AdvTradeGlobalOrder[]>
+  ): Promise<AdvTradeGlobalOrder[]>
 ⋮----
 /**
    * Get Order Margin By Ids
@@ -20715,7 +20797,7 @@ getOrderHistoryByInstrument(
    */
 getOrderMarginByIds(
     params: AdvTradeGlobalGetOrderMarginByIdsRequest,
-): Promise<AdvTradeGlobalOrderIdInitialMarginPair[]>
+  ): Promise<AdvTradeGlobalOrderIdInitialMarginPair[]>
 ⋮----
 /**
    * Get Trigger Order History
@@ -20731,7 +20813,7 @@ getOrderMarginByIds(
    */
 getTriggerOrderHistory(
     params: AdvTradeGlobalGetTriggerOrderHistoryRequest,
-): Promise<AdvTradeGlobalGetTriggerOrderHistoryResult>
+  ): Promise<AdvTradeGlobalGetTriggerOrderHistoryResult>
 ⋮----
 /**
    * Get User Trades By Currency
@@ -20750,7 +20832,7 @@ getTriggerOrderHistory(
    */
 getUserTradesByCurrency(
     params: AdvTradeGlobalGetUserTradesByCurrencyRequest,
-): Promise<AdvTradeGlobalGetUserTradesByCurrencyResult>
+  ): Promise<AdvTradeGlobalGetUserTradesByCurrencyResult>
 ⋮----
 /**
    * Get User Trades By Currency And Time
@@ -20771,7 +20853,7 @@ getUserTradesByCurrency(
    */
 getUserTradesByCurrencyAndTime(
     params: AdvTradeGlobalGetUserTradesByCurrencyAndTimeRequest,
-): Promise<AdvTradeGlobalGetUserTradesByCurrencyAndTimeResult>
+  ): Promise<AdvTradeGlobalGetUserTradesByCurrencyAndTimeResult>
 ⋮----
 /**
    * Get User Trades By Instrument
@@ -20790,7 +20872,7 @@ getUserTradesByCurrencyAndTime(
    */
 getUserTradesByInstrument(
     params: AdvTradeGlobalGetUserTradesByInstrumentRequest,
-): Promise<AdvTradeGlobalGetUserTradesByInstrumentResult>
+  ): Promise<AdvTradeGlobalGetUserTradesByInstrumentResult>
 ⋮----
 /**
    * Get User Trades By Instrument And Time
@@ -20810,7 +20892,7 @@ getUserTradesByInstrument(
    */
 getUserTradesByInstrumentAndTime(
     params: AdvTradeGlobalGetUserTradesByInstrumentAndTimeRequest,
-): Promise<AdvTradeGlobalGetUserTradesByInstrumentAndTimeResult>
+  ): Promise<AdvTradeGlobalGetUserTradesByInstrumentAndTimeResult>
 ⋮----
 /**
    * Get User Trades By Order
@@ -20829,7 +20911,7 @@ getUserTradesByInstrumentAndTime(
    */
 getUserTradesByOrder(
     params: AdvTradeGlobalGetUserTradesByOrderRequest,
-): Promise<AdvTradeGlobalUserTrade[]>
+  ): Promise<AdvTradeGlobalUserTrade[]>
 ⋮----
 /**
    * Get Margins
@@ -20844,7 +20926,7 @@ getUserTradesByOrder(
    */
 getMargins(
     params: AdvTradeGlobalGetMarginsRequest,
-): Promise<AdvTradeGlobalGetMarginsResult>
+  ): Promise<AdvTradeGlobalGetMarginsResult>
 ⋮----
 /**
    * Get Account Summaries
@@ -20859,7 +20941,7 @@ getMargins(
    */
 getAccountSummaries(
     params?: AdvTradeGlobalGetAccountSummariesRequest,
-): Promise<AdvTradeGlobalGetAccountSummariesResult>
+  ): Promise<AdvTradeGlobalGetAccountSummariesResult>
 ⋮----
 /**
    * Get Account Summary
@@ -20881,7 +20963,7 @@ getAccountSummaries(
    */
 getAccountSummary(
     params: AdvTradeGlobalGetAccountSummaryRequest,
-): Promise<AdvTradeGlobalGetAccountSummaryResult>
+  ): Promise<AdvTradeGlobalGetAccountSummaryResult>
 ⋮----
 /**
    * Get Position
@@ -20898,7 +20980,7 @@ getAccountSummary(
    */
 getPosition(
     params: AdvTradeGlobalGetPositionRequest,
-): Promise<AdvTradeGlobalPositionWithOpenOrdersMargin>
+  ): Promise<AdvTradeGlobalPositionWithOpenOrdersMargin>
 ⋮----
 /**
    * Get Positions
@@ -20915,7 +20997,7 @@ getPosition(
    */
 getPositions(
     params?: AdvTradeGlobalGetPositionsRequest,
-): Promise<AdvTradeGlobalPositionWithOpenOrdersMargin[]>
+  ): Promise<AdvTradeGlobalPositionWithOpenOrdersMargin[]>
 ⋮----
 /**
    * Change Margin Model
@@ -20932,7 +21014,7 @@ getPositions(
    */
 changeMarginModel(
     params: AdvTradeGlobalChangeMarginModelRequest,
-): Promise<AdvTradeGlobalChangeMarginModelItem[]>
+  ): Promise<AdvTradeGlobalChangeMarginModelItem[]>
 ⋮----
 /**
    * Get Access Log
@@ -20947,7 +21029,7 @@ changeMarginModel(
    */
 getAccessLog(
     params?: AdvTradeGlobalGetAccessLogRequest,
-): Promise<AdvTradeGlobalAccessLog[]>
+  ): Promise<AdvTradeGlobalAccessLog[]>
 ⋮----
 /**
    * Get Transaction Log
@@ -20972,7 +21054,7 @@ getAccessLog(
    */
 getTransactionLog(
     params: AdvTradeGlobalGetTransactionLogRequest,
-): Promise<AdvTradeGlobalGetTransactionLogResult>
+  ): Promise<AdvTradeGlobalGetTransactionLogResult>
 ⋮----
 /**
    * Get Settlement History By Currency
@@ -20993,7 +21075,7 @@ getTransactionLog(
    */
 getSettlementHistoryByCurrency(
     params: AdvTradeGlobalGetSettlementHistoryByCurrencyRequest,
-): Promise<AdvTradeGlobalGetSettlementHistoryByCurrencyResult>
+  ): Promise<AdvTradeGlobalGetSettlementHistoryByCurrencyResult>
 ⋮----
 /**
    * Get Settlement History By Instrument
@@ -21014,7 +21096,7 @@ getSettlementHistoryByCurrency(
    */
 getSettlementHistoryByInstrument(
     params: AdvTradeGlobalGetSettlementHistoryByInstrumentRequest,
-): Promise<AdvTradeGlobalGetSettlementHistoryByInstrumentResult>
+  ): Promise<AdvTradeGlobalGetSettlementHistoryByInstrumentResult>
 ⋮----
 /**
    * Simulate Portfolio
@@ -21032,7 +21114,7 @@ getSettlementHistoryByInstrument(
    */
 simulatePortfolio(
     params: AdvTradeGlobalSimulatePortfolioRequest,
-): Promise<AdvTradeGlobalSimulatePortfolioResult>
+  ): Promise<AdvTradeGlobalSimulatePortfolioResult>
 ⋮----
 /**
    * Simulate PME
@@ -21050,7 +21132,7 @@ simulatePortfolio(
    */
 simulatePme(
     params: AdvTradeGlobalSimulatePmeRequest,
-): Promise<AdvTradeGlobalSimulatePmeResult>
+  ): Promise<AdvTradeGlobalSimulatePmeResult>
 ⋮----
 /**
    * Enable Cancel On Disconnect
@@ -21072,7 +21154,7 @@ simulatePme(
    */
 enableCancelOnDisconnect(
     params?: AdvTradeGlobalEnableCancelOnDisconnectRequest,
-): Promise<'ok'>
+  ): Promise<'ok'>
 ⋮----
 /**
    * Disable Cancel On Disconnect
@@ -21086,7 +21168,7 @@ enableCancelOnDisconnect(
    */
 disableCancelOnDisconnect(
     params?: AdvTradeGlobalDisableCancelOnDisconnectRequest,
-): Promise<'ok'>
+  ): Promise<'ok'>
 ⋮----
 /**
    * Get Cancel On Disconnect
@@ -21097,7 +21179,7 @@ disableCancelOnDisconnect(
    */
 getCancelOnDisconnect(
     params?: AdvTradeGlobalGetCancelOnDisconnectRequest,
-): Promise<AdvTradeGlobalGetCancelOnDisconnectResult>
+  ): Promise<AdvTradeGlobalGetCancelOnDisconnectResult>
 ⋮----
 /**
    * Create Combo
@@ -21112,7 +21194,7 @@ getCancelOnDisconnect(
    */
 createCombo(
     params: AdvTradeGlobalCreateComboRequest,
-): Promise<AdvTradeGlobalCombo>
+  ): Promise<AdvTradeGlobalCombo>
 ⋮----
 /**
    * Get Leg Prices
@@ -21127,7 +21209,7 @@ createCombo(
    */
 getLegPrices(
     params: AdvTradeGlobalGetLegPricesRequest,
-): Promise<AdvTradeGlobalGetLegPricesResult>
+  ): Promise<AdvTradeGlobalGetLegPricesResult>
 ⋮----
 /**
    * Create Block RFQ
@@ -21381,176 +21463,6 @@ getBrokerTrades(params?: any): Promise<any>
    * JSON-RPC: private/get_broker_trade_requests
    */
 getBrokerTradeRequests(params?: any): Promise<any>
-
-================
-File: src/types/websockets/client.ts
-================
-import type { ClientRequestArgs } from 'http';
-import WebSocket from 'isomorphic-ws';
-⋮----
-/** General configuration for the WebsocketClient */
-export interface WSClientConfigurableOptions {
-  /**
-   * Your API key name.
-   *
-   * - For the Advanced Trade or App APIs, this is your API Key Name.
-   */
-  apiKey?: string;
-
-  /**
-   * Your API key secret.
-   *
-   * - For the Advanced Trade or App APIs, this is your API private key (including the -----BEGIN EC PRIVATE KEY-----\n etc).
-   */
-  apiSecret?: string;
-
-  /**
-   * Your API passphrase (NOT your account password). Only used for the API groups that use an API passphrase:
-   * - Coinbase Exchange API
-   * - Coinbase International API
-   * - Coinbase Prime API
-   */
-  apiPassphrase?: string;
-
-  /**
-   * For JWT auth (adv trade & app API), seconds until jwt expires. Defaults to 120 seconds.
-   */
-  jwtExpiresSeconds?: number;
-
-  /** How often to check if the connection is alive */
-  pingInterval?: number;
-
-  /** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
-  pongTimeout?: number;
-
-  /** Delay in milliseconds before respawning the connection */
-  reconnectTimeout?: number;
-
-  wsUrl?: string;
-
-  wsOptions?: {
-    protocols?: string[];
-    agent?: any;
-  } & (
-    | Omit<Partial<WebSocket.ClientOptions>, 'agent'>
-    | Omit<Partial<ClientRequestArgs>, 'agent'>
-  );
-
-  /**
-   * Connect to the sandbox for supported products
-   *
-   * - Coinbase Exchange: https://docs.cdp.coinbase.com/exchange/docs/sandbox
-   * - Coinbase International: https://docs.cdp.coinbase.com/intx/docs/sandbox
-   *
-   * - Coinbase Advanced Trade: No WebSocket sandbox (REST static sandbox only via RestClientOptions.useSandbox).
-   * - Coinbase App: No sandbox available.
-   * - Coinbase Prime: No sandbox available.
-   */
-  useSandbox?: boolean;
-
-  /**
-   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
-   *
-   * Look in the examples folder for a demonstration on using node's createHmac instead.
-   */
-  customSignMessageFn?: (message: string, secret: string) => Promise<string>;
-
-  /**
-   * If you authenticated the WS API before, automatically try to re-authenticate the WS API if you're disconnected/reconnected for any reason.
-   */
-  reauthWSAPIOnReconnect?: boolean;
-
-  /**
-   * Time in milliseconds to wait for a Global WS API reply after sending. Default: 10000.
-   * Connection/authentication use their own lifecycle handling.
-   */
-  wsAPITimeout?: number;
-}
-⋮----
-/**
-   * Your API key name.
-   *
-   * - For the Advanced Trade or App APIs, this is your API Key Name.
-   */
-⋮----
-/**
-   * Your API key secret.
-   *
-   * - For the Advanced Trade or App APIs, this is your API private key (including the -----BEGIN EC PRIVATE KEY-----\n etc).
-   */
-⋮----
-/**
-   * Your API passphrase (NOT your account password). Only used for the API groups that use an API passphrase:
-   * - Coinbase Exchange API
-   * - Coinbase International API
-   * - Coinbase Prime API
-   */
-⋮----
-/**
-   * For JWT auth (adv trade & app API), seconds until jwt expires. Defaults to 120 seconds.
-   */
-⋮----
-/** How often to check if the connection is alive */
-⋮----
-/** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
-⋮----
-/** Delay in milliseconds before respawning the connection */
-⋮----
-/**
-   * Connect to the sandbox for supported products
-   *
-   * - Coinbase Exchange: https://docs.cdp.coinbase.com/exchange/docs/sandbox
-   * - Coinbase International: https://docs.cdp.coinbase.com/intx/docs/sandbox
-   *
-   * - Coinbase Advanced Trade: No WebSocket sandbox (REST static sandbox only via RestClientOptions.useSandbox).
-   * - Coinbase App: No sandbox available.
-   * - Coinbase Prime: No sandbox available.
-   */
-⋮----
-/**
-   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
-   *
-   * Look in the examples folder for a demonstration on using node's createHmac instead.
-   */
-⋮----
-/**
-   * If you authenticated the WS API before, automatically try to re-authenticate the WS API if you're disconnected/reconnected for any reason.
-   */
-⋮----
-/**
-   * Time in milliseconds to wait for a Global WS API reply after sending. Default: 10000.
-   * Connection/authentication use their own lifecycle handling.
-   */
-⋮----
-/**
- * WS configuration that's always defined, regardless of user configuration
- * (usually comes from defaults if there's no user-provided values)
- */
-export interface WebsocketClientOptions extends WSClientConfigurableOptions {
-  pingInterval: number;
-  pongTimeout: number;
-  reconnectTimeout: number;
-  useSandbox: boolean;
-  recvWindow: number;
-  /**
-   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
-   */
-  requireConnectionReadyConfirmation: boolean;
-  authPrivateConnectionsOnConnect: boolean;
-  authPrivateRequests: boolean;
-  reauthWSAPIOnReconnect: boolean;
-}
-⋮----
-/**
-   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
-   */
-⋮----
-export type WsMarket =
-  | 'advancedTrade'
-  | 'advancedTradeGlobal'
-  | 'exchange'
-  | 'international'
-  | 'prime';
 
 ================
 File: docs/COINBASE_SDK_QUICKSTART_GUIDE.md
@@ -23270,7 +23182,7 @@ abstract getClientType(): RestClientType;
 constructor(
     restClientOptions: RestClientOptions = {},
     networkOptions: AxiosRequestConfig = {},
-)
+  )
 ⋮----
 /** Throw errors if any request params are empty */
 ⋮----
@@ -23323,7 +23235,7 @@ private async _call(
     endpoint: string,
     params?: ParamsInRequest,
     isPublicApi?: boolean,
-): Promise<any>
+  ): Promise<any>
 ⋮----
 // Sanity check to make sure it's only ever prefixed by one forward slash
 ⋮----
@@ -23355,7 +23267,7 @@ protected validateOrderId(
     orderIdProperty: CustomOrderIdProperty,
     /** Global Derivatives `label` max is 64. Other Coinbase client ids allow 128. */
     maxLength = 128,
-): void
+  ): void
 ⋮----
 /** Global Derivatives `label` max is 64. Other Coinbase client ids allow 128. */
 ⋮----
@@ -23368,7 +23280,7 @@ parseException(
     e: any,
     requestParams: any,
     requestOptions?: AxiosRequestConfig,
-): unknown
+  ): unknown
 ⋮----
 // Handle token rejection and credential redaction before applying the
 // shared error format, including when parseExceptions is disabled.
@@ -23393,7 +23305,7 @@ private async signRequest<T extends ParamsInRequest | undefined = {}>(
     endpoint: string,
     method: Method,
     signMethod: SignMethod,
-): Promise<SignedRequest<T>>
+  ): Promise<SignedRequest<T>>
 ⋮----
 // if there is body, use body - otherwise empty string
 ⋮----
@@ -23462,7 +23374,7 @@ private async prepareSignParams<TParams extends object | undefined>(
     signMethod: SignMethod,
     params?: TParams,
     isPublicApi?: boolean,
-)
+  )
 ⋮----
 /** Returns an axios request object. Handles signing process automatically if this is a private API call */
 private async buildRequest(
@@ -23471,7 +23383,7 @@ private async buildRequest(
     url: string,
     requestParams?: any | undefined,
     isPublicApi?: boolean,
-): Promise<AxiosRequestConfig>
+  ): Promise<AxiosRequestConfig>
 ⋮----
 // Keep JSON-RPC formatting here so endpoint methods use the usual post helpers.
 ⋮----
@@ -23487,9 +23399,187 @@ private async buildRequest(
 // global headers for every request
 
 ================
+File: src/types/websockets/client.ts
+================
+import type { ClientRequestArgs } from 'http';
+import WebSocket from 'isomorphic-ws';
+⋮----
+/** General configuration for the WebsocketClient */
+export interface WSClientConfigurableOptions {
+  /**
+   * Your API key name.
+   *
+   * - For the Advanced Trade or App APIs, this is your API Key Name.
+   */
+  apiKey?: string;
+
+  /**
+   * Your API key secret.
+   *
+   * - For the Advanced Trade or App APIs, this is your API private key (including the -----BEGIN EC PRIVATE KEY-----\n etc).
+   */
+  apiSecret?: string;
+
+  /**
+   * Your API passphrase (NOT your account password). Only used for the API groups that use an API passphrase:
+   * - Coinbase Exchange API
+   * - Coinbase International API
+   * - Coinbase Prime API
+   */
+  apiPassphrase?: string;
+
+  /**
+   * For JWT auth (adv trade & app API), seconds until jwt expires. Defaults to 120 seconds.
+   */
+  jwtExpiresSeconds?: number;
+
+  /** How often to check if the connection is alive */
+  pingInterval?: number;
+
+  /** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
+  pongTimeout?: number;
+
+  /** Delay in milliseconds before respawning the connection */
+  reconnectTimeout?: number;
+
+  wsUrl?: string;
+
+  wsOptions?: {
+    protocols?: string[];
+    agent?: any;
+  } & (
+    | Omit<Partial<WebSocket.ClientOptions>, 'agent'>
+    | Omit<Partial<ClientRequestArgs>, 'agent'>
+  );
+
+  /**
+   * Connect to the sandbox for supported products
+   *
+   * - Coinbase Exchange: https://docs.cdp.coinbase.com/exchange/docs/sandbox
+   * - Coinbase International: https://docs.cdp.coinbase.com/intx/docs/sandbox
+   *
+   * - Coinbase Advanced Trade: No WebSocket sandbox (REST static sandbox only via RestClientOptions.useSandbox).
+   * - Coinbase App: No sandbox available.
+   * - Coinbase Prime: No sandbox available.
+   */
+  useSandbox?: boolean;
+
+  /**
+   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
+   *
+   * Used for Exchange, International and Prime HMAC signatures. Receives the prehash
+   * message and original API secret, and must return a base64-encoded signature.
+   * Does not apply to JWT authentication.
+   *
+   * Look in the examples folder for a demonstration on using node's createHmac instead.
+   */
+  customSignMessageFn?: (message: string, secret: string) => Promise<string>;
+
+  /**
+   * If you authenticated the WS API before, automatically try to re-authenticate the WS API if you're disconnected/reconnected for any reason.
+   */
+  reauthWSAPIOnReconnect?: boolean;
+
+  /**
+   * Time in milliseconds to wait for a Global WS API reply after sending. Default: 10000.
+   * Connection/authentication use their own lifecycle handling.
+   */
+  wsAPITimeout?: number;
+}
+⋮----
+/**
+   * Your API key name.
+   *
+   * - For the Advanced Trade or App APIs, this is your API Key Name.
+   */
+⋮----
+/**
+   * Your API key secret.
+   *
+   * - For the Advanced Trade or App APIs, this is your API private key (including the -----BEGIN EC PRIVATE KEY-----\n etc).
+   */
+⋮----
+/**
+   * Your API passphrase (NOT your account password). Only used for the API groups that use an API passphrase:
+   * - Coinbase Exchange API
+   * - Coinbase International API
+   * - Coinbase Prime API
+   */
+⋮----
+/**
+   * For JWT auth (adv trade & app API), seconds until jwt expires. Defaults to 120 seconds.
+   */
+⋮----
+/** How often to check if the connection is alive */
+⋮----
+/** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */
+⋮----
+/** Delay in milliseconds before respawning the connection */
+⋮----
+/**
+   * Connect to the sandbox for supported products
+   *
+   * - Coinbase Exchange: https://docs.cdp.coinbase.com/exchange/docs/sandbox
+   * - Coinbase International: https://docs.cdp.coinbase.com/intx/docs/sandbox
+   *
+   * - Coinbase Advanced Trade: No WebSocket sandbox (REST static sandbox only via RestClientOptions.useSandbox).
+   * - Coinbase App: No sandbox available.
+   * - Coinbase Prime: No sandbox available.
+   */
+⋮----
+/**
+   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
+   *
+   * Used for Exchange, International and Prime HMAC signatures. Receives the prehash
+   * message and original API secret, and must return a base64-encoded signature.
+   * Does not apply to JWT authentication.
+   *
+   * Look in the examples folder for a demonstration on using node's createHmac instead.
+   */
+⋮----
+/**
+   * If you authenticated the WS API before, automatically try to re-authenticate the WS API if you're disconnected/reconnected for any reason.
+   */
+⋮----
+/**
+   * Time in milliseconds to wait for a Global WS API reply after sending. Default: 10000.
+   * Connection/authentication use their own lifecycle handling.
+   */
+⋮----
+/**
+ * WS configuration that's always defined, regardless of user configuration
+ * (usually comes from defaults if there's no user-provided values)
+ */
+export interface WebsocketClientOptions extends WSClientConfigurableOptions {
+  pingInterval: number;
+  pongTimeout: number;
+  reconnectTimeout: number;
+  useSandbox: boolean;
+  recvWindow: number;
+  /**
+   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
+   */
+  requireConnectionReadyConfirmation: boolean;
+  authPrivateConnectionsOnConnect: boolean;
+  authPrivateRequests: boolean;
+  reauthWSAPIOnReconnect: boolean;
+}
+⋮----
+/**
+   * If true, require a "receipt" that the connection is ready for use (e.g. a specific event type)
+   */
+⋮----
+export type WsMarket =
+  | 'advancedTrade'
+  | 'advancedTradeGlobal'
+  | 'exchange'
+  | 'international'
+  | 'prime';
+
+================
 File: README.md
 ================
-# Coinbase Advanced Trade - Node.js & JavaScript SDK for Coinbase's Advanced Trade, App, Exchange, International, Prime & Commerce REST APIs and WebSockets
+# Node.js & JavaScript SDK for Coinbase's Advanced Trade, App, Exchange, International, Prime & Commerce REST APIs and WebSockets
 
 <p align="center">
   <a href="https://www.npmjs.com/package/coinbase-api">
@@ -23720,9 +23810,9 @@ Coinbase's source table: [Endpoint mapping](https://docs.cdp.coinbase.com/coinba
 
 | Action                                                           | Current API                         | New API                                  | `CBAdvancedTradeGlobalClient`                                                                                                                                  |
 | ---------------------------------------------------------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Place order**<br>_Side becomes the method_                     | `POST /orders`                      | `private/buy`, `private/sell`            | `buy()`, `sell()`                                                                                                                                              |
-| **Edit order**<br>_Edit by label supported_                      | `POST /orders/edit`                 | `private/edit`, `private/edit_by_label`  | `edit()`, `editByLabel()`                                                                                                                                      |
-| **Cancel orders**<br>_No cancel-by-ID-list; loop, or cancel all_ | `POST /orders/batch_cancel`         | `private/cancel`, `private/cancel_all_*` | `cancel()`, `cancelByLabel()`, `cancelAll()`, `cancelAllByCurrency()`, `cancelAllByCurrencyPair()`, `cancelAllByInstrument()`, `cancelAllByKindOrType()`       |
+| **Place order**<br>_Side becomes the method_                     | `POST /orders`                      | `private/buy`, `private/sell`            | `submitBuy()`, `submitSell()`                                                                                                                                  |
+| **Edit order**<br>_Edit by label supported_                      | `POST /orders/edit`                 | `private/edit`, `private/edit_by_label`  | `updateOrder()`, `updateOrderByLabel()`                                                                                                                        |
+| **Cancel orders**<br>_No cancel-by-ID-list; loop, or cancel all_ | `POST /orders/batch_cancel`         | `private/cancel`, `private/cancel_all_*` | `cancelOrder()`, `cancelByLabel()`, `cancelAll()`, `cancelAllByCurrency()`, `cancelAllByCurrencyPair()`, `cancelAllByInstrument()`, `cancelAllByKindOrType()`  |
 | **Close position**                                               | `POST /orders/close_position`       | `private/close_position`                 | `closePosition()`                                                                                                                                              |
 | **Order preview**<br>_No simulated fills_                        | `POST /orders/preview`              | --                                       | --                                                                                                                                                             |
 | **Order history**                                                | `GET /orders/historical/batch`      | `private/get_order_history_*`            | `getOrderHistoryByCurrency()`, `getOrderHistoryByInstrument()`                                                                                                 |
@@ -24233,7 +24323,7 @@ File: package.json
 ================
 {
   "name": "coinbase-api",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Coinbase Advanced Trade SDK for Node.js and JavaScript. Complete Node.js & JavaScript SDK for Coinbase's Advanced Trade, App, Exchange, International, Prime & Commerce REST APIs and WebSockets, with TypeScript & strong end to end tests.",
   "scripts": {
     "clean": "rm -rf dist",
