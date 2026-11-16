@@ -1,5 +1,6 @@
 import WebSocket from 'isomorphic-ws';
 
+import { WSClientConfigurableOptions } from '../../types/websockets/client.js';
 import {
   WsExchangeRequestOperation,
   WsInternationalRequestOperation,
@@ -258,7 +259,10 @@ export function getMergedCBINTXRequestOperations<
 /**
  * Return sign used to authenticate CB Exchange WS requests
  */
-export async function getCBExchangeWSSign(apiSecret: string): Promise<{
+export async function getCBExchangeWSSign(
+  apiSecret: string,
+  customSignMessageFn?: WSClientConfigurableOptions['customSignMessageFn'],
+): Promise<{
   timestampInSeconds: string;
   sign: string;
 }> {
@@ -269,13 +273,15 @@ export async function getCBExchangeWSSign(apiSecret: string): Promise<{
   const signRequestMethod = 'GET';
   const signInput = `${timestampInSeconds}${signRequestMethod}${signPath}`;
 
-  const sign = await signMessage(
-    signInput,
-    apiSecret,
-    'base64',
-    'SHA-256',
-    'base64:web',
-  );
+  const sign = customSignMessageFn
+    ? await customSignMessageFn(signInput, apiSecret)
+    : await signMessage(
+        signInput,
+        apiSecret,
+        'base64',
+        'SHA-256',
+        'base64:web',
+      );
 
   return { sign, timestampInSeconds };
 }
@@ -287,6 +293,7 @@ export async function getCBInternationalWSSign(
   apiKey: string,
   apiSecret: string,
   apiPassphrase: string,
+  customSignMessageFn?: WSClientConfigurableOptions['customSignMessageFn'],
 ): Promise<{
   timestampInSeconds: string;
   sign: string;
@@ -296,13 +303,15 @@ export async function getCBInternationalWSSign(
 
   const signInput = timestampInSeconds + apiKey + 'CBINTLMD' + apiPassphrase;
 
-  const sign = await signMessage(
-    signInput,
-    apiSecret,
-    'base64',
-    'SHA-256',
-    'base64:web',
-  );
+  const sign = customSignMessageFn
+    ? await customSignMessageFn(signInput, apiSecret)
+    : await signMessage(
+        signInput,
+        apiSecret,
+        'base64',
+        'SHA-256',
+        'base64:web',
+      );
 
   return { sign, timestampInSeconds };
 }
@@ -310,14 +319,17 @@ export async function getCBInternationalWSSign(
 /**
  * Return sign used to authenticate CB Prime WS requests
  */
-export async function getCBPrimeWSSign(params: {
-  channelName: string;
-  svcAccountId: string;
-  portfolioId: string;
-  apiKey: string;
-  apiSecret: string;
-  product_ids?: string[];
-}): Promise<{
+export async function getCBPrimeWSSign(
+  params: {
+    channelName: string;
+    svcAccountId: string;
+    portfolioId: string;
+    apiKey: string;
+    apiSecret: string;
+    product_ids?: string[];
+  },
+  customSignMessageFn?: WSClientConfigurableOptions['customSignMessageFn'],
+): Promise<{
   timestampInSeconds: string;
   sign: string;
 }> {
@@ -334,13 +346,15 @@ export async function getCBPrimeWSSign(params: {
     params.product_ids ? params.product_ids.join('') : '',
   ].join('');
 
-  const sign = await signMessage(
-    signInput,
-    params.apiSecret,
-    'base64',
-    'SHA-256',
-    'base64:web',
-  );
+  const sign = customSignMessageFn
+    ? await customSignMessageFn(signInput, params.apiSecret)
+    : await signMessage(
+        signInput,
+        params.apiSecret,
+        'base64',
+        'SHA-256',
+        'base64:web',
+      );
 
   return { sign, timestampInSeconds };
 }
