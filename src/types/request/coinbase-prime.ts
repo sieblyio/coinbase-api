@@ -328,7 +328,7 @@ export interface GetPrimePortfolioProductsRequest {
   /** Must be between 0 and 1000 (defaults to 10 when unset). Values > 1000 are rejected. */
   limit?: number;
   sort_direction?: 'DESC' | 'ASC';
-  /** If unset, returns all product types available for the portfolio (including FUTURE). */
+  /** If unset, returns all product types available for the portfolio (including SPOT, FUTURE, and OPTION). Results are paginated. */
   product_type?:
     | 'SPOT'
     | 'FUTURE'

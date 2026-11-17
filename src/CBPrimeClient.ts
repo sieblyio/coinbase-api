@@ -760,6 +760,8 @@ export class CBPrimeClient extends BaseRestClient {
    * List Portfolio Products
    *
    * List tradable products for a given portfolio.
+   * When product_type is unset, includes SPOT, FUTURE, and OPTION products.
+   * Follow pagination.next_cursor while pagination.has_next is true to retrieve all products.
    */
   getPortfolioProducts(params: GetPrimePortfolioProductsRequest): Promise<any> {
     const { portfolio_id, ...query } = params;
