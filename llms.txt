@@ -18142,6 +18142,318 @@ export function getParamsFromURL(url: string): {
 }
 
 ================
+File: src/index.ts
+================
+
+
+================
+File: src/WebsocketClient.ts
+================
+import { BaseWebsocketClient, EmittableEvent } from './lib/BaseWSClient.js';
+import { signWSJWT } from './lib/jwtNode.js';
+import { neverGuard } from './lib/misc-util.js';
+import {
+  isCBAdvancedTradeErrorEvent,
+  isCBAdvancedTradeWSEvent,
+  isCBExchangeWSEvent,
+  isCBExchangeWSRequestOperation,
+  isCBINTXWSRequestOperation,
+  isCBPrimeWSRequestOperation,
+} from './lib/websocket/typeGuards.js';
+import {
+  getCBExchangeWSSign,
+  getCBInternationalWSSign,
+  getCBPrimeWSSign,
+  getMergedCBExchangeWSRequestOperations,
+  getPromiseRefForWSAPIRequest,
+  isAdvancedTradeGlobalWsKey,
+  isMessageEvent,
+  MessageEventLike,
+  WS_KEY_MAP,
+  WS_URL_MAP,
+  WsKey,
+  WsTopicRequest,
+} from './lib/websocket/websocket-util.js';
+import {
+  WSConnectedResult,
+  WsConnectionStateEnum,
+} from './lib/websocket/WsStore.types.js';
+import { AdvTradeGlobalAuthRequest } from './types/request/advanced-trade-global-client.js';
+import { AdvTradeGlobalWSAuthResult } from './types/websockets/advanced-trade-global.js';
+import { WsMarket } from './types/websockets/client.js';
+import {
+  WsAdvTradeGlobalRequestOperation,
+  WsAdvTradeRequestOperation,
+  WsExchangeAuthenticatedRequestOperation,
+  WsExchangeRequestOperation,
+  WsInternationalAuthenticatedRequestOperation,
+  WsInternationalRequestOperation,
+  WsOperation,
+  WsPrimeAuthenticatedRequestOperation,
+  WsPrimeRequestOperation,
+} from './types/websockets/requests.js';
+import {
+  WSAPIRequest,
+  WSAPIRequestFlags,
+  WsAPITopicRequestParamMap,
+  WsAPITopicResponseMap,
+  WsAPIWsKeyTopicMap,
+} from './types/websockets/wsAPI.js';
+⋮----
+/**
+ * Any WS keys in this list will trigger automatic auth as required, if credentials are available
+ */
+⋮----
+// Account data (fills), requires auth.
+⋮----
+// Coinbase Direct Market Data has direct access to Coinbase Exchange servers and requires auth.
+⋮----
+// The INTX feed always requires auth.
+⋮----
+// The Prime feed always requires auth.
+⋮----
+/**
+ * Any WS keys in this list will ALWAYS skip the authentication process, even if credentials are available
+ */
+⋮----
+/**
+ * WS topics are always a string for this exchange. Some exchanges use complex objects.
+ */
+type WsTopic = string;
+⋮----
+export class WebsocketClient extends BaseWebsocketClient<WsKey>
+⋮----
+/** Tracks either the pending auth reply or the next session renewal. */
+⋮----
+/**
+   * Preconnect the original product feeds, preserving the existing connection set.
+   * Global connections open on demand and are excluded from this method.
+   * Use connect(wsKey) to preconnect a specific feed, or connectWSAPI() for an authenticated Global WS API session.
+   */
+public connectAll(): Promise<(WSConnectedResult | undefined)[]>
+⋮----
+/**
+   * Request subscription to one or more topics. Pass topics as either an array of strings, or array of objects (if the topic has parameters).
+   * Objects should be formatted as {topic: string, params: object}.
+   *
+   * - Subscriptions are automatically routed to the correct websocket connection.
+   * - Authentication/connection is automatic.
+   * - Resubscribe after network issues is automatic.
+   *
+   * Call `unsubscribe(topics)` to remove topics
+   */
+public subscribe(
+    requests:
+      | (WsTopicRequest<WsTopic> | WsTopic)
+      | (WsTopicRequest<WsTopic> | WsTopic)[],
+    wsKey: WsKey,
+  )
+⋮----
+/**
+   * Unsubscribe from one or more topics. Similar to subscribe() but in reverse.
+   *
+   * - Requests are automatically routed to the correct websocket connection.
+   * - These topics will be removed from the topic cache, so they won't be subscribed to again.
+   */
+public unsubscribe(
+    requests:
+      | (WsTopicRequest<WsTopic> | WsTopic)
+      | (WsTopicRequest<WsTopic> | WsTopic)[],
+    wsKey: WsKey,
+  )
+⋮----
+/** Prepare the Global WS API connection and authenticate before the first private call. */
+public connectWSAPI(): Promise<unknown>
+⋮----
+/**
+   * Send a Global JSON-RPC method and await its matching reply. Public methods do not require auth.
+   * Pending calls reject on API errors, timeout or disconnect.
+   * The reply timeout starts after sending; connection/authentication use their own lifecycle handling.
+   * public/auth signs automatically and uses the authentication timeout.
+   * private/logout resolves on the server's normal close.
+   */
+public sendWSAPIRequest<
+    TWSKey extends keyof WsAPIWsKeyTopicMap,
+    TMethod extends WsAPIWsKeyTopicMap[TWSKey],
+  >(
+    wsKey: TWSKey,
+    method: TMethod,
+    ...args: undefined extends WsAPITopicRequestParamMap[TMethod]
+      ? [
+          params?: WsAPITopicRequestParamMap[TMethod],
+          requestFlags?: WSAPIRequestFlags,
+        ]
+      : [
+          params: WsAPITopicRequestParamMap[TMethod],
+          requestFlags?: WSAPIRequestFlags,
+        ]
+  ): Promise<WsAPITopicResponseMap[TMethod]>;
+⋮----
+public async sendWSAPIRequest(
+    wsKey: keyof WsAPIWsKeyTopicMap,
+    method: keyof WsAPITopicRequestParamMap,
+    params?: unknown,
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<any>
+⋮----
+// An explicit auth call renews the session even if already authenticated.
+⋮----
+// Let the server process logout and close. Sending our own close first
+// could trigger cancel-on-disconnect before logout has been processed.
+⋮----
+/**
+   *
+   * Internal methods
+   *
+   */
+⋮----
+/**
+   * Return a websocket URL, which is connected to as-is.
+   * If a token or anything else is needed in the URL, this is a good place to add it.
+   */
+protected async getWsUrl(wsKey: WsKey): Promise<string>
+⋮----
+protected sendPingEvent(wsKey: WsKey)
+⋮----
+protected sendPongEvent(wsKey: WsKey)
+⋮----
+// Reply to the gateway's JSON-RPC test_request. Protocol ping frames are handled by BaseWSClient.
+⋮----
+// Send a protocol layer pong
+⋮----
+protected isWsPing(msg: any, wsKey: WsKey): boolean
+⋮----
+// Let the normal message parser report malformed JSON.
+⋮----
+protected isWsPong(msg: any, wsKey: WsKey): boolean
+⋮----
+// Global uses native pong frames. JSON payloads can contain "pong" in
+// tokens, order labels or other user data and must reach the normal parser.
+⋮----
+// this.logger.info(`Not a pong: `, msg);
+⋮----
+protected resolveEmittableEvents(
+    wsKey: WsKey,
+    event: MessageEventLike,
+  ): EmittableEvent[]
+⋮----
+// Renew on the same socket with a fresh CDP JWT. The session, rather than
+// an access token attached to each subscription, authorizes requests.
+⋮----
+// Passive heartbeat notification. test_request is handled by the ping/pong hooks.
+⋮----
+// Preserve the JSON-RPC envelope for subscription acknowledgements and liveness replies.
+⋮----
+// E.g. {"type":"error","message":"rate limit exceeded","wsKey":"advTradeMarketData"}
+⋮----
+// Parse Advanced Trade WS events (update & response)
+⋮----
+// These are request/reply pattern events (e.g. after subscribing to topics or authenticating)
+⋮----
+// Generic data for a channel
+⋮----
+// Parse CB Exchange WS events
+⋮----
+// Generic data for a channel
+⋮----
+/**
+   * Determines if a topic is for a private channel, using a hardcoded list of strings
+   */
+protected isPrivateTopicRequest(
+    request: WsTopicRequest<string>,
+    wsKey: WsKey,
+  ): boolean
+⋮----
+protected getWsKeyForMarket(market: WsMarket, isPrivate: boolean): WsKey
+⋮----
+protected getWsMarketForWsKey(wsKey: WsKey): WsMarket
+⋮----
+protected getPrivateWSKeys(): WsKey[]
+⋮----
+protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean
+⋮----
+protected clearTimers(wsKey: WsKey)
+⋮----
+protected onWsClose(event: unknown, wsKey: WsKey)
+⋮----
+private handleGlobalAuthFailure(wsKey: WsKey, error: unknown)
+⋮----
+// A failed renewal cannot leave a stale session looking healthy. Reconnect
+// and authenticate again; initial auth failures are surfaced without looping.
+⋮----
+/** Force subscription requests to be sent in smaller batches, if a number is returned */
+protected getMaxTopicsPerSubscribeEvent(wsKey: WsKey): number | null
+⋮----
+// Technically, INTX supports request batching but not with nested parameters, so we'll send one at a time
+⋮----
+// Exchange supports request batching, no known limit to max topics per request
+⋮----
+/**
+   * Map one or more topics into fully prepared "subscribe request" events (already stringified and ready to send)
+   */
+protected async getWsOperationEventsForTopics(
+    topicRequests: WsTopicRequest<string>[],
+    wsKey: WsKey,
+    operation: WsOperation,
+  ): Promise<string[]>
+⋮----
+// Unlike the older Advanced Trade feed, Global accepts all channels in one request.
+⋮----
+/**
+     * Operations need to be structured in a way that this exchange understands.
+     * Parse the internal format into the format expected by the exchange. One request per operation.
+     */
+⋮----
+// In case there's ever more operation types than "subscribe" and "unsubscribe"
+⋮----
+// As of Sep 2024, parameters (such as product_id[]) cannot be nested with the channels array
+⋮----
+// This merges parametrs (such as product_id[]) into the top level request object
+⋮----
+/**
+     * - Merge commands into one if the exchange supports batch requests,
+     * - Apply auth/sign, if needed,
+     * - Apply any final formatting to return a string array, ready to be sent upstream.
+     */
+⋮----
+// Events that are ready to send (usually stringified JSON)
+// ADV trade only supports sending one at a time, so we don't try to merge them
+// These are already signed, if needed.
+⋮----
+/**
+           * No batching is supported for this product group, so we can already
+           * handle sign here and return it as is
+           */
+⋮----
+// Don't expect this to ever happen, but just to please typescript...
+⋮----
+// We're under the max topics per request limit.
+// Send operation requests as one merged request
+⋮----
+// We're over the max topics per request limit. Break into batches.
+⋮----
+// Don't expect this to ever happen, but just to please typescript...
+⋮----
+// We're over the max topics per request limit. Break into batches.
+⋮----
+// throw new Error(
+//   'CB INTX is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
+// );
+⋮----
+// Don't expect this to ever happen, but just to please typescript...
+⋮----
+// throw new Error(
+//   'CB Prime is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
+// );
+⋮----
+// throw new Error(`Not implemented for "${wsKey}" yet`);
+⋮----
+/**
+   * Global authenticates the socket session; older Coinbase feeds sign per request.
+   */
+protected async getWsAuthRequestEvent(wsKey: WsKey): Promise<object>
+
+================
 File: src/types/request/coinbase-prime.ts
 ================
 /**
@@ -18474,7 +18786,7 @@ export interface GetPrimePortfolioProductsRequest {
   /** Must be between 0 and 1000 (defaults to 10 when unset). Values > 1000 are rejected. */
   limit?: number;
   sort_direction?: 'DESC' | 'ASC';
-  /** If unset, returns all product types available for the portfolio (including SPOT, FUTURE, and OPTION). Results are paginated. */
+  /** If unset, returns all product types available for the portfolio (including FUTURE). */
   product_type?:
     | 'SPOT'
     | 'FUTURE'
@@ -18494,7 +18806,7 @@ export interface GetPrimePortfolioProductsRequest {
 ⋮----
 /** Must be between 0 and 1000 (defaults to 10 when unset). Values > 1000 are rejected. */
 ⋮----
-/** If unset, returns all product types available for the portfolio (including SPOT, FUTURE, and OPTION). Results are paginated. */
+/** If unset, returns all product types available for the portfolio (including FUTURE). */
 ⋮----
 /** Only applicable when product_type = FUTURE. */
 ⋮----
@@ -18680,1005 +18992,6 @@ export interface GetPrimePortfolioDerivativePositionsRequest {
 export interface GetPrimePortfolioDerivativesCurrencySummaryRequest {
   portfolio_id: string;
 }
-
-================
-File: src/CBPrimeClient.ts
-================
-import { AxiosRequestConfig } from 'axios';
-⋮----
-import { BaseRestClient } from './lib/BaseRestClient.js';
-import {
-  REST_CLIENT_TYPE_ENUM,
-  RestClientOptions,
-  RestClientType,
-} from './lib/requestUtils.js';
-import {
-  CreatePrimeAddressBookEntryRequest,
-  CreatePrimeConversionRequest,
-  CreatePrimePortfolioAllocationsRequest,
-  CreatePrimePortfolioNetAllocationsRequest,
-  CreatePrimeTransferRequest,
-  CreatePrimeWalletRequest,
-  CreatePrimeWithdrawalRequest,
-  EditPrimeOrderRequest,
-  GetPrimeActivitiesRequest,
-  GetPrimeAddressBookRequest,
-  GetPrimeEntityAccrualsRequest,
-  GetPrimeEntityActivitiesRequest,
-  GetPrimeEntityLocateAvailabilitiesRequest,
-  GetPrimeEntityMarginSummariesRequest,
-  GetPrimeEntityTFTieredFeesRequest,
-  GetPrimeInvoicesRequest,
-  GetPrimeOpenOrdersRequest,
-  GetPrimeOrderFillsRequest,
-  GetPrimeOrderPreviewRequest,
-  GetPrimePortfolioAccrualsRequest,
-  GetPrimePortfolioAllocationsRequest,
-  GetPrimePortfolioBuyingPowerRequest,
-  GetPrimePortfolioDerivativePositionsRequest,
-  GetPrimePortfolioDerivativesCurrencySummaryRequest,
-  GetPrimePortfolioFillsRequest,
-  GetPrimePortfolioLocatesRequest,
-  GetPrimePortfolioMarginConversionsRequest,
-  GetPrimePortfolioOrdersRequest,
-  GetPrimePortfolioProductsRequest,
-  GetPrimePortfolioTransactionsRequest,
-  GetPrimePortfolioUsersRequest,
-  GetPrimePortfolioWalletsRequest,
-  GetPrimePortfolioWithdrawalPowerRequest,
-  GetPrimeTransactionTravelRuleDataRequest,
-  GetPrimeUsersRequest,
-  GetPrimeWalletDepositInstructionsRequest,
-  GetPrimeWalletTransactionsRequest,
-  GetPrimeWeb3WalletBalancesRequest,
-  RotatePrimeApiKeyRequest,
-  SubmitPrimeOrderRequest,
-} from './types/request/coinbase-prime.js';
-⋮----
-/**
- * REST client for Coinbase Prime API:
- * https://docs.cdp.coinbase.com/prime/docs/welcome
- */
-export class CBPrimeClient extends BaseRestClient
-⋮----
-constructor(
-    restClientOptions: RestClientOptions = {},
-    requestOptions: AxiosRequestConfig = {},
-  )
-⋮----
-getClientType(): RestClientType
-⋮----
-/**
-   *
-   * Activities Endpoints
-   *
-   */
-⋮----
-/**
-   * List Activities
-   *
-   * List all activities associated with a given entity.
-   */
-getActivities(params: GetPrimeActivitiesRequest): Promise<any>
-⋮----
-/**
-   * Get Activity by Activity ID
-   *
-   * Retrieve an activity by its activity ID - this endpoint can retrieve both portfolio and entity activities when passed the appropriate API key.
-   */
-getActivityById(params: { activity_id: string }): Promise<any>
-⋮----
-/**
-   * List Entity Activities
-   *
-   * List all activities associated with a given entity.
-   */
-getEntityActivities(params: GetPrimeEntityActivitiesRequest): Promise<any>
-⋮----
-/**
-   * Get Portfolio Activity by Activity ID
-   *
-   * Retrieve an activity by its activity ID for a specific portfolio.
-   */
-getPortfolioActivityById(params: {
-    portfolio_id: string;
-    activity_id: string;
-  }): Promise<any>
-⋮----
-/**
-   *
-   * Allocation Endpoints
-   *
-   */
-⋮----
-/**
-   * Create Portfolio Allocations
-   *
-   * Create allocation for a given portfolio.
-   */
-createPortfolioAllocations(
-    params: CreatePrimePortfolioAllocationsRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Create Portfolio Net Allocations
-   *
-   * Create net allocation for a given portfolio.
-   */
-createPortfolioNetAllocations(
-    params: CreatePrimePortfolioNetAllocationsRequest,
-  ): Promise<any>
-⋮----
-/**
-   * List Portfolio Allocations
-   *
-   * Retrieve historical allocations for a given portfolio.
-   */
-getPortfolioAllocations(
-    params: GetPrimePortfolioAllocationsRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Get Allocation By ID
-   *
-   * Retrieve an allocation by allocation ID.
-   */
-getAllocationById(params: {
-    portfolio_id: string;
-    allocation_id: string;
-  }): Promise<any>
-⋮----
-/**
-   * Get Net Allocations By Netting ID
-   *
-   * Retrieve an allocation by netting ID.
-   */
-getNetAllocationsByNettingId(params: {
-    portfolio_id: string;
-    netting_id: string;
-  }): Promise<any>
-⋮----
-/**
-   *
-   * Financing Endpoints
-   *
-   */
-⋮----
-/**
-   * List Interest Accruals
-   *
-   * Lists interest accruals for an entity between the specified date range given.
-   */
-getEntityAccruals(params: GetPrimeEntityAccrualsRequest): Promise<any>
-⋮----
-/**
-   * Get Entity Locate Availabilities
-   *
-   * Get currencies available to be located with their corresponding amount and rate.
-   */
-getEntityLocateAvailabilities(
-    params: GetPrimeEntityLocateAvailabilitiesRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Get Margin Information
-   *
-   * Gets real-time evaluation of the margin model based on current positions and spot rates.
-   */
-getEntityMargin(params: { entity_id: string }): Promise<any>
-⋮----
-/**
-   * List Margin Call Summaries
-   *
-   * Lists the margin call history for a given entity ID.
-   */
-getEntityMarginSummaries(
-    params: GetPrimeEntityMarginSummariesRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Get Trade Finance Tiered Pricing Fees
-   *
-   * Get trade finance tiered pricing fees for a given entity at a specific time, default to current time.
-   */
-getEntityTFTieredFees(
-    params: GetPrimeEntityTFTieredFeesRequest,
-  ): Promise<any>
-⋮----
-/**
-   * List Interest Accruals For Portfolio
-   *
-   * Lists interest accruals between the specified date range for a specific portfolio ID.
-   */
-getPortfolioAccruals(params: GetPrimePortfolioAccrualsRequest): Promise<any>
-⋮----
-/**
-   * Get Portfolio Buying Power
-   *
-   * Returns the size of a buy trade that can be performed based on existing holdings and available credit.
-   */
-getPortfolioBuyingPower(
-    params: GetPrimePortfolioBuyingPowerRequest,
-  ): Promise<any>
-⋮----
-/**
-   * List Existing Locates
-   *
-   * List locates for the portfolio.
-   */
-getPortfolioLocates(params: GetPrimePortfolioLocatesRequest): Promise<any>
-⋮----
-/**
-   * List Margin Conversions
-   *
-   * Lists conversions and short collateral requirement between specified date range.
-   * This endpoint is deprecated and will be removed in the future. Use /v1/entities/{entity_id}/margin_summaries instead.
-   */
-getPortfolioMarginConversions(
-    params: GetPrimePortfolioMarginConversionsRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Get Portfolio Withdrawal Power
-   *
-   * Returns the nominal quantity of a given asset that can be withdrawn based on holdings and current portfolio equity.
-   */
-getPortfolioWithdrawalPower(
-    params: GetPrimePortfolioWithdrawalPowerRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Get Conversion Fees
-   *
-   * Get your organization's stablecoin conversion fee tiers and month-to-date net conversion volume per currency.
-   * Requires an organization-scoped API key. Required scope: prime.financing.get_conversion_fees.read
-   */
-getConversionFees(): Promise<any>
-⋮----
-/**
-   *
-   * Invoice Endpoints
-   *
-   */
-⋮----
-/**
-   * List Invoices
-   *
-   * Retrieve a list of invoices belonging to an entity.
-   */
-getInvoices(params: GetPrimeInvoicesRequest): Promise<any>
-⋮----
-/**
-   *
-   * Position Endpoints
-   *
-   */
-⋮----
-/**
-   * List Aggregate Entity Positions
-   *
-   * List paginated aggregate positions for a specific entity.
-   */
-getEntityAggregatePositions(params: {
-    entity_id: string;
-    cursor?: string;
-    limit?: number;
-  }): Promise<any>
-⋮----
-/**
-   * List Entity Positions
-   *
-   * List paginated positions for a specific entity.
-   */
-getEntityPositions(params: {
-    entity_id: string;
-    cursor?: string;
-    limit?: number;
-  }): Promise<any>
-⋮----
-/**
-   *
-   * Futures Endpoints
-   *
-   */
-⋮----
-/**
-   * List Portfolio Derivative Positions
-   *
-   * Retrieve all active derivative positions for a given portfolio across US Futures, prediction markets, and international derivatives.
-   * Required scope: prime.futures.get_derivative_positions.read
-   */
-getPortfolioDerivativePositions(
-    params: GetPrimePortfolioDerivativePositionsRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Get Portfolio Derivatives Currency Summary
-   *
-   * Retrieve per-currency international derivatives balances for a given portfolio.
-   * Required scope: prime.futures.get_derivatives_balance_summary.read
-   */
-getPortfolioDerivativesCurrencySummary(
-    params: GetPrimePortfolioDerivativesCurrencySummaryRequest,
-  ): Promise<any>
-⋮----
-/**
-   *
-   * Assets Endpoints
-   *
-   */
-⋮----
-/**
-   * List Assets
-   *
-   * List all assets available for a given entity.
-   */
-getAssets(params: { entity_id: string }): Promise<any>
-⋮----
-/**
-   *
-   * Payment Methods Endpoints
-   *
-   */
-⋮----
-/**
-   * List Entity Payment Methods
-   *
-   * Retrieve all payment methods for a given entity.
-   */
-getEntityPaymentMethods(params: { entity_id: string }): Promise<any>
-⋮----
-/**
-   * Get Entity Payment Method
-   *
-   * Get payment method details by id for a given entity.
-   */
-getEntityPaymentMethod(params: {
-    entity_id: string;
-    payment_method_id: string;
-  }): Promise<any>
-⋮----
-/**
-   *
-   * Users Endpoints
-   *
-   */
-⋮----
-/**
-   * List Users
-   *
-   * List all users associated with a given entity.
-   */
-getUsers(params: GetPrimeUsersRequest): Promise<any>
-⋮----
-/**
-   * List Portfolio Users
-   *
-   * List all users associated with a given portfolio.
-   */
-getPortfolioUsers(params: GetPrimePortfolioUsersRequest): Promise<any>
-⋮----
-/**
-   *
-   * Portfolios Endpoints
-   *
-   */
-⋮----
-/**
-   * List Portfolios
-   *
-   * List all portfolios for which the current API key has read access.
-   */
-getPortfolios(): Promise<any>
-⋮----
-/**
-   * Get Portfolio by Portfolio ID
-   *
-   * Retrieve a given portfolio by its portfolio ID.
-   */
-getPortfolioById(params: { portfolio_id: string }): Promise<any>
-⋮----
-/**
-   * Get Portfolio Credit Information
-   *
-   * Retrieve a portfolio's post-trade credit information.
-   */
-getPortfolioCreditInformation(params: {
-    portfolio_id: string;
-  }): Promise<any>
-⋮----
-/**
-   *
-   * Address Book Endpoints
-   *
-   */
-⋮----
-/**
-   * Get Address Book
-   *
-   * Gets a list of address book addresses.
-   */
-getAddressBook(params: GetPrimeAddressBookRequest): Promise<any>
-⋮----
-/**
-   * Create Address Book Entry
-   *
-   * Creates an entry for a portfolio's trusted addresses.
-   */
-createAddressBookEntry(
-    params: CreatePrimeAddressBookEntryRequest,
-  ): Promise<any>
-⋮----
-/**
-   *
-   * Balances Endpoints
-   *
-   */
-⋮----
-/**
-   * List Portfolio Balances
-   *
-   * List all balances for a specific portfolio.
-   */
-getPortfolioBalances(params: {
-    portfolio_id: string;
-    symbols?: string[];
-    balance_type?: 'TRADING_BALANCES' | 'VAULT_BALANCES' | 'TOTAL_BALANCES';
-  }): Promise<any>
-⋮----
-/**
-   * Get Wallet Balance
-   *
-   * Query balance for a specific wallet.
-   */
-getWalletBalance(params: {
-    portfolio_id: string;
-    wallet_id: string;
-  }): Promise<any>
-⋮----
-/**
-   * List Web3 Wallet Balances
-   *
-   * Query balances for a specific web3 wallet.
-   */
-getWeb3WalletBalances(
-    params: GetPrimeWeb3WalletBalancesRequest,
-  ): Promise<any>
-⋮----
-/**
-   *
-   * Commission Endpoints
-   *
-   */
-⋮----
-/**
-   * Get Portfolio Commission
-   *
-   * Retrieve commission associated with a given portfolio.
-   */
-getPortfolioCommission(params: { portfolio_id: string }): Promise<any>
-⋮----
-/**
-   *
-   * Orders Endpoints
-   *
-   */
-⋮----
-/**
-   * List Portfolio Fills
-   *
-   * Retrieve fills on a given portfolio.
-   *
-   * Note: This endpoint requires a start_date and returns a payload with a default
-   * limit of 100 if not specified. The maximum allowed limit is 3000.
-   */
-getPortfolioFills(params: GetPrimePortfolioFillsRequest): Promise<any>
-⋮----
-/**
-   * List Open Orders
-   *
-   * List all open orders for a given portfolio.
-   */
-getOpenOrders(params: GetPrimeOpenOrdersRequest): Promise<any>
-⋮----
-/**
-   * Create Order
-   *
-   * Create an order for a given portfolio.
-   */
-submitOrder(params: SubmitPrimeOrderRequest): Promise<any>
-⋮----
-/**
-   * Get Order Preview
-   *
-   * Retrieve an order preview for a given portfolio.
-   */
-getOrderPreview(params: GetPrimeOrderPreviewRequest): Promise<any>
-⋮----
-/**
-   * List Portfolio Orders
-   *
-   * List historical orders for a given portfolio.
-   */
-getPortfolioOrders(params: GetPrimePortfolioOrdersRequest): Promise<any>
-⋮----
-/**
-   * Get Order by Order ID
-   *
-   * Retrieve an order by order ID.
-   */
-getOrderById(params: {
-    portfolio_id: string;
-    order_id: string;
-  }): Promise<any>
-⋮----
-/**
-   * Cancel Order
-   *
-   * Cancel an order. (Filled orders cannot be canceled.)
-   */
-cancelOrder(params: {
-    portfolio_id: string;
-    order_id: string;
-  }): Promise<any>
-⋮----
-/**
-   * List Order Fills
-   *
-   * Retrieve fills on a given order.
-   */
-getOrderFills(params: GetPrimeOrderFillsRequest): Promise<any>
-⋮----
-/**
-   * Edit Order (Beta)
-   *
-   * Edit an open order. Supports LIMIT, STOP-LIMIT, TWAP, VWAP, and PEG orders.
-   */
-editOrder(params: EditPrimeOrderRequest): Promise<any>
-⋮----
-/**
-   * Rotate API Key
-   *
-   * Rotate an API key programmatically, generating a new key with the same configuration.
-   * Required scope: prime.api_keys.rotate_api_key.write
-   */
-rotateApiKey(params?: RotatePrimeApiKeyRequest): Promise<any>
-⋮----
-/**
-   *
-   * Products Endpoints
-   *
-   */
-⋮----
-/**
-   * List Portfolio Products
-   *
-   * List tradable products for a given portfolio.
-   * When product_type is unset, includes SPOT, FUTURE, and OPTION products.
-   * Follow pagination.next_cursor while pagination.has_next is true to retrieve all products.
-   */
-getPortfolioProducts(params: GetPrimePortfolioProductsRequest): Promise<any>
-⋮----
-/**
-   *
-   * Transactions Endpoints
-   *
-   */
-⋮----
-/**
-   * List Portfolio Transactions
-   *
-   * List transactions for a given portfolio (only transactions that affect balances are accessible).
-   */
-getPortfolioTransactions(
-    params: GetPrimePortfolioTransactionsRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Get Transaction by Transaction ID
-   *
-   * Retrieve a specific transaction by its transaction ID (only transactions that affect balances are accessible).
-   */
-getTransactionById(params: {
-    portfolio_id: string;
-    transaction_id: string;
-  }): Promise<any>
-⋮----
-/**
-   *
-   * Travel Rule Endpoints
-   *
-   */
-⋮----
-/**
-   * Get Transaction Travel Rule Data
-   *
-   * (Beta) Get fulfilled travel rule data for a transaction.
-   */
-getTransactionTravelRuleData(
-    params: GetPrimeTransactionTravelRuleDataRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Create Conversion
-   *
-   * Perform a conversion between 2 assets.
-   */
-createConversion(params: CreatePrimeConversionRequest): Promise<any>
-⋮----
-/**
-   * List Wallet Transactions
-   *
-   * Retrieve transactions for a given wallet (only transactions that affect balances are accessible).
-   */
-getWalletTransactions(
-    params: GetPrimeWalletTransactionsRequest,
-  ): Promise<any>
-⋮----
-/**
-   * Create Transfer
-   *
-   * Create a wallet transfer.
-   */
-createTransfer(params: CreatePrimeTransferRequest): Promise<any>
-⋮----
-/**
-   * Create Withdrawal
-   *
-   * Create a withdrawal.
-   */
-createWithdrawal(params: CreatePrimeWithdrawalRequest): Promise<any>
-⋮----
-/**
-   *
-   * Wallets Endpoints
-   *
-   */
-⋮----
-/**
-   * List Portfolio Wallets
-   *
-   * List all wallets associated with a given portfolio.
-   */
-getPortfolioWallets(params: GetPrimePortfolioWalletsRequest): Promise<any>
-⋮----
-/**
-   * Create Wallet
-   *
-   * Create a wallet.
-   */
-createWallet(params: CreatePrimeWalletRequest): Promise<any>
-⋮----
-/**
-   * Get Wallet by Wallet ID
-   *
-   * Retrieve a specific wallet by Wallet ID.
-   */
-getWalletById(params: {
-    portfolio_id: string;
-    wallet_id: string;
-  }): Promise<any>
-⋮----
-/**
-   * Get Wallet Deposit Instructions
-   *
-   * Retrieve a specific wallet's deposit instructions.
-   */
-getWalletDepositInstructions(
-    params: GetPrimeWalletDepositInstructionsRequest,
-  ): Promise<any>
-
-================
-File: src/index.ts
-================
-
-
-================
-File: src/WebsocketClient.ts
-================
-import { BaseWebsocketClient, EmittableEvent } from './lib/BaseWSClient.js';
-import { signWSJWT } from './lib/jwtNode.js';
-import { neverGuard } from './lib/misc-util.js';
-import {
-  isCBAdvancedTradeErrorEvent,
-  isCBAdvancedTradeWSEvent,
-  isCBExchangeWSEvent,
-  isCBExchangeWSRequestOperation,
-  isCBINTXWSRequestOperation,
-  isCBPrimeWSRequestOperation,
-} from './lib/websocket/typeGuards.js';
-import {
-  getCBExchangeWSSign,
-  getCBInternationalWSSign,
-  getCBPrimeWSSign,
-  getMergedCBExchangeWSRequestOperations,
-  getPromiseRefForWSAPIRequest,
-  isAdvancedTradeGlobalWsKey,
-  isMessageEvent,
-  MessageEventLike,
-  WS_KEY_MAP,
-  WS_URL_MAP,
-  WsKey,
-  WsTopicRequest,
-} from './lib/websocket/websocket-util.js';
-import {
-  WSConnectedResult,
-  WsConnectionStateEnum,
-} from './lib/websocket/WsStore.types.js';
-import { AdvTradeGlobalAuthRequest } from './types/request/advanced-trade-global-client.js';
-import { AdvTradeGlobalWSAuthResult } from './types/websockets/advanced-trade-global.js';
-import { WsMarket } from './types/websockets/client.js';
-import {
-  WsAdvTradeGlobalRequestOperation,
-  WsAdvTradeRequestOperation,
-  WsExchangeAuthenticatedRequestOperation,
-  WsExchangeRequestOperation,
-  WsInternationalAuthenticatedRequestOperation,
-  WsInternationalRequestOperation,
-  WsOperation,
-  WsPrimeAuthenticatedRequestOperation,
-  WsPrimeRequestOperation,
-} from './types/websockets/requests.js';
-import {
-  WSAPIRequest,
-  WSAPIRequestFlags,
-  WsAPITopicRequestParamMap,
-  WsAPITopicResponseMap,
-  WsAPIWsKeyTopicMap,
-} from './types/websockets/wsAPI.js';
-⋮----
-/**
- * Any WS keys in this list will trigger automatic auth as required, if credentials are available
- */
-⋮----
-// Account data (fills), requires auth.
-⋮----
-// Coinbase Direct Market Data has direct access to Coinbase Exchange servers and requires auth.
-⋮----
-// The INTX feed always requires auth.
-⋮----
-// The Prime feed always requires auth.
-⋮----
-/**
- * Any WS keys in this list will ALWAYS skip the authentication process, even if credentials are available
- */
-⋮----
-/**
- * WS topics are always a string for this exchange. Some exchanges use complex objects.
- */
-type WsTopic = string;
-⋮----
-export class WebsocketClient extends BaseWebsocketClient<WsKey>
-⋮----
-/** Tracks either the pending auth reply or the next session renewal. */
-⋮----
-/**
-   * Preconnect the original product feeds, preserving the existing connection set.
-   * Global connections open on demand and are excluded from this method.
-   * Use connect(wsKey) to preconnect a specific feed, or connectWSAPI() for an authenticated Global WS API session.
-   */
-public connectAll(): Promise<(WSConnectedResult | undefined)[]>
-⋮----
-/**
-   * Request subscription to one or more topics. Pass topics as either an array of strings, or array of objects (if the topic has parameters).
-   * Objects should be formatted as {topic: string, params: object}.
-   *
-   * - Subscriptions are automatically routed to the correct websocket connection.
-   * - Authentication/connection is automatic.
-   * - Resubscribe after network issues is automatic.
-   *
-   * Call `unsubscribe(topics)` to remove topics
-   */
-public subscribe(
-    requests:
-      | (WsTopicRequest<WsTopic> | WsTopic)
-      | (WsTopicRequest<WsTopic> | WsTopic)[],
-    wsKey: WsKey,
-  )
-⋮----
-/**
-   * Unsubscribe from one or more topics. Similar to subscribe() but in reverse.
-   *
-   * - Requests are automatically routed to the correct websocket connection.
-   * - These topics will be removed from the topic cache, so they won't be subscribed to again.
-   */
-public unsubscribe(
-    requests:
-      | (WsTopicRequest<WsTopic> | WsTopic)
-      | (WsTopicRequest<WsTopic> | WsTopic)[],
-    wsKey: WsKey,
-  )
-⋮----
-/** Prepare the Global WS API connection and authenticate before the first private call. */
-public connectWSAPI(): Promise<unknown>
-⋮----
-/**
-   * Send a Global JSON-RPC method and await its matching reply. Public methods do not require auth.
-   * Pending calls reject on API errors, timeout or disconnect.
-   * The reply timeout starts after sending; connection/authentication use their own lifecycle handling.
-   * public/auth signs automatically and uses the authentication timeout.
-   * private/logout resolves on the server's normal close.
-   */
-public sendWSAPIRequest<
-    TWSKey extends keyof WsAPIWsKeyTopicMap,
-    TMethod extends WsAPIWsKeyTopicMap[TWSKey],
-  >(
-    wsKey: TWSKey,
-    method: TMethod,
-    ...args: undefined extends WsAPITopicRequestParamMap[TMethod]
-      ? [
-          params?: WsAPITopicRequestParamMap[TMethod],
-          requestFlags?: WSAPIRequestFlags,
-        ]
-      : [
-          params: WsAPITopicRequestParamMap[TMethod],
-          requestFlags?: WSAPIRequestFlags,
-        ]
-  ): Promise<WsAPITopicResponseMap[TMethod]>;
-⋮----
-public async sendWSAPIRequest(
-    wsKey: keyof WsAPIWsKeyTopicMap,
-    method: keyof WsAPITopicRequestParamMap,
-    params?: unknown,
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<any>
-⋮----
-// An explicit auth call renews the session even if already authenticated.
-⋮----
-// Let the server process logout and close. Sending our own close first
-// could trigger cancel-on-disconnect before logout has been processed.
-⋮----
-/**
-   *
-   * Internal methods
-   *
-   */
-⋮----
-/**
-   * Return a websocket URL, which is connected to as-is.
-   * If a token or anything else is needed in the URL, this is a good place to add it.
-   */
-protected async getWsUrl(wsKey: WsKey): Promise<string>
-⋮----
-protected sendPingEvent(wsKey: WsKey)
-⋮----
-protected sendPongEvent(wsKey: WsKey)
-⋮----
-// Reply to the gateway's JSON-RPC test_request. Protocol ping frames are handled by BaseWSClient.
-⋮----
-// Send a protocol layer pong
-⋮----
-protected isWsPing(msg: any, wsKey: WsKey): boolean
-⋮----
-// Let the normal message parser report malformed JSON.
-⋮----
-protected isWsPong(msg: any, wsKey: WsKey): boolean
-⋮----
-// Global uses native pong frames. JSON payloads can contain "pong" in
-// tokens, order labels or other user data and must reach the normal parser.
-⋮----
-// this.logger.info(`Not a pong: `, msg);
-⋮----
-protected resolveEmittableEvents(
-    wsKey: WsKey,
-    event: MessageEventLike,
-  ): EmittableEvent[]
-⋮----
-// Renew on the same socket with a fresh CDP JWT. The session, rather than
-// an access token attached to each subscription, authorizes requests.
-⋮----
-// Passive heartbeat notification. test_request is handled by the ping/pong hooks.
-⋮----
-// Preserve the JSON-RPC envelope for subscription acknowledgements and liveness replies.
-⋮----
-// E.g. {"type":"error","message":"rate limit exceeded","wsKey":"advTradeMarketData"}
-⋮----
-// Parse Advanced Trade WS events (update & response)
-⋮----
-// These are request/reply pattern events (e.g. after subscribing to topics or authenticating)
-⋮----
-// Generic data for a channel
-⋮----
-// Parse CB Exchange WS events
-⋮----
-// Generic data for a channel
-⋮----
-/**
-   * Determines if a topic is for a private channel, using a hardcoded list of strings
-   */
-protected isPrivateTopicRequest(
-    request: WsTopicRequest<string>,
-    wsKey: WsKey,
-  ): boolean
-⋮----
-protected getWsKeyForMarket(market: WsMarket, isPrivate: boolean): WsKey
-⋮----
-protected getWsMarketForWsKey(wsKey: WsKey): WsMarket
-⋮----
-protected getPrivateWSKeys(): WsKey[]
-⋮----
-protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean
-⋮----
-protected clearTimers(wsKey: WsKey)
-⋮----
-protected onWsClose(event: unknown, wsKey: WsKey)
-⋮----
-private handleGlobalAuthFailure(wsKey: WsKey, error: unknown)
-⋮----
-// A failed renewal cannot leave a stale session looking healthy. Reconnect
-// and authenticate again; initial auth failures are surfaced without looping.
-⋮----
-/** Force subscription requests to be sent in smaller batches, if a number is returned */
-protected getMaxTopicsPerSubscribeEvent(wsKey: WsKey): number | null
-⋮----
-// Technically, INTX supports request batching but not with nested parameters, so we'll send one at a time
-⋮----
-// Exchange supports request batching, no known limit to max topics per request
-⋮----
-/**
-   * Map one or more topics into fully prepared "subscribe request" events (already stringified and ready to send)
-   */
-protected async getWsOperationEventsForTopics(
-    topicRequests: WsTopicRequest<string>[],
-    wsKey: WsKey,
-    operation: WsOperation,
-  ): Promise<string[]>
-⋮----
-// Unlike the older Advanced Trade feed, Global accepts all channels in one request.
-⋮----
-/**
-     * Operations need to be structured in a way that this exchange understands.
-     * Parse the internal format into the format expected by the exchange. One request per operation.
-     */
-⋮----
-// In case there's ever more operation types than "subscribe" and "unsubscribe"
-⋮----
-// As of Sep 2024, parameters (such as product_id[]) cannot be nested with the channels array
-⋮----
-// This merges parametrs (such as product_id[]) into the top level request object
-⋮----
-/**
-     * - Merge commands into one if the exchange supports batch requests,
-     * - Apply auth/sign, if needed,
-     * - Apply any final formatting to return a string array, ready to be sent upstream.
-     */
-⋮----
-// Events that are ready to send (usually stringified JSON)
-// ADV trade only supports sending one at a time, so we don't try to merge them
-// These are already signed, if needed.
-⋮----
-/**
-           * No batching is supported for this product group, so we can already
-           * handle sign here and return it as is
-           */
-⋮----
-// Don't expect this to ever happen, but just to please typescript...
-⋮----
-// We're under the max topics per request limit.
-// Send operation requests as one merged request
-⋮----
-// We're over the max topics per request limit. Break into batches.
-⋮----
-// Don't expect this to ever happen, but just to please typescript...
-⋮----
-// We're over the max topics per request limit. Break into batches.
-⋮----
-// throw new Error(
-//   'CB INTX is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
-// );
-⋮----
-// Don't expect this to ever happen, but just to please typescript...
-⋮----
-// throw new Error(
-//   'CB Prime is not fully implemented yet - awaiting test environment... if you need this, please get in touch.',
-// );
-⋮----
-// throw new Error(`Not implemented for "${wsKey}" yet`);
-⋮----
-/**
-   * Global authenticates the socket session; older Coinbase feeds sign per request.
-   */
-protected async getWsAuthRequestEvent(wsKey: WsKey): Promise<object>
 
 ================
 File: src/CBAdvancedTradeGlobalClient.ts
@@ -21465,6 +20778,691 @@ getBrokerTrades(params?: any): Promise<any>
    * JSON-RPC: private/get_broker_trade_requests
    */
 getBrokerTradeRequests(params?: any): Promise<any>
+
+================
+File: src/CBPrimeClient.ts
+================
+import { AxiosRequestConfig } from 'axios';
+⋮----
+import { BaseRestClient } from './lib/BaseRestClient.js';
+import {
+  REST_CLIENT_TYPE_ENUM,
+  RestClientOptions,
+  RestClientType,
+} from './lib/requestUtils.js';
+import {
+  CreatePrimeAddressBookEntryRequest,
+  CreatePrimeConversionRequest,
+  CreatePrimePortfolioAllocationsRequest,
+  CreatePrimePortfolioNetAllocationsRequest,
+  CreatePrimeTransferRequest,
+  CreatePrimeWalletRequest,
+  CreatePrimeWithdrawalRequest,
+  EditPrimeOrderRequest,
+  GetPrimeActivitiesRequest,
+  GetPrimeAddressBookRequest,
+  GetPrimeEntityAccrualsRequest,
+  GetPrimeEntityActivitiesRequest,
+  GetPrimeEntityLocateAvailabilitiesRequest,
+  GetPrimeEntityMarginSummariesRequest,
+  GetPrimeEntityTFTieredFeesRequest,
+  GetPrimeInvoicesRequest,
+  GetPrimeOpenOrdersRequest,
+  GetPrimeOrderFillsRequest,
+  GetPrimeOrderPreviewRequest,
+  GetPrimePortfolioAccrualsRequest,
+  GetPrimePortfolioAllocationsRequest,
+  GetPrimePortfolioBuyingPowerRequest,
+  GetPrimePortfolioDerivativePositionsRequest,
+  GetPrimePortfolioDerivativesCurrencySummaryRequest,
+  GetPrimePortfolioFillsRequest,
+  GetPrimePortfolioLocatesRequest,
+  GetPrimePortfolioMarginConversionsRequest,
+  GetPrimePortfolioOrdersRequest,
+  GetPrimePortfolioProductsRequest,
+  GetPrimePortfolioTransactionsRequest,
+  GetPrimePortfolioUsersRequest,
+  GetPrimePortfolioWalletsRequest,
+  GetPrimePortfolioWithdrawalPowerRequest,
+  GetPrimeTransactionTravelRuleDataRequest,
+  GetPrimeUsersRequest,
+  GetPrimeWalletDepositInstructionsRequest,
+  GetPrimeWalletTransactionsRequest,
+  GetPrimeWeb3WalletBalancesRequest,
+  RotatePrimeApiKeyRequest,
+  SubmitPrimeOrderRequest,
+} from './types/request/coinbase-prime.js';
+⋮----
+/**
+ * REST client for Coinbase Prime API:
+ * https://docs.cdp.coinbase.com/prime/docs/welcome
+ */
+export class CBPrimeClient extends BaseRestClient
+⋮----
+constructor(
+    restClientOptions: RestClientOptions = {},
+    requestOptions: AxiosRequestConfig = {},
+  )
+⋮----
+getClientType(): RestClientType
+⋮----
+/**
+   *
+   * Activities Endpoints
+   *
+   */
+⋮----
+/**
+   * List Activities
+   *
+   * List all activities associated with a given entity.
+   */
+getActivities(params: GetPrimeActivitiesRequest): Promise<any>
+⋮----
+/**
+   * Get Activity by Activity ID
+   *
+   * Retrieve an activity by its activity ID - this endpoint can retrieve both portfolio and entity activities when passed the appropriate API key.
+   */
+getActivityById(params: { activity_id: string }): Promise<any>
+⋮----
+/**
+   * List Entity Activities
+   *
+   * List all activities associated with a given entity.
+   */
+getEntityActivities(params: GetPrimeEntityActivitiesRequest): Promise<any>
+⋮----
+/**
+   * Get Portfolio Activity by Activity ID
+   *
+   * Retrieve an activity by its activity ID for a specific portfolio.
+   */
+getPortfolioActivityById(params: {
+    portfolio_id: string;
+    activity_id: string;
+  }): Promise<any>
+⋮----
+/**
+   *
+   * Allocation Endpoints
+   *
+   */
+⋮----
+/**
+   * Create Portfolio Allocations
+   *
+   * Create allocation for a given portfolio.
+   */
+createPortfolioAllocations(
+    params: CreatePrimePortfolioAllocationsRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Create Portfolio Net Allocations
+   *
+   * Create net allocation for a given portfolio.
+   */
+createPortfolioNetAllocations(
+    params: CreatePrimePortfolioNetAllocationsRequest,
+  ): Promise<any>
+⋮----
+/**
+   * List Portfolio Allocations
+   *
+   * Retrieve historical allocations for a given portfolio.
+   */
+getPortfolioAllocations(
+    params: GetPrimePortfolioAllocationsRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Get Allocation By ID
+   *
+   * Retrieve an allocation by allocation ID.
+   */
+getAllocationById(params: {
+    portfolio_id: string;
+    allocation_id: string;
+  }): Promise<any>
+⋮----
+/**
+   * Get Net Allocations By Netting ID
+   *
+   * Retrieve an allocation by netting ID.
+   */
+getNetAllocationsByNettingId(params: {
+    portfolio_id: string;
+    netting_id: string;
+  }): Promise<any>
+⋮----
+/**
+   *
+   * Financing Endpoints
+   *
+   */
+⋮----
+/**
+   * List Interest Accruals
+   *
+   * Lists interest accruals for an entity between the specified date range given.
+   */
+getEntityAccruals(params: GetPrimeEntityAccrualsRequest): Promise<any>
+⋮----
+/**
+   * Get Entity Locate Availabilities
+   *
+   * Get currencies available to be located with their corresponding amount and rate.
+   */
+getEntityLocateAvailabilities(
+    params: GetPrimeEntityLocateAvailabilitiesRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Get Margin Information
+   *
+   * Gets real-time evaluation of the margin model based on current positions and spot rates.
+   */
+getEntityMargin(params: { entity_id: string }): Promise<any>
+⋮----
+/**
+   * List Margin Call Summaries
+   *
+   * Lists the margin call history for a given entity ID.
+   */
+getEntityMarginSummaries(
+    params: GetPrimeEntityMarginSummariesRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Get Trade Finance Tiered Pricing Fees
+   *
+   * Get trade finance tiered pricing fees for a given entity at a specific time, default to current time.
+   */
+getEntityTFTieredFees(
+    params: GetPrimeEntityTFTieredFeesRequest,
+  ): Promise<any>
+⋮----
+/**
+   * List Interest Accruals For Portfolio
+   *
+   * Lists interest accruals between the specified date range for a specific portfolio ID.
+   */
+getPortfolioAccruals(params: GetPrimePortfolioAccrualsRequest): Promise<any>
+⋮----
+/**
+   * Get Portfolio Buying Power
+   *
+   * Returns the size of a buy trade that can be performed based on existing holdings and available credit.
+   */
+getPortfolioBuyingPower(
+    params: GetPrimePortfolioBuyingPowerRequest,
+  ): Promise<any>
+⋮----
+/**
+   * List Existing Locates
+   *
+   * List locates for the portfolio.
+   */
+getPortfolioLocates(params: GetPrimePortfolioLocatesRequest): Promise<any>
+⋮----
+/**
+   * List Margin Conversions
+   *
+   * Lists conversions and short collateral requirement between specified date range.
+   * This endpoint is deprecated and will be removed in the future. Use /v1/entities/{entity_id}/margin_summaries instead.
+   */
+getPortfolioMarginConversions(
+    params: GetPrimePortfolioMarginConversionsRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Get Portfolio Withdrawal Power
+   *
+   * Returns the nominal quantity of a given asset that can be withdrawn based on holdings and current portfolio equity.
+   */
+getPortfolioWithdrawalPower(
+    params: GetPrimePortfolioWithdrawalPowerRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Get Conversion Fees
+   *
+   * Get your organization's stablecoin conversion fee tiers and month-to-date net conversion volume per currency.
+   * Requires an organization-scoped API key. Required scope: prime.financing.get_conversion_fees.read
+   */
+getConversionFees(): Promise<any>
+⋮----
+/**
+   *
+   * Invoice Endpoints
+   *
+   */
+⋮----
+/**
+   * List Invoices
+   *
+   * Retrieve a list of invoices belonging to an entity.
+   */
+getInvoices(params: GetPrimeInvoicesRequest): Promise<any>
+⋮----
+/**
+   *
+   * Position Endpoints
+   *
+   */
+⋮----
+/**
+   * List Aggregate Entity Positions
+   *
+   * List paginated aggregate positions for a specific entity.
+   */
+getEntityAggregatePositions(params: {
+    entity_id: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<any>
+⋮----
+/**
+   * List Entity Positions
+   *
+   * List paginated positions for a specific entity.
+   */
+getEntityPositions(params: {
+    entity_id: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<any>
+⋮----
+/**
+   *
+   * Futures Endpoints
+   *
+   */
+⋮----
+/**
+   * List Portfolio Derivative Positions
+   *
+   * Retrieve all active derivative positions for a given portfolio across US Futures, prediction markets, and international derivatives.
+   * Required scope: prime.futures.get_derivative_positions.read
+   */
+getPortfolioDerivativePositions(
+    params: GetPrimePortfolioDerivativePositionsRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Get Portfolio Derivatives Currency Summary
+   *
+   * Retrieve per-currency international derivatives balances for a given portfolio.
+   * Required scope: prime.futures.get_derivatives_balance_summary.read
+   */
+getPortfolioDerivativesCurrencySummary(
+    params: GetPrimePortfolioDerivativesCurrencySummaryRequest,
+  ): Promise<any>
+⋮----
+/**
+   *
+   * Assets Endpoints
+   *
+   */
+⋮----
+/**
+   * List Assets
+   *
+   * List all assets available for a given entity.
+   */
+getAssets(params: { entity_id: string }): Promise<any>
+⋮----
+/**
+   *
+   * Payment Methods Endpoints
+   *
+   */
+⋮----
+/**
+   * List Entity Payment Methods
+   *
+   * Retrieve all payment methods for a given entity.
+   */
+getEntityPaymentMethods(params: { entity_id: string }): Promise<any>
+⋮----
+/**
+   * Get Entity Payment Method
+   *
+   * Get payment method details by id for a given entity.
+   */
+getEntityPaymentMethod(params: {
+    entity_id: string;
+    payment_method_id: string;
+  }): Promise<any>
+⋮----
+/**
+   *
+   * Users Endpoints
+   *
+   */
+⋮----
+/**
+   * List Users
+   *
+   * List all users associated with a given entity.
+   */
+getUsers(params: GetPrimeUsersRequest): Promise<any>
+⋮----
+/**
+   * List Portfolio Users
+   *
+   * List all users associated with a given portfolio.
+   */
+getPortfolioUsers(params: GetPrimePortfolioUsersRequest): Promise<any>
+⋮----
+/**
+   *
+   * Portfolios Endpoints
+   *
+   */
+⋮----
+/**
+   * List Portfolios
+   *
+   * List all portfolios for which the current API key has read access.
+   */
+getPortfolios(): Promise<any>
+⋮----
+/**
+   * Get Portfolio by Portfolio ID
+   *
+   * Retrieve a given portfolio by its portfolio ID.
+   */
+getPortfolioById(params: { portfolio_id: string }): Promise<any>
+⋮----
+/**
+   * Get Portfolio Credit Information
+   *
+   * Retrieve a portfolio's post-trade credit information.
+   */
+getPortfolioCreditInformation(params: {
+    portfolio_id: string;
+  }): Promise<any>
+⋮----
+/**
+   *
+   * Address Book Endpoints
+   *
+   */
+⋮----
+/**
+   * Get Address Book
+   *
+   * Gets a list of address book addresses.
+   */
+getAddressBook(params: GetPrimeAddressBookRequest): Promise<any>
+⋮----
+/**
+   * Create Address Book Entry
+   *
+   * Creates an entry for a portfolio's trusted addresses.
+   */
+createAddressBookEntry(
+    params: CreatePrimeAddressBookEntryRequest,
+  ): Promise<any>
+⋮----
+/**
+   *
+   * Balances Endpoints
+   *
+   */
+⋮----
+/**
+   * List Portfolio Balances
+   *
+   * List all balances for a specific portfolio.
+   */
+getPortfolioBalances(params: {
+    portfolio_id: string;
+    symbols?: string[];
+    balance_type?: 'TRADING_BALANCES' | 'VAULT_BALANCES' | 'TOTAL_BALANCES';
+  }): Promise<any>
+⋮----
+/**
+   * Get Wallet Balance
+   *
+   * Query balance for a specific wallet.
+   */
+getWalletBalance(params: {
+    portfolio_id: string;
+    wallet_id: string;
+  }): Promise<any>
+⋮----
+/**
+   * List Web3 Wallet Balances
+   *
+   * Query balances for a specific web3 wallet.
+   */
+getWeb3WalletBalances(
+    params: GetPrimeWeb3WalletBalancesRequest,
+  ): Promise<any>
+⋮----
+/**
+   *
+   * Commission Endpoints
+   *
+   */
+⋮----
+/**
+   * Get Portfolio Commission
+   *
+   * Retrieve commission associated with a given portfolio.
+   */
+getPortfolioCommission(params: { portfolio_id: string }): Promise<any>
+⋮----
+/**
+   *
+   * Orders Endpoints
+   *
+   */
+⋮----
+/**
+   * List Portfolio Fills
+   *
+   * Retrieve fills on a given portfolio.
+   *
+   * Note: This endpoint requires a start_date and returns a payload with a default
+   * limit of 100 if not specified. The maximum allowed limit is 3000.
+   */
+getPortfolioFills(params: GetPrimePortfolioFillsRequest): Promise<any>
+⋮----
+/**
+   * List Open Orders
+   *
+   * List all open orders for a given portfolio.
+   */
+getOpenOrders(params: GetPrimeOpenOrdersRequest): Promise<any>
+⋮----
+/**
+   * Create Order
+   *
+   * Create an order for a given portfolio.
+   */
+submitOrder(params: SubmitPrimeOrderRequest): Promise<any>
+⋮----
+/**
+   * Get Order Preview
+   *
+   * Retrieve an order preview for a given portfolio.
+   */
+getOrderPreview(params: GetPrimeOrderPreviewRequest): Promise<any>
+⋮----
+/**
+   * List Portfolio Orders
+   *
+   * List historical orders for a given portfolio.
+   */
+getPortfolioOrders(params: GetPrimePortfolioOrdersRequest): Promise<any>
+⋮----
+/**
+   * Get Order by Order ID
+   *
+   * Retrieve an order by order ID.
+   */
+getOrderById(params: {
+    portfolio_id: string;
+    order_id: string;
+  }): Promise<any>
+⋮----
+/**
+   * Cancel Order
+   *
+   * Cancel an order. (Filled orders cannot be canceled.)
+   */
+cancelOrder(params: {
+    portfolio_id: string;
+    order_id: string;
+  }): Promise<any>
+⋮----
+/**
+   * List Order Fills
+   *
+   * Retrieve fills on a given order.
+   */
+getOrderFills(params: GetPrimeOrderFillsRequest): Promise<any>
+⋮----
+/**
+   * Edit Order (Beta)
+   *
+   * Edit an open order. Supports LIMIT, STOP-LIMIT, TWAP, VWAP, and PEG orders.
+   */
+editOrder(params: EditPrimeOrderRequest): Promise<any>
+⋮----
+/**
+   * Rotate API Key
+   *
+   * Rotate an API key programmatically, generating a new key with the same configuration.
+   * Required scope: prime.api_keys.rotate_api_key.write
+   */
+rotateApiKey(params?: RotatePrimeApiKeyRequest): Promise<any>
+⋮----
+/**
+   *
+   * Products Endpoints
+   *
+   */
+⋮----
+/**
+   * List Portfolio Products
+   *
+   * List tradable products for a given portfolio.
+   */
+getPortfolioProducts(params: GetPrimePortfolioProductsRequest): Promise<any>
+⋮----
+/**
+   *
+   * Transactions Endpoints
+   *
+   */
+⋮----
+/**
+   * List Portfolio Transactions
+   *
+   * List transactions for a given portfolio (only transactions that affect balances are accessible).
+   */
+getPortfolioTransactions(
+    params: GetPrimePortfolioTransactionsRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Get Transaction by Transaction ID
+   *
+   * Retrieve a specific transaction by its transaction ID (only transactions that affect balances are accessible).
+   */
+getTransactionById(params: {
+    portfolio_id: string;
+    transaction_id: string;
+  }): Promise<any>
+⋮----
+/**
+   *
+   * Travel Rule Endpoints
+   *
+   */
+⋮----
+/**
+   * Get Transaction Travel Rule Data
+   *
+   * (Beta) Get fulfilled travel rule data for a transaction.
+   */
+getTransactionTravelRuleData(
+    params: GetPrimeTransactionTravelRuleDataRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Create Conversion
+   *
+   * Perform a conversion between 2 assets.
+   */
+createConversion(params: CreatePrimeConversionRequest): Promise<any>
+⋮----
+/**
+   * List Wallet Transactions
+   *
+   * Retrieve transactions for a given wallet (only transactions that affect balances are accessible).
+   */
+getWalletTransactions(
+    params: GetPrimeWalletTransactionsRequest,
+  ): Promise<any>
+⋮----
+/**
+   * Create Transfer
+   *
+   * Create a wallet transfer.
+   */
+createTransfer(params: CreatePrimeTransferRequest): Promise<any>
+⋮----
+/**
+   * Create Withdrawal
+   *
+   * Create a withdrawal.
+   */
+createWithdrawal(params: CreatePrimeWithdrawalRequest): Promise<any>
+⋮----
+/**
+   *
+   * Wallets Endpoints
+   *
+   */
+⋮----
+/**
+   * List Portfolio Wallets
+   *
+   * List all wallets associated with a given portfolio.
+   */
+getPortfolioWallets(params: GetPrimePortfolioWalletsRequest): Promise<any>
+⋮----
+/**
+   * Create Wallet
+   *
+   * Create a wallet.
+   */
+createWallet(params: CreatePrimeWalletRequest): Promise<any>
+⋮----
+/**
+   * Get Wallet by Wallet ID
+   *
+   * Retrieve a specific wallet by Wallet ID.
+   */
+getWalletById(params: {
+    portfolio_id: string;
+    wallet_id: string;
+  }): Promise<any>
+⋮----
+/**
+   * Get Wallet Deposit Instructions
+   *
+   * Retrieve a specific wallet's deposit instructions.
+   */
+getWalletDepositInstructions(
+    params: GetPrimeWalletDepositInstructionsRequest,
+  ): Promise<any>
 
 ================
 File: docs/COINBASE_SDK_QUICKSTART_GUIDE.md
