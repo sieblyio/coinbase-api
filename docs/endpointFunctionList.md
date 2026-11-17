@@ -456,18 +456,18 @@ This table includes all endpoints from the official Exchange API docs and corres
 | [getOrderFills()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L722) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/orders/{order_id}/fills` |
 | [editOrder()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L735) | :closed_lock_with_key:  | PUT | `/v1/portfolios/{portfolio_id}/orders/{order_id}/edit` |
 | [rotateApiKey()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L749) | :closed_lock_with_key:  | POST | `/v1/api-keys/rotate` |
-| [getPortfolioProducts()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L764) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/products` |
-| [getPortfolioTransactions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L780) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/transactions` |
-| [getTransactionById()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L795) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/transactions/{transaction_id}` |
-| [getTransactionTravelRuleData()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L816) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/transactions/{transaction_id}/travel_rule` |
-| [createConversion()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L830) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/conversion` |
-| [getWalletTransactions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L843) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/transactions` |
-| [createTransfer()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L858) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/transfers` |
-| [createWithdrawal()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L871) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/withdrawals` |
-| [getPortfolioWallets()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L890) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets` |
-| [createWallet()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L900) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets` |
-| [getWalletById()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L912) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}` |
-| [getWalletDepositInstructions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L927) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/deposit_instructions` |
+| [getPortfolioProducts()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L766) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/products` |
+| [getPortfolioTransactions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L782) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/transactions` |
+| [getTransactionById()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L797) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/transactions/{transaction_id}` |
+| [getTransactionTravelRuleData()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L818) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/transactions/{transaction_id}/travel_rule` |
+| [createConversion()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L832) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/conversion` |
+| [getWalletTransactions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L845) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/transactions` |
+| [createTransfer()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L860) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/transfers` |
+| [createWithdrawal()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L873) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/withdrawals` |
+| [getPortfolioWallets()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L892) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets` |
+| [createWallet()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L902) | :closed_lock_with_key:  | POST | `/v1/portfolios/{portfolio_id}/wallets` |
+| [getWalletById()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L914) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}` |
+| [getWalletDepositInstructions()](https://github.com/sieblyio/coinbase-api/blob/master/src/CBPrimeClient.ts#L929) | :closed_lock_with_key:  | GET | `/v1/portfolios/{portfolio_id}/wallets/{wallet_id}/deposit_instructions` |
 
 # CBCommerceClient.ts
 
