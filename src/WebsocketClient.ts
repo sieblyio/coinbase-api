@@ -935,8 +935,10 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
             );
           }
 
-          const { sign, timestampInSeconds } =
-            await getCBExchangeWSSign(apiSecret);
+          const { sign, timestampInSeconds } = await getCBExchangeWSSign(
+            apiSecret,
+            this.options.customSignMessageFn,
+          );
 
           const mergedOperationEventsWithSign: WsExchangeAuthenticatedRequestOperation<WsTopic> =
             {
@@ -974,8 +976,10 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
               );
             }
 
-            const { sign, timestampInSeconds } =
-              await getCBExchangeWSSign(apiSecret);
+            const { sign, timestampInSeconds } = await getCBExchangeWSSign(
+              apiSecret,
+              this.options.customSignMessageFn,
+            );
 
             const wsRequestEventWithSign: WsExchangeAuthenticatedRequestOperation<WsTopic> =
               {
@@ -1018,6 +1022,7 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
             apiKey,
             apiSecret,
             apiPassphrase,
+            this.options.customSignMessageFn,
           );
 
           const wsRequestEventWithSign: WsInternationalAuthenticatedRequestOperation<WsTopic> =
@@ -1056,14 +1061,17 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey> {
 
         const finalOperations: string[] = [];
         for (const operationEvent of operationEvents) {
-          const { sign, timestampInSeconds } = await getCBPrimeWSSign({
-            channelName: operationEvent.channel,
-            svcAccountId: operationEvent.svcAccountId,
-            portfolioId: operationEvent.portfolio_id,
-            apiKey,
-            apiSecret,
-            product_ids: operationEvent.product_ids,
-          });
+          const { sign, timestampInSeconds } = await getCBPrimeWSSign(
+            {
+              channelName: operationEvent.channel,
+              svcAccountId: operationEvent.svcAccountId,
+              portfolioId: operationEvent.portfolio_id,
+              apiKey,
+              apiSecret,
+              product_ids: operationEvent.product_ids,
+            },
+            this.options.customSignMessageFn,
+          );
 
           const wsRequestEventWithSign: WsPrimeAuthenticatedRequestOperation<WsTopic> =
             {

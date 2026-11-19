@@ -64,6 +64,10 @@ export interface WSClientConfigurableOptions {
   /**
    * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
    *
+   * Used for Exchange, International and Prime HMAC signatures. Receives the prehash
+   * message and original API secret, and must return a base64-encoded signature.
+   * Does not apply to JWT authentication.
+   *
    * Look in the examples folder for a demonstration on using node's createHmac instead.
    */
   customSignMessageFn?: (message: string, secret: string) => Promise<string>;
